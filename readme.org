@@ -1,0 +1,25 @@
+* trackify - track and visualize your spotify activity
+trackify tracks your spotify activity and displays it in beautiful charts for you to admire
+* dependencies
+  # flask for the webapp
+  pip3 install flask
+  # the python requests module
+  pip3 install requests
+  # mariadb used as database
+  apt-get install mariadb
+  # nginx/apache/<or whatever u prefer> for the webserver
+  apt-get install nginx
+* how to run
+** clone the repo & cd into it
+   #+BEGIN_SRC bash
+   git clone https://github.com/mahmoodsheikh36/trackify
+   cd trackfiy
+   #+END_SRC
+** setup database
+   the arch wiki provides a better guide than i could ever write
+   https://wiki.archlinux.org/index.php?title=MariaDB&redirect=no
+   setup the database then create the trackify database
+   then create the tables using this command:
+   #+BEGIN_SRC bash
+   sudo mysql -u <database user> -p -D trackify < trackify/schema.sql
+   #+END_SRC
