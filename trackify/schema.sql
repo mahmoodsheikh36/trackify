@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS requests (
-  id INT PRIMARY KEY AUTOINCREMENT,
+  id INT AUTO_INCREMENT PRIMARY KEY,
   time_added INT NOT NULL,
   ip TEXT NOT NULL,
   url TEXT NOT NULL,
@@ -38,6 +38,14 @@ CREATE TABLE IF NOT EXISTS refresh_tokens (
   token VARCHAR(140) NOT NULL -- refresh token length is 131 chars but gotta be safe
 );
 
+CREATE TABLE IF NOT EXISTS albums (
+  id VARCHAR(25) PRIMARY KEY, -- album ids are 22 chars
+  album_name TEXT NOT NULL,
+  album_type VARCHAR(10) NOT NULL, -- think values for this are album/single, gotta be safe
+  release_date VARCHAR(13) NOT NULL, -- max length is 10
+  release_date_precision VARCHAR(10) NOT NULL -- max length AFAIK is 4
+);
+
 CREATE TABLE IF NOT EXISTS tracks (
   id VARCHAR(25) PRIMARY KEY, -- track ids are 22 chars
   track_name TEXT NOT NULL,
@@ -48,14 +56,6 @@ CREATE TABLE IF NOT EXISTS tracks (
   explicit BOOL NOT NULL,
   album_id VARCHAR(25) NOT NULL,
   FOREIGN KEY (album_id) REFERENCES albums (id)
-);
-
-CREATE TABLE IF NOT EXISTS albums (
-  id VARCHAR(25) PRIMARY KEY, -- album ids are 22 chars
-  album_name TEXT NOT NULL,
-  album_type VARCHAR(10) NOT NULL, -- think values for this are album/single, gotta be safe
-  release_date VARCHAR(13) NOT NULL, -- max length is 10
-  release_date_precision VARCHAR(10) NOT NULL, -- max length AFAIK is 4
 );
 
 CREATE TABLE IF NOT EXISTS artists (
@@ -79,20 +79,6 @@ CREATE TABLE IF NOT EXISTS track_artists (
   FOREIGN KEY (track_id) REFERENCES tracks (id)
 );
 
-CREATE TABLE IF NOT EXISTS plays (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  user_id INT NOT NULL,
-  time_started INT NOT NULL,
-  time_ended INT NOT NULL,
-  track_id VARCHAR(25) NOT NULL,
-  device_id VARCHAR(45) NOT NULL,
-  context_id INT,
-  FOREIGN KEY (track_id) REFERENCES tracks (id),
-  FOREIGN KEY (user_id) REFERENCES users (id),
-  FOREIGN KEY (context_id) REFERENCES contexts (id),
-  FOREIGN KEY (device_id) REFERENCES devices (id)
-);
-
 CREATE TABLE IF NOT EXISTS devices (
   id VARCHAR(45) PRIMARY KEY, -- devices ids are 40 chars long
   device_name TEXT NOT NULL,
@@ -101,8 +87,22 @@ CREATE TABLE IF NOT EXISTS devices (
 );
 
 CREATE TABLE IF NOT EXISTS contexts (
-  uri TEXT PRIMARY KEY,
+  uri VARCHAR(60) PRIMARY KEY,
   context_type VARCHAR(10) NOT NULL -- i think possible values are album/playlist
+);
+
+CREATE TABLE IF NOT EXISTS plays (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  time_started INT NOT NULL,
+  time_ended INT NOT NULL,
+  user_id INT NOT NULL,
+  track_id VARCHAR(25) NOT NULL,
+  device_id VARCHAR(45) NOT NULL,
+  context_uri VARCHAR(60) NOT NULL,
+  FOREIGN KEY (track_id) REFERENCES tracks (id),
+  FOREIGN KEY (user_id) REFERENCES users (id),
+  FOREIGN KEY (context_uri) REFERENCES contexts (uri),
+  FOREIGN KEY (device_id) REFERENCES devices (id)
 );
 
 CREATE TABLE IF NOT EXISTS pauses (
