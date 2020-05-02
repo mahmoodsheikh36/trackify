@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS requests (
-  id INT AUTO_INCREMENT PRIMARY KEY,
+  id VARCHAR(36) PRIMARY KEY,
   time_added INT NOT NULL,
   ip TEXT NOT NULL,
   url TEXT NOT NULL,
@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS requests (
 );
 
 CREATE TABLE IF NOT EXISTS users (
-  id INT AUTO_INCREMENT PRIMARY KEY,
+  id VARCHAR(36) PRIMARY KEY,
   username VARCHAR(30) NOT NULL,
   password VARCHAR(94) NOT NULL,
   email VARCHAR(255) NOT NULL,
@@ -19,21 +19,21 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 CREATE TABLE IF NOT EXISTS auth_codes (
-  id INT AUTO_INCREMENT PRIMARY KEY,
+  id VARCHAR(36) PRIMARY KEY,
   time_added INT NOT NULL,
   code TEXT NOT NULL,
-  user_id INT NOT NULL,
+  user_id VARCHAR(36) NOT NULL,
   FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
 CREATE TABLE IF NOT EXISTS access_tokens (
-  id INT AUTO_INCREMENT PRIMARY KEY,
+  id VARCHAR(36) PRIMARY KEY,
   time_added INT NOT NULL,
   token VARCHAR(310) NOT NULL -- access token length is 303, gotta be safe
 );
 
 CREATE TABLE IF NOT EXISTS refresh_tokens (
-  id INT AUTO_INCREMENT PRIMARY KEY,
+  id VARCHAR(36) PRIMARY KEY,
   time_added INT NOT NULL,
   token VARCHAR(140) NOT NULL -- refresh token length is 131 chars but gotta be safe
 );
@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS artists (
 );
 
 CREATE TABLE IF NOT EXISTS album_artists (
-  id INT AUTO_INCREMENT PRIMARY KEY,
+  id VARCHAR(36) PRIMARY KEY,
   artist_id VARCHAR(25) NOT NULL,
   album_id VARCHAR(25) NOT NULL,
   FOREIGN KEY (artist_id) REFERENCES artists (id),
@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS album_artists (
 );
 
 CREATE TABLE IF NOT EXISTS track_artists (
-  id INT AUTO_INCREMENT PRIMARY KEY,
+  id VARCHAR(36) PRIMARY KEY,
   artist_id VARCHAR(25) NOT NULL,
   track_id VARCHAR(25) NOT NULL,
   FOREIGN KEY (artist_id) REFERENCES artists (id),
@@ -92,7 +92,7 @@ CREATE TABLE IF NOT EXISTS contexts (
 );
 
 CREATE TABLE IF NOT EXISTS plays (
-  id INT AUTO_INCREMENT PRIMARY KEY,
+  id VARCHAR(36) PRIMARY KEY,
   time_started INT NOT NULL,
   time_ended INT NOT NULL,
   user_id INT NOT NULL,
@@ -106,23 +106,23 @@ CREATE TABLE IF NOT EXISTS plays (
 );
 
 CREATE TABLE IF NOT EXISTS pauses (
-  id INT AUTO_INCREMENT PRIMARY KEY,
+  id VARCHAR(36) PRIMARY KEY,
   time_added INT NOT NULL,
-  play_id INT NOT NULL,
+  play_id VARCHAR(36) NOT NULL,
   FOREIGN KEY (play_id) REFERENCES plays (id)
 );
 
 CREATE TABLE IF NOT EXISTS resumes (
-  id INT AUTO_INCREMENT PRIMARY KEY,
+  id VARCHAR(36) PRIMARY KEY,
   time_added INT NOT NULL,
-  play_id INT NOT NULL,
+  play_id VARCHAR(36) NOT NULL,
   FOREIGN KEY (play_id) REFERENCES plays (id)
 );
 
 CREATE TABLE IF NOT EXISTS seeks (
-  id INT AUTO_INCREMENT PRIMARY KEY,
+  id VARCHAR(36) PRIMARY KEY,
   time_added INT NOT NULL,
   position INT NOT NULL,
-  play_id INT NOT NULL,
+  play_id VARCHAR(36) NOT NULL,
   FOREIGN KEY (play_id) REFERENCES plays (id)
 );
