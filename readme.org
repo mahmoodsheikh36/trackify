@@ -2,6 +2,7 @@
 trackify tracks your spotify activity and displays it in beautiful charts for you to admire
 * dependencies
   pip3 install flask requests mysql-connector
+
   apt-get install mariadb nginx
 * how to run
 ** clone the repo & cd into it
