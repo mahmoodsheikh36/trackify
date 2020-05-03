@@ -28,7 +28,7 @@ class DBProvider:
         self.execute('INSERT INTO requests (id, time_added, ip, url, headers, request_data,\
                                             form, referrer, access_route)\
                       VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)',
-                     (request_id, time_added, ip, url, headers, request_data, form,
+                     (request_id, time_added, ip, url, headers, data, form,
                       referrer, access_route))
 
     def add_user(self, user_id, username, password, email, time_added):
