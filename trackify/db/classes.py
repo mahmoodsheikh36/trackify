@@ -1,5 +1,5 @@
-from trackify import db
-from trackify.utils import current_time, random_str
+from trackify.db.db import DBProvider
+from trackify.utils import current_time, generate_id
 
 class Request:
     def __init__(flask_request):
@@ -27,6 +27,7 @@ class Artist:
     def __init__(self, artist_id, name, albums):
         self.id = artist_id
         self.name = name
+        self.albums = albums
 
 class Track:
     def __init__(self, name, album, duration_ms, popularity, preview_url, track_number,
@@ -49,4 +50,19 @@ class Album:
 
 class MusicProvider:
     def __init__(self, *args, **kwargs):
-        self.db_provider = DBProvider(args, kwargs)
+        self.db_provider = DBProvider(*args, **kwargs)
+
+    def close(self):
+        self.db_provider.close()
+
+    def commit(self):
+        self.db_provider.commit()
+
+    def get_user_by_username(self, username):
+        r = self.db_provider.get_user_by_username(username)
+        return User(r[0], r[1], r[2], r[3], r[4])
+
+    def add_user(self, user):
+        self.db_provider.add_user(user.id, user.username, user.password, user.email,
+                                  user.time_added)
+        self.commit()
