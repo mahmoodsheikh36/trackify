@@ -17,5 +17,5 @@ trackify tracks your spotify activity and displays it in beautiful charts for yo
    setup the database then create the trackify database
    then create the tables using this command:
    #+BEGIN_SRC bash
-   sudo mysql -u <database user> -p -D <database name> < trackify/db/schema.sql
+   sudo mysql -u database_user -p -D database_name < trackify/db/schema.sql
    #+END_SRC
