@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS users (
   id VARCHAR(36) PRIMARY KEY,
   username VARCHAR(30) NOT NULL,
   password VARCHAR(94) NOT NULL,
-  email VARCHAR(255) NOT NULL,
+  email VARCHAR(255),
   time_added INT NOT NULL
 );
 
