@@ -1,0 +1,7 @@
+{
+    "secret_key": "dev",
+    "database_user": "mahmooz",
+    "database_password": "test",
+    "database_host": "0.0.0.0",
+    "database": "trackify"
+}
