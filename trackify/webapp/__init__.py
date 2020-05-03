@@ -30,10 +30,9 @@ def create_app(test_config=None):
                                              app.config['DATABASE_PASSWD'],
                                              host=app.config['DATABASE_HOST'],
                                              database=app.config['DATABASE_NAME'])
+            self.teardown_appcontext(g.music_provider.close)
         db_request = Request(request)
         g.music_provider.add_request(db_request)
-
-    db.init_app(app)
 
     @app.after_request
     def add_header(r):
