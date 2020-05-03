@@ -24,7 +24,7 @@ def create_app(test_config=None):
         pass
 
     @app.before_request
-    def log_request():
+    def before_request():
         if not 'music_provider' in g:
             g.music_provider = MusicProvider(app.config['DATABASE_USER'],
                                              app.config['DATABASE_PASSWD'],
