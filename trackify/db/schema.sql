@@ -95,7 +95,7 @@ CREATE TABLE IF NOT EXISTS plays (
   id VARCHAR(36) PRIMARY KEY,
   time_started INT NOT NULL,
   time_ended INT NOT NULL,
-  user_id INT NOT NULL,
+  user_id VARCHAR(36) NOT NULL,
   track_id VARCHAR(25) NOT NULL,
   device_id VARCHAR(45) NOT NULL,
   context_uri VARCHAR(60) NOT NULL,
