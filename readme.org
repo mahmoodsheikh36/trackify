@@ -1,9 +1,10 @@
 * trackify - track and visualize your spotify activity
 trackify tracks your spotify activity and displays it in beautiful charts for you to admire
 * dependencies
+  #+BEGIN_SRC bash
   pip3 install flask requests mysql-connector
-
   apt-get install mariadb nginx
+  #+END_SRC
 * how to run
 ** clone the repo & cd into it
    #+BEGIN_SRC bash
