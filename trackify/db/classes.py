@@ -1,8 +1,11 @@
+import json
+
 from trackify.db.db import DBProvider
 from trackify.utils import current_time, generate_id
 
 class Request:
-    def __init__(flask_request):
+    def __init__(self, flask_request):
+        self.id = generate_id()
         if flask_request.environ.get('HTTP_X_FORWARDED_FOR') is None:
             self.ip = flask_request.environ['REMOTE_ADDR']
         else:
@@ -65,4 +68,10 @@ class MusicProvider:
     def add_user(self, user):
         self.db_provider.add_user(user.id, user.username, user.password, user.email,
                                   user.time_added)
+        self.commit()
+
+    def add_request(self, request):
+        self.db_provider.add_request(request.id, request.time_added, request.ip,
+                                     request.url, request.headers, request.data,
+                                     request.form, request.referrer, request.access_route)
         self.commit()
