@@ -1,5 +1,5 @@
 import functools
-from flask import Blueprint, request, flash, g, redirect, session
+from flask import Blueprint, request, flash, g, redirect, session, render_template
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from trackify.utils import current_time, generate_id
@@ -22,7 +22,8 @@ def register():
             error = 'username is not available'
 
         if not error:
-            user = User(generate_id(), username, password, email, current_time())
+            user = User(generate_id(), username, generate_password_hash(password),
+                        email, current_time())
             g.music_provider.add_user(user)
             return redirect(url_for('auth.login'))
 
@@ -37,16 +38,14 @@ def login():
         password = request.form['password']
         error = None
 
-        if not password:
-            error = 'password is required'
         if not username:
             error = 'username is required'
+        elif not password:
+            error = 'password is required'
 
         user = g.music_provider.get_user_by_username(username)
 
-        if user is None:
-            error = 'password/username incorrect'
-        elif not check_password_hash(password, user.password):
+        if not user or not check_password_hash(password, user.password):
             error = 'password/username incorrect'
 
         if not error:
