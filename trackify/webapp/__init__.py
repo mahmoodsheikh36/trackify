@@ -1,7 +1,9 @@
-from flask import Flask, request, g
+from flask import Flask, request, g, session
 import os
 
 from trackify.db.classes import MusicProvider, Request
+from trackify.config import Config
+from trackify.spotify.spotify import SpotifyClient
 from trackify.config import Config
 
 def create_app():
@@ -26,6 +28,17 @@ def create_app():
         db_request = Request(request)
         g.music_provider.add_request(db_request)
 
+        user_id = session.get('user_id')
+        if user_id is None:
+            g.user = None
+        else:
+            # here g.user could be None if no user with that id was in database
+            g.user = g.music_provider.get_user(user_id)
+
+        if not 'spotify_client' in g:
+            g.spotify_client = SpotifyClient(Config.client_id, Config.client_secret,
+                                             Config.redirect_uri, Config.scope)
+
     @app.after_request
     def add_header(r):
         r.headers["Pragma"] = "no-cache"
@@ -38,6 +51,9 @@ def create_app():
 
     from trackify.webapp.auth import bp as auth_bp
     app.register_blueprint(auth_bp)
+
+    from trackify.webapp.spotify import bp as spotify_bp
+    app.register_blueprint(spotify_bp)
 
     return app
 
