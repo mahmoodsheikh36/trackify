@@ -77,3 +77,64 @@ class MusicProvider:
                                      request.url, request.headers, request.data,
                                      request.form, request.referrer, request.access_route)
         self.commit()
+
+    def add_auth_code(self, code):
+        self.db_provider.add_auth_code(code.id, code.time_added, code.code, code.user.id)
+        self.commit()
+
+    def add_access_token(self, t):
+        self.db_provider.add_access_token(t.id, t.token, t.user.id, t.time_added)
+        self.commit()
+
+    def add_refresh_token(self, t):
+        self.db_provider.add_refresh_token(t.id, t.token, t.user.id, t.time_added)
+        self.commit()
+
+    def get_user(self, user_id):
+        user_row = self.db_provider.get_user(user_id)
+        if user_row:
+            return User(user_row[0], user_row[1], user_row[2], user_row[3], user_row[4])
+        return None
+
+    def get_user_auth_code(self, user):
+        code_row = self.db_provider.get_user_auth_code(user.id)
+        if code_row:
+            return AuthCode(code_row[0], code_row[2], code_row[3], code_row[1])
+        return None
+
+    def get_user_access_token(self, user):
+        token_row = self.db_provider.get_user_access_token(user.id)
+        if token_row:
+            return AccessToken(token_row[0], token_row[2], user, token_row[1])
+        return None
+
+    def get_user_refresh_token(self, user):
+        token_row = self.db_provider.get_user_refresh_token(user.id)
+        if token_row:
+            return RefreshToken(token_row[0], token_row[2], user, token_row[1])
+        return None
+
+class AuthCode:
+    def __init__(self, code_id, code, user, time_added):
+        self.id = code_id
+        self.code = code
+        self.user = user
+        self.time_added = time_added
+
+class RefreshToken:
+    def __init__(self, token_id, token, user, time_added):
+        self.id = token_id
+        self.token = token
+        self.time_added = time_added
+        self.user = user
+
+class AccessToken:
+    def __init__(self, token_id, token, user, time_added):
+        self.id = token_id
+        self.token = token
+        self.time_added = time_added
+        self.user = user
+
+    def expired(self):
+        # expiry time is actually 3600 not 2500 but gotta be safe
+        return self.time_added < current_time() - 2500 * 1000
