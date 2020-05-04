@@ -5,5 +5,6 @@
     "database_host": "0.0.0.0",
     "database": "trackify",
     "client_id": "your_spotify_client_id",
-    "client_secret": "your_spotify_secret_key"
+    "client_secret": "your_spotify_secret_key",
+    "redirect_uri": "your_redirect_uri"
 }
