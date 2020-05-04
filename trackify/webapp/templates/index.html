@@ -5,5 +5,10 @@
 {% endblock %}
 
 {% block content %}
-hello this is the homepage
+{% if g.user.username %}
+i got your access token!
+{{ g.music_provider.get_user_access_token(g.user).token }}
+{% else %}
+you need to login lol
+{% endif %}
 {% endblock %}
