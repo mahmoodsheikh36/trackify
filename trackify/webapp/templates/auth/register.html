@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>register</title>
+<link rel="stylesheet" href="/static/css/auth.css">
+{% endblock %}
+
+{% block content %}
+<form class="fields_container" autocomplete="off">
+    <a class="main_header">join <span class="highlighted">Trackify</span></a>
+    username
+    <input type="text" name="username" class="field" />
+    password
+    <input type="password" name="password" class="field" />
+    email (recommended)
+    <input type="text" name="email" class="field" />
+    <input type=submit class="button" value="register" />
+</form>
+{% endblock %}

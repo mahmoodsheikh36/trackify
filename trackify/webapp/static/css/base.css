@@ -1,0 +1,23 @@
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    background-color: #28292a;
+    color: #aaa;
+    font-size: 20px;
+}
+
+span.highlighted {
+    color: rgb(242, 93, 93);
+}
+
+body {
+    padding: 0px;
+    margin: 0px;
+    font-family: Inconsolata; 
+}
+
+/* remove annoying glow from elements */
+textarea, select, input, button { outline: none; }

@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>login</title>
+<link rel="stylesheet" href="/static/css/auth.css">
+{% endblock %}
+
+{% block content %}
+<form class="fields_container" autocomplete="off">
+    <a class="main_header">enter <span class="highlighted">Trackify</span></a>
+    username
+    <input type="text" name="username" class="field" />
+    password
+    <input type="password" name="password" class="field" />
+    <input type=submit class="button" value="log in" />
+</form>
+{% endblock %}
