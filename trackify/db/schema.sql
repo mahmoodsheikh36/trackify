@@ -29,13 +29,17 @@ CREATE TABLE IF NOT EXISTS auth_codes (
 CREATE TABLE IF NOT EXISTS access_tokens (
   id VARCHAR(36) PRIMARY KEY,
   time_added VARCHAR(13) NOT NULL,
-  token VARCHAR(310) NOT NULL -- access token length is 303, gotta be safe
+  token VARCHAR(310) NOT NULL, -- access token length is 303, gotta be safe
+  user_id VARCHAR(36) NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
 CREATE TABLE IF NOT EXISTS refresh_tokens (
   id VARCHAR(36) PRIMARY KEY,
   time_added VARCHAR(13) NOT NULL,
-  token VARCHAR(140) NOT NULL -- refresh token length is 131 chars but gotta be safe
+  token VARCHAR(140) NOT NULL, -- refresh token length is 131 chars but gotta be safe
+  user_id VARCHAR(36) NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
 CREATE TABLE IF NOT EXISTS albums (
