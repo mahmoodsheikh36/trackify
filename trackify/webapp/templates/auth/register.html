@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block content %}
-<form class="fields_container" autocomplete="off">
+<form class="fields_container" autocomplete="off" method="post">
     <a class="main_header">join <span class="highlighted">Trackify</span></a>
     username
     <input type="text" name="username" class="field" />
@@ -15,5 +15,8 @@
     email (recommended)
     <input type="text" name="email" class="field" />
     <input type=submit class="button" value="register" />
+    {% for message in get_flashed_messages() %}
+    <a class="error_message">{{ message }}</a>
+    {% endfor %}
 </form>
 {% endblock %}

@@ -19,5 +19,16 @@ body {
     font-family: Inconsolata; 
 }
 
+a.error_message {
+    color: red;
+}
+
+a:visited {
+    color: aquamarine;
+}
+a:link {
+    color: green;
+}
+
 /* remove annoying glow from elements */
 textarea, select, input, button { outline: none; }

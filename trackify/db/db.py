@@ -9,7 +9,6 @@ class DBProvider:
             passwd=passwd,
             database=database,
         )
-        self.conn.autocommit = False
 
     def cursor(self):
         return self.conn.cursor()
@@ -34,7 +33,7 @@ class DBProvider:
     def add_user(self, user_id, username, password, email, time_added):
         self.execute('INSERT INTO users (id, username, password, email, time_added)\
                       VALUES (%s, %s, %s, %s, %s)', (user_id, username, password, email,
-                                                time_added))
+                                                     time_added))
 
     def add_auth_code(self, auth_code_id, code, time_added, user_id):
         self.execute('INSERT INTO auth_codes (id, time_added, code, user_id)\
@@ -101,5 +100,5 @@ class DBProvider:
 
     def get_user_by_username(self, username):
         c = self.cursor()
-        return c.execute('SELECT * FROM users WHERE username = %s',
-                         (username,)).fetchone()
+        c.execute('SELECT * FROM users WHERE username = %s', (username,))
+        return c.fetchone()

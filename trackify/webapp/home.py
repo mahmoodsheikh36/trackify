@@ -13,6 +13,6 @@ def index():
 def index_page():
     return index()
 
-@bp.route('/home', methods=('GET',))
+@bp.route('home', methods=('GET',))
 def home():
     return index()

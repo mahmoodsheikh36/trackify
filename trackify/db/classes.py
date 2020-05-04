@@ -62,8 +62,10 @@ class MusicProvider:
         self.db_provider.commit()
 
     def get_user_by_username(self, username):
-        r = self.db_provider.get_user_by_username(username)
-        return User(r[0], r[1], r[2], r[3], r[4])
+        user_row = self.db_provider.get_user_by_username(username)
+        if user_row:
+            return User(user_row[0], user_row[1], user_row[2], user_row[3], user_row[4])
+        return None
 
     def add_user(self, user):
         self.db_provider.add_user(user.id, user.username, user.password, user.email,
