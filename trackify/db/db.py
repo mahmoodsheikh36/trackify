@@ -35,23 +35,25 @@ class DBProvider:
                       VALUES (%s, %s, %s, %s, %s)', (user_id, username, password, email,
                                                      time_added))
 
-    def add_auth_code(self, auth_code_id, code, time_added, user_id):
+    def add_auth_code(self, auth_code_id, time_added, code, user_id):
         self.execute('INSERT INTO auth_codes (id, time_added, code, user_id)\
                       VALUES (%s, %s, %s, %s)', (auth_code_id, time_added, code, user_id))
 
-    def add_access_token(self, access_token_id, token, time_added):
-        self.execute('INSERT INTO access_token (id, time_added, token)\
-                      VALUES (%s, %s, %s)', (access_token_id, token, time_added))
+    def add_access_token(self, access_token_id, token, user_id, time_added):
+        self.execute('INSERT INTO access_tokens (id, time_added, user_id, token)\
+                      VALUES (%s, %s, %s, %s)', (access_token_id, time_added, user_id,
+                                                 token))
 
-    def add_refresh_token(self, refresh_token_id, token, time_added):
-        self.execute('INSERT INTO refresh_tokens (id, time_added, token)\
-                      VALUES (%s, %s, %s)', (refresh_token_id, token, time_added))
+    def add_refresh_token(self, refresh_token_id, token, user_id, time_added):
+        self.execute('INSERT INTO refresh_tokens (id, time_added, user_id, token)\
+                      VALUES (%s, %s, %s, %s)', (refresh_token_id, time_added, user_id,
+                                                 token))
 
     def add_album(self, album_id, name, album_type, release_date, release_date_precision):
         self.execute('INSERT INTO albums (id, album_name, album_type, release_date,\
                                           release_date_precision)\
-                     VALUES (%s, %s, %s, %s, %s)', (album_id, name, album_type, release_date,
-                                            release_date_precision,))
+                     VALUES (%s, %s, %s, %s, %s)', (album_id, name, album_type,
+                                                    release_date, release_date_precision,))
 
     def add_track(self, track_id, name, duration_ms, popularity, preview_url, track_number,
                   explicit, album_id):
@@ -101,4 +103,30 @@ class DBProvider:
     def get_user_by_username(self, username):
         c = self.cursor()
         c.execute('SELECT * FROM users WHERE username = %s', (username,))
+        return c.fetchone()
+
+    def get_user(self, user_id):
+        c = self.cursor()
+        c.execute('SELECT * FROM users WHERE id = %s', (user_id,))
+        return c.fetchone()
+
+    def get_user_auth_code(self, user_id):
+        c = self.cursor()
+        c.execute('SELECT * FROM auth_codes WHERE user_id = %s ORDER BY time_added DESC\
+                   LIMIT 1',
+                  (user_id,))
+        return c.fetchone()
+
+    def get_user_access_token(self, user_id):
+        c = self.cursor()
+        c.execute('SELECT * FROM access_tokens WHERE user_id = %s\
+                   ORDER BY time_added DESC LIMIT 1',
+                  (user_id,))
+        return c.fetchone()
+
+    def get_user_refresh_token(self, user_id):
+        c = self.cursor()
+        c.execute('SELECT * FROM refresh_tokens WHERE user_id = %s\
+                   ORDER BY time_added DESC LIMIT 1',
+                  (user_id,))
         return c.fetchone()
