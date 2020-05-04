@@ -14,6 +14,7 @@ def create_app():
     def terminate(e=None):
         if 'music_provider' in g:
             g.music_provider.close()
+    app.teardown_appcontext(terminate)
 
     @app.before_request
     def before_request():
@@ -22,7 +23,6 @@ def create_app():
                                              Config.database_password,
                                              Config.database,
                                              Config.database_host)
-            app.teardown_appcontext(terminate)
         db_request = Request(request)
         g.music_provider.add_request(db_request)
 
@@ -35,6 +35,9 @@ def create_app():
 
     from trackify.webapp.home import bp as home_bp
     app.register_blueprint(home_bp)
+
+    from trackify.webapp.auth import bp as auth_bp
+    app.register_blueprint(auth_bp)
 
     return app
 
