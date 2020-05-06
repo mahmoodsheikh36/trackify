@@ -62,7 +62,10 @@ class SpotifyClient:
 
         device = Device(r_json['device']['id'], r_json['device']['name'],
                         r_json['device']['type'])
-        context = Context(r_json['context']['uri'], r_json['context']['type'])
+
+        context = None
+        if r_json['context']:
+            context = Context(r_json['context']['uri'], r_json['context']['type'])
 
         track_json = r_json['item']
         album_json = r_json['item']['album']
