@@ -50,6 +50,15 @@ CREATE TABLE IF NOT EXISTS albums (
   release_date_precision VARCHAR(10) NOT NULL -- max length AFAIK is 4
 );
 
+CREATE TABLE IF NOT EXISTS album_images (
+  id VARCHAR(25) PRIMARY KEY,
+  height INT NOT NULL,
+  width INT NOT NULL,
+  url VARCHAR(70) NOT NULL, -- the url is actually 64 chars long but whatever
+  album_id VARCHAR(25) NOT NULL,
+  FOREIGN KEY (album_id) REFERENCES albums (id)
+);
+
 CREATE TABLE IF NOT EXISTS tracks (
   id VARCHAR(25) PRIMARY KEY, -- track ids are 22 chars
   track_name TEXT NOT NULL,
@@ -86,8 +95,7 @@ CREATE TABLE IF NOT EXISTS track_artists (
 CREATE TABLE IF NOT EXISTS devices (
   id VARCHAR(45) PRIMARY KEY, -- devices ids are 40 chars long
   device_name TEXT NOT NULL,
-  device_type TEXT NOT NULL,
-  volume_percent INT NOT NULL
+  device_type TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS contexts (
@@ -103,6 +111,7 @@ CREATE TABLE IF NOT EXISTS plays (
   track_id VARCHAR(25) NOT NULL,
   device_id VARCHAR(45) NOT NULL,
   context_uri VARCHAR(60) NOT NULL,
+  volume_percent INT NOT NULL,
   FOREIGN KEY (track_id) REFERENCES tracks (id),
   FOREIGN KEY (user_id) REFERENCES users (id),
   FOREIGN KEY (context_uri) REFERENCES contexts (uri),
