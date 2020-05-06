@@ -1,7 +1,9 @@
 import requests
 import json
 
-from trackify.db.classes import RefreshToken, AccessToken
+from trackify.db.classes import (
+    RefreshToken, AccessToken, Device, Artist, Play, Image, Context, Album, Track
+)
 from trackify.utils import generate_id, current_time
 
 class SpotifyClient:
@@ -43,3 +45,51 @@ class SpotifyClient:
         access_token = AccessToken(generate_id(), r_json['access_token'],
                                    refresh_token.user, current_time())
         return access_token
+
+    def get_current_play(self, access_token):
+        r = requests.get('https://api.spotify.com/v1/me/player',
+                         headers = {
+                             'Authorization': 'Bearer {}'.format(access_token.token)
+                         })
+        if r.status_code == 429: # we hit rate limit
+            return None
+        if r.text == '':
+            return None
+
+        r_json = json.loads(r.text)
+        if not 'is_playing' in r_json or not 'item' in r_json:
+            return None
+
+        device = Device(r_json['device']['id'], r_json['device']['name'],
+                        r_json['device']['type'])
+        context = Context(r_json['context']['uri'], r_json['context']['type'])
+
+        track_json = r_json['item']
+        album_json = r_json['item']['album']
+
+        album_images = []
+        for image_json in r_json['item']['album']['images']:
+            image = Image(generate_id(), image_json['url'], image_json['width'],
+                          image_json['height'])
+            album_images.append(image)
+
+        album_artists = []
+        for artist_json in album_json['artists']:
+            album_artists.append(Artist(artist_json['id'], artist_json['name']))
+
+        album = Album(album_json['id'], album_json['name'], album_artists, album_images,
+                      album_json['type'], album_json['release_date'],
+                      album_json['release_date_precision'])
+
+        track_artists = []
+        for artist_json in track_json['artists']:
+            track_artists.append(Artist(artist_json['id'], artist_json['name']))
+
+        track = Track(track_json['id'], track_json['name'], album, track_artists,
+                      track_json['duration_ms'], track_json['popularity'],
+                      track_json['preview_url'], track_json['track_number'],
+                      track_json['explicit'])
+        play = Play(generate_id(), current_time(), -1, access_token.user, track, device,
+                    r_json['device']['volume_percent'], context, r_json['is_playing'],
+                    int(r_json['progress_ms']))
+        return play
