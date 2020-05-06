@@ -75,18 +75,21 @@ class DBProvider:
         self.execute('INSERT INTO album_artists (id, album_id, artist_id)\
                       VALUES (%s, %s, %s)', (row_id, album_id, artist_id))
 
-    def add_device(self, device_id, name, device_type, volume_percent):
-        self.execute('INSERT INTO devices (id, device_name, device_type, volume_percent)\
-                      VALUES (%s, %s, %s, %s)', (device_id, name, device_type, volume_percent))
+    def add_device(self, device_id, name, device_type):
+        self.execute('INSERT INTO devices (id, device_name, device_type)\
+                      VALUES (%s, %s, %s)', (device_id, name, device_type))
 
     def add_context(self, uri, context_type):
         self.execute('INSERT INTO contexts (uri, context_type)\
                       VALUES (%s, %s)', (uri, context_type))
 
-    def add_play(self, play_id, time_started, time_ended, user_id, track_id,
-                 device_id, context_uri):
-        self.execute('INSERT INTO plays (id, time_started, time_ended, user_id, track_id,\
-                                         device_id, context_uri)')
+    def add_play(self, play_id, time_started, time_ended, volume_percent, user_id,
+                 track_id, device_id, context_uri):
+        self.execute('INSERT INTO plays (id, time_started, time_ended, volume_percent,\
+                      user_id, track_id, device_id, context_uri)\
+                      VALUES (%s, %s, %s, %s, %s, %s, %s, %s)',
+                     (play_id, time_started, time_ended, volume_percent, user_id,
+                      track_id, device_id, context_uri))
 
     def add_pause(self, pause_id, time_added, play_id):
         self.execute('INSERT INTO pauses (id, time_added, play_id)\
@@ -130,3 +133,19 @@ class DBProvider:
                    ORDER BY time_added DESC LIMIT 1',
                   (user_id,))
         return c.fetchone()
+
+    def get_users(self):
+        c = self.cursor()
+        c.execute('SELECT * FROM users')
+        return c.fetchall()
+
+    def get_users_with_tokens(self):
+        c = self.cursor()
+        c.execute('\
+        SELECT * FROM users, access_tokens, refresh_tokens\
+        WHERE users.id = refresh_tokens.user_id AND refresh_tokens.id =\
+        (SELECT id FROM refresh_tokens ORDER BY time_added DESC LIMIT 1) AND\
+        users.id = access_tokens.user_id AND access_tokens.id =\
+        (SELECT id from access_tokens ORDER BY time_added DESC LIMIT 1)\
+        ')
+        return c.fetchall()
