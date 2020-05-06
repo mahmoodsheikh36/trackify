@@ -20,7 +20,7 @@ class Request:
 
 class User:
     def __init__(self, user_id, username, password, email, time_added,
-                 access_token=None, refresh_token=None):
+                 access_token=None, refresh_token=None, plays=None):
         self.id = user_id
         self.username = username
         self.password = password
@@ -28,6 +28,7 @@ class User:
         self.time_added = time_added
         self.access_token = access_token
         self.refresh_token = refresh_token
+        self.plays = plays
 
 class Artist:
     def __init__(self, artist_id, name):
