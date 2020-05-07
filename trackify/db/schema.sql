@@ -99,7 +99,7 @@ CREATE TABLE IF NOT EXISTS devices (
 );
 
 CREATE TABLE IF NOT EXISTS contexts (
-  uri VARCHAR(60) PRIMARY KEY,
+  uri VARCHAR(100) PRIMARY KEY,
   context_type VARCHAR(10) NOT NULL -- i think possible values are album/playlist
 );
 
