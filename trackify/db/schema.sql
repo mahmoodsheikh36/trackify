@@ -110,7 +110,7 @@ CREATE TABLE IF NOT EXISTS plays (
   user_id VARCHAR(36) NOT NULL,
   track_id VARCHAR(25) NOT NULL,
   device_id VARCHAR(45) NOT NULL,
-  context_uri VARCHAR(60),
+  context_uri VARCHAR(100),
   volume_percent INT NOT NULL,
   FOREIGN KEY (track_id) REFERENCES tracks (id),
   FOREIGN KEY (user_id) REFERENCES users (id),
