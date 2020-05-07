@@ -1,5 +1,9 @@
 from time import sleep
 
+from trackify.utils import current_time, generate_id
+
+from trackify.db.classes import Pause, Resume, Seek
+
 RATE_LIMIT_TIMEOUT = 2.5
 REQUEST_TIMEOUT = 0.1
 ITERATION_TIMEOUT = 1
@@ -10,20 +14,70 @@ class SpotifyTracker:
         self.spotify_client = spotify_client
 
     def start_tracking(self):
-        plays = {}
+        # map user id to their last play and the time of the last request made for them
+        user_data = {}
         while True:
-            users = self.music_provider.get_users_with_tokens()
+            users = self.music_provider.get_users()
             for user in users:
+                user.access_token = self.music_provider.get_user_access_token(user)
+                if not user.access_token:
+                    continue
                 if user.access_token.expired():
-                    print('access token expired!')
-                    print(user.access_token.token)
+                    user.refresh_token =\
+                        self.music_provider.get_user_refresh_token(user)
                     user.access_token = self.spotify_client.fetch_access_token(
                         user.refresh_token)
                     self.music_provider.add_access_token(user.access_token)
 
                 play = self.spotify_client.get_current_play(
                     user.access_token)
-                print(play.track.name)
+                if not play: # nothing playing
+                    continue
+                if user.id in user_data:
+                    last_play = user_data[user.id][0]
+                else:
+                    last_play = None
+
+                if last_play is None:
+                    self.music_provider.add_play(play)
+                    if not play.is_playing:
+                        pause = Pause(generate_id(), play, current_time())
+                        self.music_provider.add_pause(pause)
+                else:
+                    track_changed = not play.has_same_track_as(last_play)
+                    if not track_changed:
+                        play.id = last_play.id
+                    if track_changed: # track changed
+                        last_play.time_ended = current_time()
+                        self.music_provider.update_play_time_ended(last_play)
+                        self.music_provider.add_play(play)
+                        if not play.is_playing:
+                            pause = Pause(generate_id(), play, current_time())
+                            self.music_provider.add_pause(pause)
+                    elif not play.is_playing and last_play.is_playing: # track paused
+                        pause = Pause(generate_id(), play, current_time())
+                        self.music_provider.add_pause(pause)
+                    elif play.is_playing and not last_play.is_playing: # track resumed
+                        resume = Resume(generate_id(), play, current_time())
+                        self.music_provider.add_resume(resume)
+                    else: # if no actions just update time_ended
+                        play.time_ended = current_time()
+                        self.music_provider.update_play_time_ended(play)
+
+                    # checking if a seek action (skip to position) was made
+                    if not track_changed:
+                        prev_request_time = user_data[user.id][1]
+                        seconds_passed = (current_time() - prev_request_time) / 1000.
+                        gap = abs(seconds_passed -
+                                    abs(play.progress_ms - last_play.progress_ms) / 1000.)
+                        if gap > 5:
+                            seek = Seek(generate_id(), play, play.progress_ms,
+                                        current_time())
+                            self.music_provider.add_seek(seek)
+
+                user_data[user.id] = play, current_time()
+
+                #print('{} - {}'.format(play.track.name, play.track.artists[0].name))
             sleep(ITERATION_TIMEOUT)
 
 if __name__ == '__main__':

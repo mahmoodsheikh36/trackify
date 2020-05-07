@@ -5,10 +5,12 @@
 {% endblock %}
 
 {% block content %}
-{% if g.user.username %}
-i got your access token!
-{{ g.music_provider.get_user_access_token(g.user).token }}
+
+{% if g.user.username and g.music_provider.get_user_access_token(g.user) %}
+i got your music bro!
+{% elif g.user.username %}
+you need to authenticate with spotify bro!
 {% else %}
-you need to login lol
+you need to sign up!
 {% endif %}
 {% endblock %}

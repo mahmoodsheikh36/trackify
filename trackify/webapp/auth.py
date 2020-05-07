@@ -46,7 +46,6 @@ def login():
 
         user = g.music_provider.get_user_by_username(username)
 
-        print(check_password_hash(user.password, password))
         if not user or not check_password_hash(user.password, password):
             error = 'password/username incorrect'
 

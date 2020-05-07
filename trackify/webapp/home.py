@@ -1,6 +1,6 @@
 import functools
 from flask import (
-    Blueprint, render_template
+    Blueprint, render_template, g
 )
 
 bp = Blueprint('home', __name__, url_prefix='/')
@@ -16,3 +16,9 @@ def index_page():
 @bp.route('home', methods=('GET',))
 def home():
     return index()
+
+@bp.route('mus', methods=('GET',))
+def mus():
+    tracks = g.music_provider.get_tracks()
+    print(tracks)
+    return 'hello<br>there'

@@ -92,7 +92,9 @@ class SpotifyClient:
                       track_json['duration_ms'], track_json['popularity'],
                       track_json['preview_url'], track_json['track_number'],
                       track_json['explicit'])
-        play = Play(generate_id(), current_time(), -1, access_token.user, track, device,
-                    r_json['device']['volume_percent'], context, r_json['is_playing'],
+        play = Play(generate_id(), current_time(), -1, None, None, access_token.user,
+                    track, device, r_json['device']['volume_percent'],
+                    context, r_json['is_playing'],
                     int(r_json['progress_ms']))
+
         return play

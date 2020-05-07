@@ -11,7 +11,7 @@ class DBProvider:
         )
 
     def cursor(self):
-        return self.conn.cursor()
+        return self.conn.cursor(dictionary=True)
 
     def close(self):
         self.conn.close()
@@ -55,16 +55,16 @@ class DBProvider:
                      VALUES (%s, %s, %s, %s, %s)', (album_id, name, album_type,
                                                     release_date, release_date_precision,))
 
-    def add_track(self, track_id, name, duration_ms, popularity, preview_url, track_number,
-                  explicit, album_id):
+    def add_track(self, track_id, name, duration_ms, popularity, preview_url,
+                  track_number, explicit, album_id):
         self.execute('INSERT INTO tracks (id, track_name, duration_ms, popularity,\
-                                          preview_url, track_number, explicit, album_id)\
+                      preview_url, track_number, explicit, album_id)\
                       VALUES (%s, %s, %s, %s, %s, %s, %s, %s)',
-                     name, duration_ms, popularity, preview_url, track_number, explicit,
-                     album_id)
+                     (track_id, name, duration_ms, popularity, preview_url, track_number,
+                      explicit, album_id))
 
     def add_artist(self, artist_id, artist_name):
-        self.execute('INSERT INTO artists (id, artist_name) VALUES (%s)',
+        self.execute('INSERT INTO artists (id, artist_name) VALUES (%s, %s)',
                      (artist_id, artist_name,))
 
     def add_album_artist(self, row_id, album_id, artist_id):
@@ -72,8 +72,8 @@ class DBProvider:
                       VALUES (%s, %s, %s)', (row_id, album_id, artist_id))
 
     def add_track_artist(self, row_id, track_id, artist_id):
-        self.execute('INSERT INTO album_artists (id, album_id, artist_id)\
-                      VALUES (%s, %s, %s)', (row_id, album_id, artist_id))
+        self.execute('INSERT INTO track_artists (id, track_id, artist_id)\
+                      VALUES (%s, %s, %s)', (row_id, track_id, artist_id))
 
     def add_device(self, device_id, name, device_type):
         self.execute('INSERT INTO devices (id, device_name, device_type)\
@@ -100,7 +100,8 @@ class DBProvider:
                       VALUES (%s, %s, %s)', (resume_id, time_added, play_id))
 
     def add_seek(self, seek_id, time_added, position, play_id):
-        self.execute('INSERT INTO seeks (id, time_added, position, play_id)',
+        self.execute('INSERT INTO seeks (id, time_added, position, play_id)\
+                      VALUES (%s, %s, %s, %s)',
                      (seek_id, time_added, position, play_id))
 
     def get_user_by_username(self, username):
@@ -149,3 +150,81 @@ class DBProvider:
         (SELECT id from access_tokens ORDER BY time_added DESC LIMIT 1)\
         ')
         return c.fetchall()
+
+    def get_tracks(self):
+        c = self.cursor()
+        c.execute('SELECT * FROM tracks')
+        return c.fetchall()
+
+    def get_artists(self):
+        c = self.cursor()
+        c.execute('SELECT * FROM artists')
+        return c.fetchall()
+
+    def get_albums(self):
+        c = self.cursor()
+        c.execute('SELECT * FROM albums')
+        return c.fetchall()
+
+    def get_album_images(self):
+        c = self.cursor()
+        c.execute('SELECT * FROM album_images')
+        return c.fetchall()
+
+    def get_album_artists(self):
+        c = self.cursor()
+        c.execute('SELECT * FROM album_artists')
+        return c.fetchall()
+
+    def get_album(self, album_id):
+        c = self.cursor()
+        c.execute('SELECT * FROM albums WHERE id = %s', (album_id,))
+        return c.fetchone()
+
+    def get_track_artists(self):
+        c = self.cursor()
+        c.execute('SELECT * FROM track_artists')
+        return c.fetchall()
+
+    def get_track(self, track_id):
+        c = self.cursor()
+        c.execute('SELECT * FROM tracks WHERE id = %s', (track_id,))
+        return c.fetchone()
+
+    def get_artist(self, artist_id):
+        c = self.cursor()
+        c.execute('SELECT * FROM artists WHERE id = %s', (artist_id,))
+        return c.fetchone()
+
+    def get_context(self, uri):
+        c = self.cursor()
+        c.execute('SELECT * FROM contexts WHERE uri = %s', (uri,))
+        return c.fetchone()
+
+    def get_device(self, device_id):
+        c = self.cursor()
+        c.execute('SELECT * FROM devices WHERE id = %s', (device_id,))
+        return c.fetchone()
+
+    # returns plays, resumes, pauses, seeks
+    def get_user_actions(self, user_id):
+        c = self.cursor()
+        c.execute('\
+        SELECT * FROM plays, pauses, resumes, seeks\
+        WHERE user_id = %s\
+        ', (user_id,))
+        return c.fetchall()
+
+    def get_last_user_play(self, user_id):
+        c = self.cursor()
+        c.execute('SELECT * FROM plays WHERE user_id = %s', (user_id,))
+        return c.fetchone()
+
+    def update_play_time_ended(self, play_id, time_ended):
+        self.execute('UPDATE plays SET time_ended = %s WHERE id = %s',
+                     (time_ended, play_id))
+
+    def get_play(self, play_id):
+        c = self.cursor()
+        c.execute('SELECT * FROM plays WHERE id = %s', (play_id,))
+        return c.fetchone()
