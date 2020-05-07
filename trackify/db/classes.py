@@ -159,6 +159,49 @@ class MusicProvider:
             users.append(user)
         return users
 
+    def get_user_tracks(self, user, return_map=False):
+        track_rows = self.db_provider.get_user_tracks(user.id)
+        artist_rows = self.db_provider.get_user_artists(user.id)
+        album_rows = self.db_provider.get_user_albums(user.id)
+        album_image_rows = self.db_provider.get_user_album_images(user.id)
+        album_artist_rows = self.db_provider.get_user_album_artists(user.id)
+        track_artist_rows = self.db_provider.get_user_track_artists(user.id)
+
+        # map each object's id to the object to make lookup faster
+        tracks = {}
+        albums = {}
+        artists = {}
+
+        for row in artist_rows:
+            artist = Artist(row['id'], row['artist_name'])
+            artists[artist.id] = artist
+
+        for row in album_rows:
+            album = Album(row['id'], row['album_name'], [], [], row['album_type'],
+                          row['release_date'], row['release_date_precision'])
+            albums[album.id] = album
+        
+        for row in track_rows:
+            track = Track(row['id'], row['track_name'], None, [], row['duration_ms'],
+                          row['popularity'], row['preview_url'], row['track_number'],
+                          row['explicit'])
+            track.album = albums[row['album_id']]
+            tracks[track.id] = track
+
+        for row in album_image_rows:
+            image = Image(row['id'], row['url'], row['width'], row['height'])
+            albums[row['album_id']].images.append(image)
+
+        for row in album_artist_rows:
+            albums[row['album_id']].artists.append(artists[row['artist_id']])
+
+        for row in track_artist_rows:
+            tracks[row['track_id']].artists.append(artists[row['artist_id']])
+
+        if return_map:
+            return tracks
+        return tracks.values()
+
     def get_tracks(self):
         track_rows = self.db_provider.get_tracks()
         artist_rows = self.db_provider.get_artists()
@@ -185,6 +228,7 @@ class MusicProvider:
             track = Track(row['id'], row['track_name'], None, [], row['duration_ms'],
                           row['popularity'], row['preview_url'], row['track_number'],
                           row['explicit'])
+            track.album = albums[row['album_id']]
             tracks[track.id] = track
 
         for row in album_image_rows:
@@ -197,7 +241,7 @@ class MusicProvider:
         for row in track_artist_rows:
             tracks[row['track_id']].artists.append(artists[row['artist_id']])
 
-        return tracks
+        return tracks.values()
 
     def add_album(self, album):
         self.db_provider.add_album(album.id, album.name, album.type, album.release_date,
@@ -248,7 +292,7 @@ class MusicProvider:
         row = self.db_provider.get_last_user_play(user.id)
         if row:
             track = self.get_track(row['track_id'])
-            return Play(row['id'], row['time_added'], row['time_ended'], None, None,
+            return Play(row['id'], row['time_added'], row['time_ended'], None, None, None,
                         user, track, None, row['volume_percent'])
         return None
 
@@ -260,13 +304,43 @@ class MusicProvider:
         self.db_provider.add_pause(pause.id, pause.time_added, pause.play.id)
         self.commit()
 
-    def add_resume(self, pause):
+    def add_resume(self, resume):
         self.db_provider.add_resume(resume.id, resume.time_added, resume.play.id)
         self.commit()
 
     def add_seek(self, seek):
         self.db_provider.add_seek(seek.id, seek.time_added, seek.position, seek.play.id)
         self.commit()
+
+    def get_user_plays(self, user):
+        play_rows = self.db_provider.get_user_plays(user.id)
+        pause_rows = self.db_provider.get_user_pauses(user.id)
+        resume_rows = self.db_provider.get_user_resumes(user.id)
+        seek_rows = self.db_provider.get_user_seeks(user.id)
+
+        # map each play id to its object to make lookup faster
+        plays = {}
+
+        tracks = self.get_user_tracks(user, return_map=True)
+
+        for row in play_rows:
+            plays[row['id']] = Play(row['id'], int(row['time_started']),
+                                    int(row['time_ended']), [], [], [], user,
+                                    tracks[row['track_id']], None, row['volume_percent'])
+
+        for row in pause_rows:
+            plays[row['play_id']].pauses.append(Pause(row['id'], None,
+                                                      int(row['time_added'])))
+
+        for row in resume_rows:
+            plays[row['play_id']].resumes.append(Resume(row['id'], None,
+                                                        int(row['time_added'])))
+
+        for row in seek_rows:
+            plays[row['play_id']].seeks.append(Seek(row['id'], None, row['position'],
+                                                    int(row['time_added'])))
+
+        return plays.values()
 
 class AuthCode:
     def __init__(self, code_id, code, user, time_added):
@@ -294,8 +368,9 @@ class AccessToken:
         return self.time_added < current_time() - 2500 * 1000
 
 class Play:
-    def __init__(self, play_id, time_started, time_ended, pauses, resumes, user, track,
-                 device, volume_percent, context=None, is_playing=False, progress_ms=-1):
+    def __init__(self, play_id, time_started, time_ended, pauses, resumes, seeks, user,
+                 track, device, volume_percent, context=None, is_playing=False,
+                 progress_ms=-1):
         self.id = play_id
         self.time_started = time_started
         self.time_ended = time_ended
@@ -308,6 +383,7 @@ class Play:
         self.volume_percent = volume_percent
         self.pauses = pauses
         self.resumes = resumes
+        self.seeks = seeks
 
     def has_same_track_as(self, other_play):
         return self.track.id == other_play.track.id

@@ -9,7 +9,7 @@ bp = Blueprint('spotify', __name__, url_prefix='/spotify')
 
 @login_required
 @bp.route('/auth', methods=('GET',))
-def spotify_auth():
+def auth():
     spotify_auth_url = "https://accounts.spotify.com/authorize" +\
         "?response_type=code" +\
         '&client_id={}'.format(g.spotify_client.client_id) +\

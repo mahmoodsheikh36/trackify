@@ -1,4 +1,5 @@
 import requests
+import requests.exceptions
 import json
 
 from trackify.db.classes import (
@@ -47,10 +48,13 @@ class SpotifyClient:
         return access_token
 
     def get_current_play(self, access_token):
-        r = requests.get('https://api.spotify.com/v1/me/player',
-                         headers = {
-                             'Authorization': 'Bearer {}'.format(access_token.token)
-                         })
+        try:
+            r = requests.get('https://api.spotify.com/v1/me/player',
+                             headers = {
+                                 'Authorization': 'Bearer {}'.format(access_token.token)
+                             })
+        except requests.exceptions.RequestException as e:
+            return None
         if r.status_code == 429: # we hit rate limit
             return None
         if r.text == '':
@@ -92,7 +96,8 @@ class SpotifyClient:
                       track_json['duration_ms'], track_json['popularity'],
                       track_json['preview_url'], track_json['track_number'],
                       track_json['explicit'])
-        play = Play(generate_id(), current_time(), -1, None, None, access_token.user,
+        play = Play(generate_id(), current_time(), -1, None, None, None,
+                    access_token.user,
                     track, device, r_json['device']['volume_percent'],
                     context, r_json['is_playing'],
                     int(r_json['progress_ms']))
