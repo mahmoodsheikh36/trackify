@@ -40,7 +40,7 @@ def data():
         else:
             track.listened_ms = play.listened_ms()
     return render_template('data.html',
-                           top_tracks=list(tracks.values())[:4],
-                           top_albums=list(albums.values())[:4],
-                           top_artists=list(artists.values())[:4],
+                           top_tracks=list(tracks.values())[:20],
+                           top_albums=list(albums.values())[:20],
+                           top_artists=list(artists.values())[:20],
                            tracks=tracks.values())
