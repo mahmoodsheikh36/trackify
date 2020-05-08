@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Trackify data</title>
+{% endblock %}
+
+{% block content %}
+    {% for track in tracks %}
+    <br>
+    <a>{{ track.name + ' ' + (track.listened_ms / 1000)|string }}</a>
+    {% endfor %}
+{% endblock %}
