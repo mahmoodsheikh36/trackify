@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS albums (
 );
 
 CREATE TABLE IF NOT EXISTS album_images (
-  id VARCHAR(25) PRIMARY KEY,
+  id VARCHAR(36) PRIMARY KEY,
   height INT NOT NULL,
   width INT NOT NULL,
   url VARCHAR(70) NOT NULL, -- the url is actually 64 chars long but whatever
