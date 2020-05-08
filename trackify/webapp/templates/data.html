@@ -25,13 +25,15 @@
                         <div class="top_entry">
                             <img style="width:65px;height:65px;" alt="img" src="{{ track.album.images[0].url }}">
                             <div class="info">
-                                <span style="color: rgb(242, 93, 93)">{{ track.name }}</span>
+                                <span class="highlighted">{{ track.name }}</span>
                                 <a>{{ track.artists[0].name }}</a>
                             </div>
                         </div>
                     </td>
                     <td>
-                        <a>123 hrs<br>123 mins<br>1 secs</a>
+                        {% if track.listened_ms %}
+                        <a>{{ track.listened_ms / 1000 }}</a>
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}
@@ -42,7 +44,7 @@
             <table>
                 <tr>
                     <th>rank</th>
-                    <th>track</th>
+                    <th>album</th>
                     <th>time</th>
                 </tr>
                 {% for album in top_albums %}
@@ -54,13 +56,15 @@
                         <div class="top_entry">
                             <img style="width:65px;height:65px;" alt="img" src="{{ album.images[0].url }}">
                             <div class="info">
-                                <span style="color: rgb(242, 93, 93)">{{ album.name }}</span>
+                                <span class="highlighted">{{ album.name }}</span>
                                 <a>{{ album.artists[0].name }}</a>
                             </div>
                         </div>
                     </td>
                     <td>
-                        <a>123</a>
+                        {% if album.listened_ms %}
+                        <a>{{ album.listened_ms / 1000 }}</a>
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}
@@ -85,12 +89,14 @@
                             <img style="width:65px;height:65px;" alt="img" src="{{ artist.albums[0].images[0].url }}">
                             {% endif %}
                             <div class="info">
-                                <span style="color: rgb(242, 93, 93)">{{ artist.name }}</span>
+                                <span class="highlighted">{{ artist.name }}</span>
                             </div>
                         </div>
                     </td>
                     <td>
-                        <a>123</a>
+                        {% if artist.listened_ms %}
+                        <a>{{ artist.listened_ms/1000 }}</a>
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}

@@ -5,5 +5,11 @@
 {% endblock %}
 
 {% block content %}
+{% if g.user %}
 hello {{ g.user.username }}
+{% if not g.music_provider.get_user_access_token(g.user) %}
+<br>
+you need to <a href="{{ url_for('spotify.auth') }}">authenticate with Spotify</a>
+{% endif %}
+{% endif %}
 {% endblock %}

@@ -22,6 +22,7 @@ div.info {
     display: flex;
     flex-flow: column nowrap;
     justify-content: space-evenly;
+    max-width: 400px;
 }
 
 div.top_entries_container {

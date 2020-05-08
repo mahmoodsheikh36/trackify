@@ -50,12 +50,13 @@ class Track:
         self.explicit = explicit
 
 class Album:
-    def __init__(self, album_id, name, artists, images, album_type, release_date,
+    def __init__(self, album_id, name, tracks, artists, images, album_type, release_date,
                  release_date_precision):
         self.id = album_id
         self.name = name
         self.type = album_type
         self.artists = artists
+        self.tracks = tracks
         self.images = images
         self.release_date = release_date
         self.release_date_precision = release_date_precision
@@ -181,7 +182,7 @@ class MusicProvider:
             artists[artist.id] = artist
 
         for row in album_rows:
-            album = Album(row['id'], row['album_name'], [], [], row['album_type'],
+            album = Album(row['id'], row['album_name'], [], [], [], row['album_type'],
                           row['release_date'], row['release_date_precision'])
             albums[album.id] = album
         
@@ -190,6 +191,7 @@ class MusicProvider:
                           row['popularity'], row['preview_url'], row['track_number'],
                           row['explicit'])
             track.album = albums[row['album_id']]
+            track.album.tracks.append(track)
             tracks[track.id] = track
 
         for row in album_image_rows:

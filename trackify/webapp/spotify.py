@@ -1,7 +1,7 @@
 import functools
 from flask import Blueprint, render_template, g, redirect, request, url_for
 
-from trackify.utils import uri_encode, generate_id, current_time
+from trackify.utils import uri_encode, generate_id, current_time, get_largest_elements
 from trackify.webapp.auth import login_required
 from trackify.db.classes import AuthCode
 
@@ -39,8 +39,37 @@ def data():
             track.listened_ms += play.listened_ms()
         else:
             track.listened_ms = play.listened_ms()
+
+    for album in albums.values():
+        for track in album.tracks:
+            if hasattr(album, 'listened_ms'):
+                album.listened_ms += track.listened_ms
+            else:
+                album.listened_ms = track.listened_ms
+
+    for artist in artists.values():
+        print('{} {}'.format(artist.id, len(artist.albums)))
+        for album in artist.albums:
+            if hasattr(album, 'listened_ms'):
+                if hasattr(artist, 'listened_ms'):
+                    artist.listened_ms += album.listened_ms
+                else:
+                    artist.listened_ms = album.listened_ms
+
+    LIMIT = 100
+
+    def compare(music_obj1, music_obj2):
+        if not hasattr(music_obj1, 'listened_ms'):
+            return False
+        if not hasattr(music_obj2, 'listened_ms'):
+            return True
+        return music_obj1.listened_ms > music_obj2.listened_ms
+
+    top_tracks = get_largest_elements(list(tracks.values()), LIMIT, compare)
+    top_albums = get_largest_elements(list(albums.values()), LIMIT, compare)
+    top_artists = get_largest_elements(list(artists.values()), LIMIT, compare)
+    
     return render_template('data.html',
-                           top_tracks=list(tracks.values())[:20],
-                           top_albums=list(albums.values())[:20],
-                           top_artists=list(artists.values())[:20],
-                           tracks=tracks.values())
+                           top_tracks=top_tracks,
+                           top_albums=top_albums,
+                           top_artists=top_artists)
