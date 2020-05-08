@@ -30,3 +30,17 @@ def callback():
         g.music_provider.add_refresh_token(refresh_token)
         g.music_provider.add_access_token(access_token)
     return redirect(url_for('home.home'))
+
+@login_required
+@bp.route('/data', methods=('GET',))
+def data():
+    if not g.music_provider.get_user_auth_code(g.user):
+        return ''
+    plays, tracks = g.music_provider.get_user_music(g.user)
+    for play in plays.values():
+        track = tracks[play.track.id]
+        if hasattr(track, 'listened_ms'):
+            track.listened_ms += play.listened_ms()
+        else:
+            track.listened_ms = play.listened_ms()
+    return render_template('data.html', tracks=tracks.values())
