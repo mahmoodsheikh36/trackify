@@ -11,5 +11,7 @@ hello {{ g.user.username }}
 <br>
 you need to <a href="{{ url_for('spotify.auth') }}">authenticate with Spotify</a>
 {% endif %}
+{% else %}
+you need to <a href="{{ url_for('auth.register') }}">sign up!</a>
 {% endif %}
 {% endblock %}
