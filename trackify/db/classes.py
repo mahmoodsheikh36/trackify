@@ -69,6 +69,9 @@ class MusicProvider:
     def commit(self):
         self.db_provider.commit()
 
+    def new_conn(self):
+        self.db_provider.new_conn()
+
     def get_user_by_username(self, username):
         user_row = self.db_provider.get_user_by_username(username)
         if user_row:
@@ -159,7 +162,7 @@ class MusicProvider:
             users.append(user)
         return users
 
-    def get_user_tracks(self, user, return_map=False):
+    def get_user_music(self, user):
         track_rows = self.db_provider.get_user_tracks(user.id)
         artist_rows = self.db_provider.get_user_artists(user.id)
         album_rows = self.db_provider.get_user_albums(user.id)
@@ -198,9 +201,7 @@ class MusicProvider:
         for row in track_artist_rows:
             tracks[row['track_id']].artists.append(artists[row['artist_id']])
 
-        if return_map:
-            return tracks
-        return tracks.values()
+        return artists, albums, tracks
 
     def get_tracks(self):
         track_rows = self.db_provider.get_tracks()
@@ -250,6 +251,9 @@ class MusicProvider:
             if not self.db_provider.get_artist(artist.id):
                 self.db_provider.add_artist(artist.id, artist.name)
             self.db_provider.add_album_artist(generate_id(), album.id, artist.id)
+        for image in album.images:
+            self.db_provider.add_album_image(image.id, image.url, album.id, image.width,
+                                             image.height)
 
     def add_track(self, track):
         if not self.db_provider.get_album(track.album.id):
@@ -312,7 +316,7 @@ class MusicProvider:
         self.db_provider.add_seek(seek.id, seek.time_added, seek.position, seek.play.id)
         self.commit()
 
-    def get_user_music(self, user):
+    def get_user_data(self, user):
         play_rows = self.db_provider.get_user_plays(user.id)
         pause_rows = self.db_provider.get_user_pauses(user.id)
         resume_rows = self.db_provider.get_user_resumes(user.id)
@@ -321,7 +325,7 @@ class MusicProvider:
         # map each play id to its object to make lookup faster
         plays = {}
 
-        tracks = self.get_user_tracks(user, return_map=True)
+        artists, albums, tracks = self.get_user_music(user)
 
         for row in play_rows:
             plays[row['id']] = Play(row['id'], int(row['time_started']),
@@ -340,7 +344,7 @@ class MusicProvider:
             plays[row['play_id']].seeks.append(Seek(row['id'], None, row['position'],
                                                     int(row['time_added'])))
 
-        return plays, tracks
+        return artists, albums, tracks, plays
 
 class AuthCode:
     def __init__(self, code_id, code, user, time_added):
