@@ -1,11 +1,15 @@
-body {
-    display: flexbox;
-}
-
 div.stats_container {
     display: flex;
     flex-flow: row wrap;
     justify-content: space-evenly;
+    width: 95%;
+}
+
+div.main_container {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-evenly;
+    width: 100%;
 }
 
 div.top_entry {

@@ -2,21 +2,22 @@
     box-sizing: border-box;
 }
 
-html, body {
-    height: 100%;
-    background-color: #28292a;
-    color: #aaa;
-    font-size: 20px;
-}
-
 span.highlighted {
     color: rgb(242, 93, 93);
 }
 
 body {
+    height: 100%;
     padding: 0px;
     margin: 0px;
     font-family: Inconsolata; 
+    font-size: 20px;
+    color: #aaa;
+    background-color: #28292a;
+}
+
+div.content_container {
+    height: 90%;
 }
 
 a.error_message {

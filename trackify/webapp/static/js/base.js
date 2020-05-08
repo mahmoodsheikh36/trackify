@@ -3,7 +3,7 @@ function $(selector) {
 }
 
 function navbarFunction() {
-    var x = document.getElementById("myTopnav")
+    var x = document.getElementById("topnav")
     console.log(x)
     if (x.className === "topnav") {
         x.className += " responsive"
