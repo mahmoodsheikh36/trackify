@@ -6,8 +6,11 @@ span.highlighted {
     color: rgb(242, 93, 93);
 }
 
-body {
+html, body {
     height: 100%;
+}
+
+body {
     padding: 0px;
     margin: 0px;
     font-family: Inconsolata; 
