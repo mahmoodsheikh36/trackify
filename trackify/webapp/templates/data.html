@@ -5,8 +5,15 @@
 {% endblock %}
 
 {% block content %}
-    {% for track in tracks %}
-    <br>
-    <a>{{ track.name + ' ' + (track.listened_ms / 1000)|string }}</a>
+<div>
+    {% for track in top_tracks %}
+    <div class="track">
+        <img style="width:50px;height:50px;" alt="img" src="{{ track.album.images[0].url }}">
+        <div class="track_info">
+            <span style="color: rgb(242, 93, 93)">{{ track.name }}</span>
+            <a>{{ track.artists[0].name }}</a>
+        </div>
+    </div>
     {% endfor %}
+</div>
 {% endblock %}
