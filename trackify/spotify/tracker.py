@@ -17,6 +17,7 @@ class SpotifyTracker:
         # map user id to their last play and the time of the last request made for them
         user_data = {}
         while True:
+            self.music_provider.new_conn()
             users = self.music_provider.get_users()
             for user in users:
                 user.access_token = self.music_provider.get_user_access_token(user)
