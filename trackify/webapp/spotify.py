@@ -7,8 +7,8 @@ from trackify.db.classes import AuthCode
 
 bp = Blueprint('spotify', __name__, url_prefix='/spotify')
 
-@login_required
 @bp.route('/auth', methods=('GET',))
+@login_required
 def auth():
     spotify_auth_url = "https://accounts.spotify.com/authorize" +\
         "?response_type=code" +\
@@ -17,11 +17,9 @@ def auth():
         '&redirect_uri={}'.format(uri_encode(g.spotify_client.redirect_uri))
     return redirect(spotify_auth_url)
 
-@login_required
 @bp.route('/callback', methods=('GET',))
+@login_required
 def callback():
-    if g.music_provider.get_user_auth_code(g.user):
-        return '' # in this case we know someone is trying to abuse the backend
     auth_code = AuthCode(generate_id(), request.args['code'],
                          g.user, current_time())
     g.music_provider.add_auth_code(auth_code)
@@ -29,18 +27,18 @@ def callback():
     if access_token and refresh_token:
         g.music_provider.add_refresh_token(refresh_token)
         g.music_provider.add_access_token(access_token)
-    return redirect(url_for('home.home'))
+    return redirect(url_for('home.index'))
 
-@login_required
 @bp.route('/data', methods=('GET',))
+@login_required
 def data():
-    if not g.music_provider.get_user_auth_code(g.user):
-        return ''
-    plays, tracks = g.music_provider.get_user_music(g.user)
+    artists, albums, tracks, plays = g.music_provider.get_user_data(g.user)
     for play in plays.values():
         track = tracks[play.track.id]
         if hasattr(track, 'listened_ms'):
             track.listened_ms += play.listened_ms()
         else:
             track.listened_ms = play.listened_ms()
-    return render_template('data.html', tracks=tracks.values())
+    return render_template('data.html',
+                           top_tracks=list(tracks.values())[:4],
+                           tracks=tracks.values())
