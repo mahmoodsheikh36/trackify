@@ -82,7 +82,7 @@ class SpotifyClient:
 
         album_artists = []
         for artist_json in album_json['artists']:
-            album_artists.append(Artist(artist_json['id'], artist_json['name']))
+            album_artists.append(Artist(artist_json['id'], artist_json['name'], None))
 
         album = Album(album_json['id'], album_json['name'], album_artists, album_images,
                       album_json['type'], album_json['release_date'],
@@ -90,7 +90,7 @@ class SpotifyClient:
 
         track_artists = []
         for artist_json in track_json['artists']:
-            track_artists.append(Artist(artist_json['id'], artist_json['name']))
+            track_artists.append(Artist(artist_json['id'], artist_json['name'], None))
 
         track = Track(track_json['id'], track_json['name'], album, track_artists,
                       track_json['duration_ms'], track_json['popularity'],

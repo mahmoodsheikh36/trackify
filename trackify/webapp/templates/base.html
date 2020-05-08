@@ -1,6 +1,7 @@
 <!doctype html>
 <html>
     <head>
+        <script src="/static/js/base.js"></script>
         {% block head %}
         {% endblock %}
         <meta charset="UTF-8">
@@ -8,8 +9,16 @@
         <link rel="icon" href="/static/favicon.png" type="image/gif" sizes="16x16">
         <link rel="stylesheet" href="/static/css/base.css">
         <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Inconsolata"/>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     </head>
     <body>
+        <div class="topnav" id="myTopnav">
+            <a href="{{ url_for('home.index') }}" class="active">Home</a>
+            <a href="{{ url_for('spotify.data') }}">My Data</a>
+            <a href="javascript:void(0);" class="icon" onclick="navbarFunction()">
+                <i class="fa fa-bars"></i>
+            </a>
+        </div>
         {% block content %}
         {% endblock %}
     </body>

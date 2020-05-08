@@ -55,6 +55,9 @@ def create_app():
     from trackify.webapp.spotify import bp as spotify_bp
     app.register_blueprint(spotify_bp)
 
+    from trackify.webapp.static import bp as static_bp
+    app.register_blueprint(static_bp)
+
     return app
 
 web_application = create_app()

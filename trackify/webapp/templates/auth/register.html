@@ -3,21 +3,25 @@
 {% block head %}
 <title>register</title>
 <link rel="stylesheet" href="/static/css/auth.css">
+<script src="/static/js/register.js"></script>
 {% endblock %}
 
 {% block content %}
-<form class="fields_container" autocomplete="off" method="post">
+<form class="fields_container" autocomplete="off" method="post" onsubmit="return validate()">
     <a class="main_header">join <span class="highlighted">Trackify</span></a>
     username
-    <input type="text" name="username" class="field" />
+    <input type="text" name="username" class="field" id="username" />
     password
-    <input type="password" name="password" class="field" />
+    <input type="password" name="password" class="field" id="password" />
+    verify password
+    <input type="password" name="verified_password" class="field" id="verified_password" />
     email (recommended)
-    <input type="text" name="email" class="field" />
+    <input type="text" name="email" class="field" id="email" />
     <input type=submit class="button" value="register" />
     {% for message in get_flashed_messages() %}
     <a class="error_message">{{ message }}</a>
     {% endfor %}
+    <a class="error_message" id="error_message"></a>
     <div>already got an account? <a href="{{ url_for('auth.login') }}">login</a></div>
 </form>
 {% endblock %}

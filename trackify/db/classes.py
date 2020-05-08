@@ -31,9 +31,10 @@ class User:
         self.plays = plays
 
 class Artist:
-    def __init__(self, artist_id, name):
+    def __init__(self, artist_id, name, albums):
         self.id = artist_id
         self.name = name
+        self.albums = albums
 
 class Track:
     def __init__(self, track_id, name, album, artists, duration_ms, popularity,
@@ -176,7 +177,7 @@ class MusicProvider:
         artists = {}
 
         for row in artist_rows:
-            artist = Artist(row['id'], row['artist_name'])
+            artist = Artist(row['id'], row['artist_name'], [])
             artists[artist.id] = artist
 
         for row in album_rows:
@@ -197,52 +198,12 @@ class MusicProvider:
 
         for row in album_artist_rows:
             albums[row['album_id']].artists.append(artists[row['artist_id']])
+            artists[row['artist_id']].albums.append(albums[row['album_id']])
 
         for row in track_artist_rows:
             tracks[row['track_id']].artists.append(artists[row['artist_id']])
 
         return artists, albums, tracks
-
-    def get_tracks(self):
-        track_rows = self.db_provider.get_tracks()
-        artist_rows = self.db_provider.get_artists()
-        album_rows = self.db_provider.get_albums()
-        album_image_rows = self.db_provider.get_album_images()
-        album_artist_rows = self.db_provider.get_album_artists()
-        track_artist_rows = self.db_provider.get_track_artists()
-
-        # map each object's id to the object to make lookup faster
-        tracks = {}
-        albums = {}
-        artists = {}
-
-        for row in artist_rows:
-            artist = Artist(row['id'], row['artist_name'])
-            artists[artist.id] = artist
-
-        for row in album_rows:
-            album = Album(row['id'], row['album_name'], [], [], row['album_type'],
-                          row['release_date'], row['release_date_precision'])
-            albums[album.id] = album
-        
-        for row in track_rows:
-            track = Track(row['id'], row['track_name'], None, [], row['duration_ms'],
-                          row['popularity'], row['preview_url'], row['track_number'],
-                          row['explicit'])
-            track.album = albums[row['album_id']]
-            tracks[track.id] = track
-
-        for row in album_image_rows:
-            image = Image(row['id'], row['url'], row['width'], row['height'])
-            albums[row['album_id']].images.append(image)
-
-        for row in album_artist_rows:
-            albums[row['album_id']].artists.append(artists[row['artist_id']])
-
-        for row in track_artist_rows:
-            tracks[row['track_id']].artists.append(artists[row['artist_id']])
-
-        return tracks.values()
 
     def add_album(self, album):
         self.db_provider.add_album(album.id, album.name, album.type, album.release_date,
@@ -345,6 +306,9 @@ class MusicProvider:
                                                     int(row['time_added'])))
 
         return artists, albums, tracks, plays
+
+    def user_has_plays(self, user):
+        return self.db_provider.user_has_plays(user.id)
 
 class AuthCode:
     def __init__(self, code_id, code, user, time_added):

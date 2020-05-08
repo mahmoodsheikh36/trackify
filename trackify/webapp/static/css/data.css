@@ -1,0 +1,47 @@
+body {
+    display: flexbox;
+}
+
+div.stats_container {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-evenly;
+}
+
+div.top_entry {
+    display: flex;
+    flex-flow: row nowrap;
+}
+
+div.info {
+    margin-left: 5px;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: space-evenly;
+}
+
+div.top_entries_container {
+    display: flex;
+    flex-flow: column nowrap;
+}
+
+a.top_entry_title {
+    color: rgb(242, 93, 93);
+    align-self: center;
+    font-size: 25px;
+    margin: 10px;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+td, th {
+    border: 1px solid #111111;
+    text-align: left;
+    /* padding: 8px; */
+}
+
+tr:nth-child(even) {
+    background-color: #222222;
+}

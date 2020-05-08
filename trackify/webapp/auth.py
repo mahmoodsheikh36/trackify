@@ -9,17 +9,22 @@ bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 @bp.route('/register', methods=('GET', 'POST'))
 def register():
+    if g.user:
+        return redirect(url_for('home.index'))
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+        verified_password = request.form['verified_password']
         email = request.form['email']
         error = None
 
         if not password:
             error = 'password is required'
+        elif not password == verified_password:
+            error = 'passwords dont match'
         if not username:
             error = 'username is required'
-        if g.music_provider.get_user_by_username(username):
+        elif g.music_provider.get_user_by_username(username):
             error = 'username is not available'
 
         if not error:
@@ -34,6 +39,8 @@ def register():
 
 @bp.route('/login', methods=('GET', 'POST'))
 def login():
+    if g.user:
+        return redirect(url_for('home.index'))
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']

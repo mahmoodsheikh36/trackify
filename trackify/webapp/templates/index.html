@@ -5,13 +5,5 @@
 {% endblock %}
 
 {% block content %}
-{% if g.user.username and g.music_provider.get_user_access_token(g.user) %}
-<a>{{ g.user.username }}</a>
-{% elif g.user.username %}
-<a>{{ g.user.username }}</a>
-<br>
-you need to <a href="{{ url_for('spotify.auth') }}">authenticate with spotify</a> bro!
-{% else %}
-you need to <a href="{{ url_for('auth.register') }}">sign up</a>
-{% endif %}
+hello
 {% endblock %}
