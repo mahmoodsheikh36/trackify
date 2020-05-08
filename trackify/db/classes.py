@@ -312,7 +312,7 @@ class MusicProvider:
         self.db_provider.add_seek(seek.id, seek.time_added, seek.position, seek.play.id)
         self.commit()
 
-    def get_user_plays(self, user):
+    def get_user_music(self, user):
         play_rows = self.db_provider.get_user_plays(user.id)
         pause_rows = self.db_provider.get_user_pauses(user.id)
         resume_rows = self.db_provider.get_user_resumes(user.id)
@@ -340,7 +340,7 @@ class MusicProvider:
             plays[row['play_id']].seeks.append(Seek(row['id'], None, row['position'],
                                                     int(row['time_added'])))
 
-        return plays.values()
+        return plays, tracks
 
 class AuthCode:
     def __init__(self, code_id, code, user, time_added):
