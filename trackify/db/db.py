@@ -3,6 +3,10 @@ from trackify.utils import current_time, generate_id
 
 class DBProvider:
     def __init__(self, user, passwd, database='trackify', host='localhost'):
+        self.user = user
+        self.passwd = passwd
+        self.database = database
+        self.host = host
         self.conn = mysql.connector.connect(
             host=host,
             user=user,
@@ -15,6 +19,16 @@ class DBProvider:
 
     def close(self):
         self.conn.close()
+
+    def new_conn(self):
+        self.commit()
+        self.close()
+        self.conn = mysql.connector.connect(
+            host=self.host,
+            user=self.user,
+            passwd=self.passwd,
+            database=self.database,
+        )
 
     def commit(self):
         self.conn.commit()
@@ -103,6 +117,11 @@ class DBProvider:
         self.execute('INSERT INTO seeks (id, time_added, position, play_id)\
                       VALUES (%s, %s, %s, %s)',
                      (seek_id, time_added, position, play_id))
+
+    def add_album_image(self, row_id, url, album_id, width, height):
+        self.execute('INSERT INTO album_images (id, width, height, url, album_id)\
+                      VALUES (%s, %s, %s, %s, %s)',
+                     (row_id, width, height, url, album_id))
 
     def get_user_by_username(self, username):
         c = self.cursor()
@@ -267,7 +286,11 @@ class DBProvider:
         c.execute('SELECT * FROM artists WHERE artists.id IN\
                    (SELECT artist_id FROM track_artists WHERE track_id IN\
                    (SELECT id FROM tracks WHERE id IN\
-                   (SELECT track_id FROM plays WHERE user_id = %s)))', (user_id,))
+                   (SELECT track_id FROM plays WHERE user_id = %s))) OR artists.id IN\
+                   (SELECT artist_id FROM album_artists WHERE album_id IN\
+                   (SELECT album_id FROM tracks WHERE tracks.id IN\
+                   (SELECT track_id FROM plays WHERE user_id = %s)))',
+                  (user_id, user_id))
         return c.fetchall()
 
     def get_user_album_images(self, user_id):
