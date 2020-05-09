@@ -27,63 +27,63 @@ class SpotifyTracker:
                 users = self.music_provider.get_users()
                 for user in users:
                     user.access_token = self.music_provider.get_user_access_token(user)
-                if not user.access_token:
-                    continue
-                if user.access_token.expired():
-                    user.refresh_token =\
-                        self.music_provider.get_user_refresh_token(user)
-                    user.access_token = self.spotify_client.fetch_access_token(
-                        user.refresh_token)
-                    self.music_provider.add_access_token(user.access_token)
+                    if not user.access_token:
+                        continue
+                    if user.access_token.expired():
+                        user.refresh_token =\
+                            self.music_provider.get_user_refresh_token(user)
+                        user.access_token = self.spotify_client.fetch_access_token(
+                            user.refresh_token)
+                        self.music_provider.add_access_token(user.access_token)
 
-                play = self.spotify_client.get_current_play(
-                    user.access_token)
-                if not play: # nothing playing
-                    continue
-                if user.id in user_data:
-                    last_play = user_data[user.id][0]
-                else:
-                    last_play = None
+                    play = self.spotify_client.get_current_play(
+                        user.access_token)
+                    if not play: # nothing playing
+                        continue
+                    if user.id in user_data:
+                        last_play = user_data[user.id][0]
+                    else:
+                        last_play = None
 
-                if last_play is None:
-                    self.music_provider.add_play(play)
-                    if not play.is_playing:
-                        pause = Pause(generate_id(), play, current_time())
-                        self.music_provider.add_pause(pause)
-                else:
-                    track_changed = not play.has_same_track_as(last_play)
-                    if not track_changed:
-                        play.id = last_play.id
-                    if track_changed: # track changed
-                        last_play.time_ended = current_time()
-                        self.music_provider.update_play_time_ended(last_play)
+                    if last_play is None:
                         self.music_provider.add_play(play)
                         if not play.is_playing:
                             pause = Pause(generate_id(), play, current_time())
                             self.music_provider.add_pause(pause)
-                    elif not play.is_playing and last_play.is_playing: # track paused
-                        pause = Pause(generate_id(), play, current_time())
-                        self.music_provider.add_pause(pause)
-                    elif play.is_playing and not last_play.is_playing: # track resumed
-                        resume = Resume(generate_id(), play, current_time())
-                        self.music_provider.add_resume(resume)
-                    else: # if no actions just update time_ended
-                        play.time_ended = current_time()
-                        self.music_provider.update_play_time_ended(play)
+                    else:
+                        track_changed = not play.has_same_track_as(last_play)
+                        if not track_changed:
+                            play.id = last_play.id
+                        if track_changed: # track changed
+                            last_play.time_ended = current_time()
+                            self.music_provider.update_play_time_ended(last_play)
+                            self.music_provider.add_play(play)
+                            if not play.is_playing:
+                                pause = Pause(generate_id(), play, current_time())
+                                self.music_provider.add_pause(pause)
+                        elif not play.is_playing and last_play.is_playing: # track paused
+                            pause = Pause(generate_id(), play, current_time())
+                            self.music_provider.add_pause(pause)
+                        elif play.is_playing and not last_play.is_playing: # track resumed
+                            resume = Resume(generate_id(), play, current_time())
+                            self.music_provider.add_resume(resume)
+                        else: # if no actions just update time_ended
+                            play.time_ended = current_time()
+                            self.music_provider.update_play_time_ended(play)
 
-                    # checking if a seek action (skip to position) was made
-                    if not track_changed:
-                        prev_request_time = user_data[user.id][1]
-                        seconds_passed = (current_time() - prev_request_time) / 1000.
-                        gap = abs(seconds_passed -
-                                  abs(play.progress_ms - last_play.progress_ms) / 1000.)
-                        if gap > 5:
-                            seek = Seek(generate_id(), play, play.progress_ms,
-                                        current_time())
-                            self.music_provider.add_seek(seek)
+                        # checking if a seek action (skip to position) was made
+                        if not track_changed:
+                            prev_request_time = user_data[user.id][1]
+                            seconds_passed = (current_time() - prev_request_time) / 1000.
+                            gap = abs(seconds_passed -
+                                    abs(play.progress_ms - last_play.progress_ms) / 1000.)
+                            if gap > 5:
+                                seek = Seek(generate_id(), play, play.progress_ms,
+                                            current_time())
+                                self.music_provider.add_seek(seek)
 
-                user_data[user.id] = play, current_time()
-                #print('{} - {}'.format(play.track.name, play.track.artists[0].name))
+                    user_data[user.id] = play, current_time()
+                    print('{} - {}'.format(play.track.name, play.track.artists[0].name))
             except Exception as e:
                 logger.error(err)
 
