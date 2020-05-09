@@ -1,7 +1,11 @@
 from time import sleep
 
-from trackify.utils import current_time, generate_id
+import logging
+logging.basicConfig(filename='/tmp/tracker.log', level=logging.DEBUG, 
+                    format='%(asctime)s %(levelname)s %(name)s %(message)s')
+logger=logging.getLogger(__name__)
 
+from trackify.utils import current_time, generate_id
 from trackify.db.classes import Pause, Resume, Seek
 
 RATE_LIMIT_TIMEOUT = 2.5
@@ -15,12 +19,14 @@ class SpotifyTracker:
 
     def start_tracking(self):
         # map user id to their last play and the time of the last request made for them
+        logf = open("tracker.log", "w+")
         user_data = {}
         while True:
-            self.music_provider.new_conn()
-            users = self.music_provider.get_users()
-            for user in users:
-                user.access_token = self.music_provider.get_user_access_token(user)
+            try:
+                self.music_provider.new_conn()
+                users = self.music_provider.get_users()
+                for user in users:
+                    user.access_token = self.music_provider.get_user_access_token(user)
                 if not user.access_token:
                     continue
                 if user.access_token.expired():
@@ -70,13 +76,15 @@ class SpotifyTracker:
                         prev_request_time = user_data[user.id][1]
                         seconds_passed = (current_time() - prev_request_time) / 1000.
                         gap = abs(seconds_passed -
-                                    abs(play.progress_ms - last_play.progress_ms) / 1000.)
+                                  abs(play.progress_ms - last_play.progress_ms) / 1000.)
                         if gap > 5:
                             seek = Seek(generate_id(), play, play.progress_ms,
                                         current_time())
                             self.music_provider.add_seek(seek)
 
                 user_data[user.id] = play, current_time()
+            except Exception as e:
+                logger.error(err)
 
                 #print('{} - {}'.format(play.track.name, play.track.artists[0].name))
             sleep(ITERATION_TIMEOUT)
