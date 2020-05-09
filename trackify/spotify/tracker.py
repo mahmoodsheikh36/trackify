@@ -19,7 +19,6 @@ class SpotifyTracker:
 
     def start_tracking(self):
         # map user id to their last play and the time of the last request made for them
-        logf = open("tracker.log", "w+")
         user_data = {}
         while True:
             try:
@@ -85,7 +84,7 @@ class SpotifyTracker:
                     user_data[user.id] = play, current_time()
                     #print('{} - {}'.format(play.track.name, play.track.artists[0].name))
             except Exception as e:
-                logger.error(err)
+                logger.error(e)
 
             sleep(ITERATION_TIMEOUT)
 
