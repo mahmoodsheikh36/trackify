@@ -34,20 +34,28 @@ a:visited, a:link {
 table {
     border-collapse: collapse;
 }
-th {
-    padding: 10px;
-    font-size: 22px;
-}
 td, th {
     border: 1px solid #111111;
     text-align: left;
+    padding: 2px;
     /* padding: 8px; */
+}
+th {
+    padding: 10px;
+    font-size: 22px;
 }
 tr:nth-child(even) {
     background-color: #222222;
 }
 td.centered {
     text-align: center;
+}
+
+/* the div that contains hrs,mins,secs all in a column */
+div.time_container {
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: space-evenly;
 }
 
 /* remove annoying glow from elements */

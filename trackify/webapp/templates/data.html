@@ -32,7 +32,17 @@
                     </td>
                     <td>
                         {% if track.listened_ms %}
-                        <a>{{ track.listened_ms / 1000 }}</a>
+                        <div class="time_container">
+                            {% if hrs_from_ms(track.listened_ms) %}
+                            <a>{{ hrs_from_ms(track.listened_ms) }} hrs</a>
+                            {% endif %}
+                            {% if mins_from_ms(track.listened_ms) %}
+                            <a>{{ mins_from_ms(track.listened_ms) }} mins</a>
+                            {% endif %}
+                            {% if secs_from_ms(track.listened_ms) %}
+                            <a>{{ secs_from_ms(track.listened_ms) }} secs</a>
+                            {% endif %}
+                        </div>
                         {% endif %}
                     </td>
                 </tr>
@@ -63,7 +73,17 @@
                     </td>
                     <td>
                         {% if album.listened_ms %}
-                        <a>{{ album.listened_ms / 1000 }}</a>
+                        <div class="time_container">
+                            {% if hrs_from_ms(album.listened_ms) %}
+                            <a>{{ hrs_from_ms(album.listened_ms) }} hrs</a>
+                            {% endif %}
+                            {% if mins_from_ms(album.listened_ms) %}
+                            <a>{{ mins_from_ms(album.listened_ms) }} mins</a>
+                            {% endif %}
+                            {% if secs_from_ms(album.listened_ms) %}
+                            <a>{{ secs_from_ms(album.listened_ms) }} secs</a>
+                            {% endif %}
+                        </div>
                         {% endif %}
                     </td>
                 </tr>
@@ -95,7 +115,17 @@
                     </td>
                     <td>
                         {% if artist.listened_ms %}
-                        <a>{{ artist.listened_ms/1000 }}</a>
+                        <div class="time_container">
+                            {% if hrs_from_ms(artist.listened_ms) %}
+                            <a>{{ hrs_from_ms(artist.listened_ms) }} hrs</a>
+                            {% endif %}
+                            {% if mins_from_ms(artist.listened_ms) %}
+                            <a>{{ mins_from_ms(artist.listened_ms) }} mins</a>
+                            {% endif %}
+                            {% if secs_from_ms(artist.listened_ms) %}
+                            <a>{{ secs_from_ms(artist.listened_ms) }} secs</a>
+                            {% endif %}
+                        </div>
                         {% endif %}
                     </td>
                 </tr>

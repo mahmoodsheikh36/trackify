@@ -16,11 +16,21 @@
         </tr>
         {% for user in top_users %}
         <tr>
-            <td>
-                <a class="highlighted">{{ user.username }}</a>
+            <td class="centered">
+                <a class="highlighted centered">{{ user.username }}</a>
             </td>
             <td>
-                {{ user.listened_ms }}
+                <div class="time_container">
+                    {% if hrs_from_ms(user.listened_ms) %}
+                    <a>{{ hrs_from_ms(user.listened_ms) }} hrs</a>
+                    {% endif %}
+                    {% if mins_from_ms(user.listened_ms) %}
+                    <a>{{ mins_from_ms(user.listened_ms) }} mins</a>
+                    {% endif %}
+                    {% if secs_from_ms(user.listened_ms) %}
+                    <a>{{ secs_from_ms(user.listened_ms) }} secs</a>
+                    {% endif %}
+                </div>
             </td>
             <td>
                 <div class="top_track">

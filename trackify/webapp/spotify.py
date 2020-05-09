@@ -1,7 +1,10 @@
 import functools
 from flask import Blueprint, render_template, g, redirect, request, url_for
 
-from trackify.utils import uri_encode, generate_id, current_time, get_largest_elements
+from trackify.utils import (
+    uri_encode, generate_id, current_time, get_largest_elements, mins_from_ms,
+    hrs_from_ms, secs_from_ms
+)
 from trackify.webapp.auth import login_required
 from trackify.db.classes import AuthCode
 
@@ -74,7 +77,10 @@ def data():
     return render_template('data.html',
                            top_tracks=top_tracks,
                            top_albums=top_albums,
-                           top_artists=top_artists)
+                           top_artists=top_artists,
+                           mins_from_ms=mins_from_ms,
+                           hrs_from_ms=hrs_from_ms,
+                           secs_from_ms=secs_from_ms)
 
 @bp.route('/top_users', methods=('GET',))
 def top_users():
@@ -109,4 +115,8 @@ def top_users():
         return user1.listened_ms > user2.listened_ms
     t_users = get_largest_elements(users_to_sort, LIMIT, compare)
 
-    return render_template('top_users.html', top_users=t_users)
+    return render_template('top_users.html',
+                           top_users=t_users,
+                           mins_from_ms=mins_from_ms,
+                           hrs_from_ms=hrs_from_ms,
+                           secs_from_ms=secs_from_ms)
