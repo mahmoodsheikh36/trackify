@@ -24,6 +24,12 @@ def register():
             error = 'passwords dont match'
         if not username:
             error = 'username is required'
+        elif len(username) > 29:
+            error = 'username too long'
+        elif len(password) > 93:
+            error = 'password too long'
+        elif len(email) > 254:
+            error = 'email too long'
         elif g.music_provider.get_user_by_username(username):
             error = 'username is not available'
 
