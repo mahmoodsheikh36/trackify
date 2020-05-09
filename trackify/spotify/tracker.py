@@ -1,7 +1,7 @@
 from time import sleep
 
 import logging
-logging.basicConfig(filename='/tmp/tracker.log', level=logging.DEBUG, 
+logging.basicConfig(filename='/tmp/tracker.log', level=logging.WARNING, 
                     format='%(asctime)s %(levelname)s %(name)s %(message)s')
 logger=logging.getLogger(__name__)
 
