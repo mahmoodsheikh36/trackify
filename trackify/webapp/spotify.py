@@ -88,16 +88,14 @@ def top_users():
             continue
         users_to_sort.append(user)
         for play in plays.values():
-            track = tracks[play.track.id]
             listened_ms = play.listened_ms()
-            if hasattr(track, 'listened_ms'):
-                track.listened_ms += listened_ms
+            if hasattr(play.track, 'listened_ms'):
+                play.track.listened_ms += listened_ms
             else:
-                track.listened_ms = listened_ms
-            user.top_track = track
+                play.track.listened_ms = listened_ms
             if not hasattr(user, 'top_track') or\
-               track.listened_ms > user.top_track.listened_ms:
-                user.top_track = track
+               play.track.listened_ms > user.top_track.listened_ms:
+                user.top_track = play.track
             if not hasattr(user, 'listened_ms'):
                 user.listened_ms = listened_ms
             else:
