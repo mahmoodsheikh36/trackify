@@ -16,11 +16,3 @@ def index_page():
 @bp.route('home', methods=('GET',))
 def home():
     return index()
-
-@bp.route('mus', methods=('GET',))
-def mus():
-    tracks = g.music_provider.get_tracks()
-    txt = ''
-    for track in tracks:
-        txt += track.name + ' - ' + track.album.name + ' - ' + track.artists[0].name + '<br>'
-    return txt
