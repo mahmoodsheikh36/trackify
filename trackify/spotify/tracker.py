@@ -1,8 +1,7 @@
 from time import sleep
 
 import logging
-logging.basicConfig(filename='/tmp/tracker.log', level=logging.WARNING, 
-                    format='%(asctime)s %(levelname)s %(name)s %(message)s')
+logging.basicConfig(filename='/tmp/tracker.log', level=logging.WARNING)
 logger=logging.getLogger(__name__)
 
 from trackify.utils import current_time, generate_id
@@ -84,7 +83,7 @@ class SpotifyTracker:
                     user_data[user.id] = play, current_time()
                     #print('{} - {}'.format(play.track.name, play.track.artists[0].name))
             except Exception as e:
-                logger.error(e)
+                logger.exception(e)
 
             sleep(ITERATION_TIMEOUT)
 
