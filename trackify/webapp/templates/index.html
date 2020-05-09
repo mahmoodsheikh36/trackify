@@ -2,16 +2,15 @@
 
 {% block head %}
 <title>Trackify home</title>
+<link rel="stylesheet" href="/static/css/index.css">
 {% endblock %}
 
 {% block content %}
-{% if g.user %}
-hello {{ g.user.username }}
+<div class="message">
 {% if not g.music_provider.get_user_access_token(g.user) %}
-<br>
-you need to <a href="{{ url_for('spotify.auth') }}">authenticate with Spotify</a>
+    <div>
+        you need to <a href="{{ url_for('spotify.auth') }}">authenticate with Spotify</a>
+    </div>
 {% endif %}
-{% else %}
-you need to <a href="{{ url_for('auth.register') }}">sign up!</a>
-{% endif %}
+</div>
 {% endblock %}

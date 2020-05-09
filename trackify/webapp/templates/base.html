@@ -13,8 +13,15 @@
     </head>
     <body>
         <div class="topnav" id="topnav">
+            {% if g.user %}
+            <a href="{{ url_for('home.index') }}" class="active">{{ g.user.username }}</a>
+            {% else %}
             <a href="{{ url_for('home.index') }}" class="active">Home</a>
-            <a href="{{ url_for('spotify.data') }}">My Data</a>
+            {% endif %}
+            <a href="{{ url_for('spotify.top_users') }}">Top Users</a>
+            {% if g.user %}
+            <a href="{{ url_for('auth.logout') }}">Logout</a>
+            {% endif %}
             <a href="javascript:void(0);" class="icon" onclick="navbarFunction()">
                 <i class="fa fa-bars"></i>
             </a>

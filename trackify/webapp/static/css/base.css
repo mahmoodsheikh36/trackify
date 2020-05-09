@@ -2,7 +2,7 @@
     box-sizing: border-box;
 }
 
-span.highlighted {
+.highlighted {
     color: rgb(242, 93, 93);
 }
 
@@ -31,9 +31,27 @@ a:visited, a:link {
     color: rgb(242, 93, 93);
 }
 
+table {
+    border-collapse: collapse;
+}
+th {
+    padding: 10px;
+    font-size: 22px;
+}
+td, th {
+    border: 1px solid #111111;
+    text-align: left;
+    /* padding: 8px; */
+}
+tr:nth-child(even) {
+    background-color: #222222;
+}
+td.centered {
+    text-align: center;
+}
+
 /* remove annoying glow from elements */
 textarea, select, input, button { outline: none; }
-
 
 .topnav {
     overflow: hidden;

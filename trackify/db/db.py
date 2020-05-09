@@ -314,3 +314,8 @@ class DBProvider:
         c.execute('SELECT * FROM track_artists WHERE track_id IN\
                    (SELECT track_id FROM plays WHERE user_id = %s)', (user_id,))
         return c.fetchall()
+
+    def user_has_plays(self, user_id):
+        c = self.cursor()
+        c.execute('SELECT id FROM plays WHERE id = %s LIMIT 1', (user_id,))
+        return c.fetchone() is not None

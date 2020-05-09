@@ -36,22 +36,3 @@ a.top_entry_title {
     font-size: 25px;
     margin: 10px;
 }
-
-table {
-    border-collapse: collapse;
-}
-
-th {
-    padding: 10px;
-    font-size: 22px;
-}
-
-td, th {
-    border: 1px solid #111111;
-    text-align: left;
-    /* padding: 8px; */
-}
-
-tr:nth-child(even) {
-    background-color: #222222;
-}

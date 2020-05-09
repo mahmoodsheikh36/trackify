@@ -51,7 +51,6 @@ def data():
                 album.listened_ms = track.listened_ms
 
     for artist in artists.values():
-        print('{} {}'.format(artist.id, len(artist.albums)))
         for album in artist.albums:
             if hasattr(album, 'listened_ms'):
                 if hasattr(artist, 'listened_ms'):
@@ -76,3 +75,40 @@ def data():
                            top_tracks=top_tracks,
                            top_albums=top_albums,
                            top_artists=top_artists)
+
+@bp.route('/top_users', methods=('GET',))
+def top_users():
+    users = g.music_provider.get_users()
+    LIMIT = 10
+
+    users_to_sort = []
+    for idx, user in enumerate(users):
+        artists, albums, tracks, plays = g.music_provider.get_user_data(user)
+        if not plays:
+            continue
+        users_to_sort.append(user)
+        for play in plays.values():
+            track = tracks[play.track.id]
+            listened_ms = play.listened_ms()
+            if hasattr(track, 'listened_ms'):
+                track.listened_ms += listened_ms
+            else:
+                track.listened_ms = listened_ms
+            user.top_track = track
+            if not hasattr(user, 'top_track') or\
+               track.listened_ms > user.top_track.listened_ms:
+                user.top_track = track
+            if not hasattr(user, 'listened_ms'):
+                user.listened_ms = listened_ms
+            else:
+                user.listened_ms += listened_ms
+
+    def compare(user1, user2):
+        if not hasattr(user1, 'listened_ms'):
+            return False
+        if not hasattr(user2, 'listened_ms'):
+            return True
+        return user1.listened_ms > user2.listened_ms
+    t_users = get_largest_elements(users_to_sort, LIMIT, compare)
+
+    return render_template('top_users.html', top_users=t_users)

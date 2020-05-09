@@ -83,10 +83,10 @@ class SpotifyTracker:
                             self.music_provider.add_seek(seek)
 
                 user_data[user.id] = play, current_time()
+                #print('{} - {}'.format(play.track.name, play.track.artists[0].name))
             except Exception as e:
                 logger.error(err)
 
-                #print('{} - {}'.format(play.track.name, play.track.artists[0].name))
             sleep(ITERATION_TIMEOUT)
 
 if __name__ == '__main__':

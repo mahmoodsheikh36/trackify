@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Trackify top users</title>
+<link rel="stylesheet" href="/static/css/top_users.css">
+{% endblock %}
+
+{% block content %}
+<div class="table_container">
+    <a class="table_title highlighted">top users (by listening time)</a>
+    <table>
+        <tr>
+            <th>user</th>
+            <th>time</th>
+            <th>favorite track</th>
+        </tr>
+        {% for user in top_users %}
+        <tr>
+            <td>
+                <a class="highlighted">{{ user.username }}</a>
+            </td>
+            <td>
+                {{ user.listened_ms }}
+            </td>
+            <td>
+                <div class="top_track">
+                    <img style="width:65px;height:65px;" src="{{ user.top_track.album.images[0].url }}"></img>
+                    <div class="top_track_title">
+                        <a class="highlighted">{{ user.top_track.name }}</a>
+                        <a>{{ user.top_track.artists[0].name }}</a>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}
