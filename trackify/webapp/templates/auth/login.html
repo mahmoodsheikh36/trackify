@@ -16,6 +16,6 @@
     {% for message in get_flashed_messages() %}
     <a class="error_message">{{ message }}</a>
     {% endfor %}
-    <div>dont have an account?: <a href="{{ url_for('auth.register') }}">register</a></div>
+    <div>dont have an account? <a href="{{ url_for('auth.register') }}">register</a></div>
 </form>
 {% endblock %}
