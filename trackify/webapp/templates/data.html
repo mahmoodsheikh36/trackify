@@ -18,8 +18,8 @@
                 </tr>
                 {% for track in top_tracks %}
                 <tr>
-                    <td>
-                        1
+                    <td class="centered">
+                        {{ loop.index }}
                     </td>
                     <td>
                         <div class="top_entry">
@@ -59,8 +59,8 @@
                 </tr>
                 {% for album in top_albums %}
                 <tr>
-                    <td>
-                        1
+                    <td class="centered">
+                        {{ loop.index }}
                     </td>
                     <td>
                         <div class="top_entry">
@@ -100,8 +100,8 @@
                 </tr>
                 {% for artist in top_artists %}
                 <tr>
-                    <td>
-                        1
+                    <td class="centered">
+                        {{ loop.index }}
                     </td>
                     <td>
                         <div class="top_entry">
