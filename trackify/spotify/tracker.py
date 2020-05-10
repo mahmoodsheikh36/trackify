@@ -37,6 +37,7 @@ class SpotifyTracker:
                     play = self.spotify_client.get_current_play(
                         user.access_token)
                     if not play: # nothing playing
+                        user_data[user.id] = None, current_time()
                         continue
                     if user.id in user_data:
                         last_play = user_data[user.id][0]
@@ -83,6 +84,7 @@ class SpotifyTracker:
                     user_data[user.id] = play, current_time()
                     #print('{} - {}'.format(play.track.name, play.track.artists[0].name))
             except Exception as e:
+                user_data = {}
                 logger.exception(e)
 
             sleep(ITERATION_TIMEOUT)
