@@ -1,3 +1,10 @@
+div.main_container {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-evenly;
+    width: 100%
+}
+
 div.table_container {
     display: flex;
     flex-flow: column nowrap;
