@@ -11,6 +11,8 @@ def index():
         return redirect(url_for('auth.login'))
     if not g.music_provider.get_user_access_token(g.user):
         return render_template('index.html')
+    if not g.music_provider.user_has_plays(g.user):
+        return render_template('index.html')
     return redirect(url_for('spotify.data'))
 
 @bp.route('index', methods=('GET',))

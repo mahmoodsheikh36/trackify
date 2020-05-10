@@ -4,4 +4,23 @@ div.message {
     align-items: center;
     justify-content: center;
     height: 100%;
+    text-align: center;
+}
+
+div.auth {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    text-align: center;
+}
+
+button {
+    border-color: rgb(242, 93, 93);
+    border-width: 2px;
+    background-color: #111;
+    max-width: 250px;
+    height: 30px;
+    font-size: 20px;
+    border-radius: 10px;
+    color: #aaa;
 }
