@@ -57,6 +57,7 @@ div.time_container {
     display: flex;
     flex-flow: column nowrap;
     justify-content: space-evenly;
+    min-width: 65px;
 }
 
 /* remove annoying glow from elements */
