@@ -12,7 +12,7 @@
             <a class="top_entry_title">top tracks</a>
             <table>
                 <tr>
-                    <th>rank</th>
+                    <th></th>
                     <th>track</th>
                     <th>time</th>
                 </tr>
@@ -53,15 +53,13 @@
             <a class="top_entry_title">top albums</a>
             <table>
                 <tr>
-                    <th>rank</th>
+                    <td></th>
                     <th>album</th>
                     <th>time</th>
                 </tr>
                 {% for album in top_albums %}
                 <tr>
-                    <td class="centered">
-                        {{ loop.index }}
-                    </td>
+                    <td>{{ loop.index }}</td>
                     <td>
                         <div class="top_entry">
                             <img style="width:65px;height:65px;" alt="img" src="{{ album.images[0].url }}">
@@ -94,7 +92,7 @@
             <a class="top_entry_title">top artists</a>
             <table>
                 <tr>
-                    <th>rank</th>
+                    <th></th>
                     <th>artist</th>
                     <th>time</th>
                 </tr>
