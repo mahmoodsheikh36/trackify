@@ -54,15 +54,18 @@ class SpotifyClient:
                                  'Authorization': 'Bearer {}'.format(access_token.token)
                              })
         except requests.exceptions.RequestException as e:
-            return None
+            return None, None
         if r.status_code == 429: # we hit rate limit
-            return None
+            if 'Retry-After' in r.headers:
+                if r.headers['Retry-After']:
+                    return None, r.headers['Retry-After']
+            return None, None
         if r.text == '':
-            return None
+            return None, None
 
         r_json = json.loads(r.text)
         if not 'is_playing' in r_json or not r_json['item']:
-            return None
+            return None, None
 
         device = Device(r_json['device']['id'], r_json['device']['name'],
                         r_json['device']['type'])
@@ -104,4 +107,4 @@ class SpotifyClient:
                     context, r_json['is_playing'],
                     int(r_json['progress_ms']))
 
-        return play
+        return play, None

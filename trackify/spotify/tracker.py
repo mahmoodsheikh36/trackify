@@ -34,9 +34,11 @@ class SpotifyTracker:
                             user.refresh_token)
                         self.music_provider.add_access_token(user.access_token)
 
-                    play = self.spotify_client.get_current_play(
+                    play, retry_after = self.spotify_client.get_current_play(
                         user.access_token)
                     if not play: # nothing playing
+                        if retry_after:
+                            sleep(retry_after)
                         user_data[user.id] = None, current_time()
                         continue
                     if user.id in user_data:
