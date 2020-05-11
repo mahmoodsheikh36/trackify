@@ -14,9 +14,9 @@
     <body>
         <div class="topnav" id="topnav">
             {% if g.user %}
-            <a href="{{ url_for('home.index') }}" class="active">{{ g.user.username }}</a>
+            <a href="{{ url_for('home.index') }}">{{ g.user.username }}</a>
             {% else %}
-            <a href="{{ url_for('home.index') }}" class="active">Home</a>
+            <a href="{{ url_for('home.index') }}">Home</a>
             {% endif %}
             <a href="{{ url_for('spotify.top_users') }}">Top Users</a>
             {% if g.user %}
