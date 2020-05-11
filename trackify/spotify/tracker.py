@@ -7,9 +7,8 @@ logger=logging.getLogger(__name__)
 from trackify.utils import current_time, generate_id
 from trackify.db.classes import Pause, Resume, Seek
 
-RATE_LIMIT_TIMEOUT = 2.5
-REQUEST_TIMEOUT = 0.1
-ITERATION_TIMEOUT = 1
+REQUEST_TIMEOUT = 0.03
+ITERATION_TIMEOUT = 0.6
 
 class SpotifyTracker:
     def __init__(self, music_provider, spotify_client):
@@ -85,6 +84,7 @@ class SpotifyTracker:
                                 self.music_provider.add_seek(seek)
 
                     user_data[user.id] = play, current_time()
+                    sleep(REQUEST_TIMEOUT)
                     #print('{} - {}'.format(play.track.name, play.track.artists[0].name))
             except Exception as e:
                 user_data = {}
