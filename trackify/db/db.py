@@ -37,12 +37,12 @@ class DBProvider:
         self.cursor().execute(sql, values)
 
     def add_request(self, request_id, time_added, ip, url, headers, data, form, referrer,
-                    access_route):
-        self.execute('INSERT INTO requests (id, time_added, ip, url, headers, request_data,\
-                                            form, referrer, access_route)\
-                      VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)',
+                    access_route, user_id):
+        self.execute('INSERT INTO requests (id, time_added, ip, url, headers,\
+                      request_data, form, referrer, access_route, user_id)\
+                      VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)',
                      (request_id, time_added, ip, url, headers, data, form,
-                      referrer, access_route))
+                      referrer, access_route, user_id))
 
     def add_user(self, user_id, username, password, email, time_added):
         self.execute('INSERT INTO users (id, username, password, email, time_added)\

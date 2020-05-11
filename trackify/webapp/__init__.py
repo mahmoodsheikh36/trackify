@@ -25,8 +25,7 @@ def create_app():
                                              Config.database_password,
                                              Config.database,
                                              Config.database_host)
-        db_request = Request(request)
-        g.music_provider.add_request(db_request)
+        db_request = Request(request, None)
 
         user_id = session.get('user_id')
         if user_id is None:
@@ -34,6 +33,9 @@ def create_app():
         else:
             # here g.user could be None if no user with that id was in database
             g.user = g.music_provider.get_user(user_id)
+
+        db_request.user = g.user
+        g.music_provider.add_request(db_request)
 
         if not 'spotify_client' in g:
             g.spotify_client = SpotifyClient(Config.client_id, Config.client_secret,

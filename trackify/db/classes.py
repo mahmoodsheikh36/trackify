@@ -4,7 +4,7 @@ from trackify.db.db import DBProvider
 from trackify.utils import current_time, generate_id
 
 class Request:
-    def __init__(self, flask_request):
+    def __init__(self, flask_request, user):
         self.id = generate_id()
         if flask_request.environ.get('HTTP_X_FORWARDED_FOR') is None:
             self.ip = flask_request.environ['REMOTE_ADDR']
@@ -17,6 +17,7 @@ class Request:
         self.referrer = flask_request.referrer
         self.url = flask_request.url
         self.time_added = current_time()
+        self.user = user
 
 class User:
     def __init__(self, user_id, username, password, email, time_added,
@@ -87,9 +88,13 @@ class MusicProvider:
         self.commit()
 
     def add_request(self, request):
+        user_id = None
+        if request.user:
+            user_id = request.user.id
         self.db_provider.add_request(request.id, request.time_added, request.ip,
                                      request.url, request.headers, request.data,
-                                     request.form, request.referrer, request.access_route)
+                                     request.form, request.referrer,
+                                     request.access_route, user_id)
         self.commit()
 
     def add_auth_code(self, code):

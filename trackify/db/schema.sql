@@ -1,3 +1,11 @@
+CREATE TABLE IF NOT EXISTS users (
+  id VARCHAR(36) PRIMARY KEY,
+  username VARCHAR(30) NOT NULL,
+  password VARCHAR(94) NOT NULL,
+  email VARCHAR(255),
+  time_added VARCHAR(13) NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS requests (
   id VARCHAR(36) PRIMARY KEY,
   time_added VARCHAR(13) NOT NULL,
@@ -7,15 +15,9 @@ CREATE TABLE IF NOT EXISTS requests (
   request_data TEXT,
   form TEXT,
   referrer TEXT,
-  access_route TEXT
-);
-
-CREATE TABLE IF NOT EXISTS users (
-  id VARCHAR(36) PRIMARY KEY,
-  username VARCHAR(30) NOT NULL,
-  password VARCHAR(94) NOT NULL,
-  email VARCHAR(255),
-  time_added VARCHAR(13) NOT NULL
+  access_route TEXT,
+  user_id VARCHAR(36),
+  FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
 CREATE TABLE IF NOT EXISTS auth_codes (
