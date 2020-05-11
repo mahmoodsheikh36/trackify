@@ -66,6 +66,8 @@ class SpotifyClient:
 
         device = Device(r_json['device']['id'], r_json['device']['name'],
                         r_json['device']['type'])
+        if device.id == None:
+            device.id = generate_id()
 
         context = None
         if r_json['context']:
