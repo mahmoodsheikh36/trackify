@@ -39,7 +39,8 @@ class SpotifyTracker:
                     if not play: # nothing playing
                         if retry_after:
                             sleep(retry_after)
-                        user_data[user.id] = None, current_time()
+                        else:
+                            user_data[user.id] = None, current_time()
                         continue
                     if user.id in user_data:
                         last_play = user_data[user.id][0]
