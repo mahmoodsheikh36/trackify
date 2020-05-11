@@ -58,7 +58,7 @@ class SpotifyClient:
         if r.status_code == 429: # we hit rate limit
             if 'Retry-After' in r.headers:
                 if r.headers['Retry-After']:
-                    return None, r.headers['Retry-After']
+                    return None, int(r.headers['Retry-After'])
             return None, None
         if r.text == '':
             return None, None
