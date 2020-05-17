@@ -1,9 +1,13 @@
 import uuid
 import time
 import urllib.parse
+import string
+import random
 
-def generate_id():
-    return str(uuid.uuid4())
+def generate_id(length=None):
+    if not length:
+        return str(uuid.uuid4())
+    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=length))
 
 # time since the unix epoch in milliseconds
 current_time = lambda: int(round(time.time() * 1000))
