@@ -34,6 +34,8 @@ class User:
 class Artist:
     def __init__(self, artist_id, name, albums):
         self.id = artist_id
+        if not self.id:
+            self.id = generate_id(24)
         self.name = name
         self.albums = albums
 
@@ -41,6 +43,8 @@ class Track:
     def __init__(self, track_id, name, album, artists, duration_ms, popularity,
                  preview_url, track_number, explicit):
         self.id = track_id
+        if not self.id:
+            self.id = generate_id()
         self.name = name
         self.album = album
         self.artists = artists
@@ -51,9 +55,11 @@ class Track:
         self.explicit = explicit
 
 class Album:
-    def __init__(self, album_id, name, tracks, artists, images, album_type, release_date,
-                 release_date_precision):
+    def __init__(self, album_id, name, tracks, artists, images, album_type,
+                 release_date, release_date_precision):
         self.id = album_id
+        if not self.id:
+            self.id = generate_id(24)
         self.name = name
         self.type = album_type
         self.artists = artists
