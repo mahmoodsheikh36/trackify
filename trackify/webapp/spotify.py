@@ -105,11 +105,11 @@ def data():
                     play.track.time_added = play.time_started
             else:
                 play.track.time_added = play.time_started
-                if not hrs_limit or\
-                   current_time() - play.track.time_added < hrs_limit * 3600 * 1000:
-                    play.track.should_be_displayed = True
-                else:
-                    play.track.should_be_displayed = False
+            if not hrs_limit or\
+                current_time() - play.track.time_added < hrs_limit * 3600 * 1000:
+                play.track.should_be_displayed = True
+            else:
+                play.track.should_be_displayed = False
 
         for album in albums.values():
             for track in album.tracks:
