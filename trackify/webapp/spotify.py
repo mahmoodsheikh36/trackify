@@ -105,7 +105,11 @@ def data():
                     play.track.time_added = play.time_started
             else:
                 play.track.time_added = play.time_started
-                play.track.should_be_displayed = True
+                if not hrs_limit or\
+                   current_time() - play.track.time_added < hrs_limit * 3600 * 1000:
+                    play.track.should_be_displayed = True
+                else:
+                    play.track.should_be_displayed = False
 
         for album in albums.values():
             for track in album.tracks:
@@ -114,7 +118,11 @@ def data():
                         album.time_added = track.time_added
                 else:
                     album.time_added = track.time_added
-                album.should_be_displayed = True
+                if not hrs_limit or\
+                   current_time() - album.time_added < hrs_limit * 3600 * 1000:
+                    album.should_be_displayed = True
+                else:
+                    album.should_be_displayed = False
 
         for artist in artists.values():
             for album in artist.albums:
@@ -124,7 +132,11 @@ def data():
                             artist.time_added = album.time_added
                     else:
                         artist.time_added = album.time_added
-                    artist.should_be_displayed = True
+                    if not hrs_limit or\
+                       current_time() - artist.time_added < hrs_limit * 3600 * 1000:
+                        artist.should_be_displayed = True
+                    else:
+                        artist.should_be_displayed = False
 
     def compare(music_obj1, music_obj2):
         if sort_by == 'time_listened':

@@ -152,6 +152,7 @@
                     {% endif %}
                 </tr>
                 {% for album in top_albums %}
+                {% if album.should_be_displayed %}
                 <tr>
                     <td class="centered">{{ loop.index }}</td>
                     <td>
@@ -191,6 +192,7 @@
                         </div>
                     </td>
                 </tr>
+                {% endif %}
                 {% endfor %}
             </table>
         </div>
@@ -213,6 +215,7 @@
                     {% endif %}
                 </tr>
                 {% for artist in top_artists %}
+                {% if artist.should_be_displayed %}
                 <tr>
                     <td class="centered">
                         {{ loop.index }}
@@ -255,6 +258,7 @@
                         </div>
                     </td>
                 </tr>
+                {% endif %}
                 {% endfor %}
             </table>
         </div>
