@@ -113,3 +113,18 @@ textarea, select, input, button { outline: none; }
         text-align: left;
     }
 }
+
+.general_button {
+    margin: 15px;
+    border-radius: 15px;
+    padding-left: 20px;
+    padding-right: 20px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    font-size: 20px;
+    background-color: #bbb;
+}
+.general_button:hover {
+    background-color: #bbb;
+    border-color: rgb(242, 93, 93);
+}

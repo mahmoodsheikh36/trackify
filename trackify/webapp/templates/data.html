@@ -3,21 +3,91 @@
 {% block head %}
 <title>Trackify data</title>
 <link rel="stylesheet" href="/static/css/data.css">
-<input type=hidden id="navbar_value" value="{{ g.user.username }}">
 {% endblock %}
 
 {% block content %}
-<div class="main_container"> <!-- used this to center the stats_container div -->
+<input type=hidden id="navbar_value" value="{{ g.user.username }}">
+<div class="main_container">
+    <form class="controls">
+        <div>
+            <a>limit time</a>
+            <select name="time_limit" class="highlighted">
+                {% for hrs,time in {'1':'past hour', '24':'past day', '168': 'past week',
+                                   '0':'all time'}.items() %}
+                {% if hrs|int == hrs_limit %}
+                <option value="{{ hrs }}" selected="selected">{{ time }}</option>
+                {% else %}
+                <option value="{{ hrs }}">{{ time }}</option>
+                {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <a>limit entries</a>
+            <select name="entry_limit" class="highlighted">
+                {% for num in [10,25,50,100,250,500] %}
+                {% if num == entry_limit %}
+                <option value="{{ num }}" selected="selected">{{ num }}</option>
+                {% else %}
+                <option value="{{ num }}">{{ num }}</option>
+                {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <a>sort by</a>
+            <select name="sort_by" class="highlighted">
+                {% for item in ['time_listened', 'time_added'] %}
+                {% if sort_by == item %}
+                <option value="{{ item }}" selected="selected">{{ item.replace('_', ' ') }}</option>
+                {% else %}
+                <option value="{{ item }}">{{ item.replace('_', ' ') }}</option>
+                {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+        <div class="display_options">
+            {% if display_tracks %}
+            <input type="checkbox" name="display_tracks" id="display_tracks" value="true" checked>
+            {% else %}
+            <input type="checkbox" name="display_tracks" id="display_tracks" value="true">
+            {% endif %}
+            <label for="display_tracks">tracks</label>
+            {% if display_albums %}
+            <input type="checkbox" name="display_albums" id="display_albums" value="true" checked>
+            {% else %}
+            <input type="checkbox" name="display_albums" id="display_albums" value="true">
+            {% endif %}
+            <label for="display_albums">albums</label>
+            {% if display_artists %}
+            <input type="checkbox" name="display_artists" id="display_artists" value="true" checked>
+            {% else %}
+            <input type="checkbox" name="display_artists" id="display_artists" value="true">
+            {% endif %}
+            <label for="display_artists">artists</label>
+        </div>
+        <button class="general_button" type=submit>RELOAD</button>
+    </form>
     <div class="stats_container">
+        {% if display_tracks %}
         <div class="top_entries_container">
+            {% if sort_by == 'time_added' %}
+            <a class="top_entry_title">newest tracks</a>
+            {% else %}
             <a class="top_entry_title">top tracks</a>
+            {% endif %}
             <table>
                 <tr>
                     <th></th>
                     <th>track</th>
+                    {% if sort_by == 'time_added' %}
+                    <th>time<br>(ago)</th>
+                    {% else %}
                     <th>time</th>
+                    {% endif %}
                 </tr>
                 {% for track in top_tracks %}
+                {% if track.should_be_displayed %}
                 <tr>
                     <td class="centered">
                         {{ loop.index }}
@@ -32,31 +102,54 @@
                         </div>
                     </td>
                     <td class="centered">
-                        {% if track.listened_ms %}
                         <div class="time_container">
-                            {% if hrs_from_ms(track.listened_ms) %}
-                            <a>{{ hrs_from_ms(track.listened_ms) }} hrs</a>
+                            {% if track.listened_ms %}
+                                {% if hrs_from_ms(track.listened_ms) %}
+                                <a>{{ hrs_from_ms(track.listened_ms) }} hrs</a>
+                                {% endif %}
+                                {% if mins_from_ms(track.listened_ms) %}
+                                <a>{{ mins_from_ms(track.listened_ms) }} mins</a>
+                                {% endif %}
+                                {% if secs_from_ms(track.listened_ms) %}
+                                <a>{{ secs_from_ms(track.listened_ms) }} secs</a>
+                                {% endif %}
                             {% endif %}
-                            {% if mins_from_ms(track.listened_ms) %}
-                            <a>{{ mins_from_ms(track.listened_ms) }} mins</a>
-                            {% endif %}
-                            {% if secs_from_ms(track.listened_ms) %}
-                            <a>{{ secs_from_ms(track.listened_ms) }} secs</a>
+
+                            {% if hasattr(track, 'time_added') %}
+                                {% if hrs_from_ms(current_time() - track.time_added) %}
+                                <a>{{ hrs_from_ms(current_time() - track.time_added) }} hrs</a>
+                                {% endif %}
+                                {% if mins_from_ms(current_time() - track.time_added) %}
+                                <a>{{ mins_from_ms(current_time() - track.time_added) }} mins</a>
+                                {% endif %}
+                                {% if secs_from_ms(current_time() - track.time_added) %}
+                                <a>{{ secs_from_ms(current_time() - track.time_added) }} secs</a>
+                                {% endif %}
                             {% endif %}
                         </div>
-                        {% endif %}
                     </td>
                 </tr>
+                {% endif %}
                 {% endfor %}
             </table>
         </div>
+        {% endif %}
+        {% if display_albums %}
         <div class="top_entries_container">
+            {% if sort_by == 'time_added' %}
+            <a class="top_entry_title">newest albums</a>
+            {% else %}
             <a class="top_entry_title">top albums</a>
+            {% endif %}
             <table>
                 <tr>
                     <td></th>
                     <th>album</th>
+                    {% if sort_by == 'time_added' %}
+                    <th>time<br>(ago)</th>
+                    {% else %}
                     <th>time</th>
+                    {% endif %}
                 </tr>
                 {% for album in top_albums %}
                 <tr>
@@ -71,31 +164,53 @@
                         </div>
                     </td>
                     <td class="centered">
-                        {% if album.listened_ms %}
                         <div class="time_container">
-                            {% if hrs_from_ms(album.listened_ms) %}
-                            <a>{{ hrs_from_ms(album.listened_ms) }} hrs</a>
+                            {% if album.listened_ms %}
+                                {% if hrs_from_ms(album.listened_ms) %}
+                                <a>{{ hrs_from_ms(album.listened_ms) }} hrs</a>
+                                {% endif %}
+                                {% if mins_from_ms(album.listened_ms) %}
+                                <a>{{ mins_from_ms(album.listened_ms) }} mins</a>
+                                {% endif %}
+                                {% if secs_from_ms(album.listened_ms) %}
+                                <a>{{ secs_from_ms(album.listened_ms) }} secs</a>
+                                {% endif %}
                             {% endif %}
-                            {% if mins_from_ms(album.listened_ms) %}
-                            <a>{{ mins_from_ms(album.listened_ms) }} mins</a>
-                            {% endif %}
-                            {% if secs_from_ms(album.listened_ms) %}
-                            <a>{{ secs_from_ms(album.listened_ms) }} secs</a>
+
+                            {% if hasattr(album, 'time_added') %}
+                                {% if hrs_from_ms(current_time() - album.time_added) %}
+                                <a>{{ hrs_from_ms(current_time() - album.time_added) }} hrs</a>
+                                {% endif %}
+                                {% if mins_from_ms(current_time() - album.time_added) %}
+                                <a>{{ mins_from_ms(current_time() - album.time_added) }} mins</a>
+                                {% endif %}
+                                {% if secs_from_ms(current_time() - album.time_added) %}
+                                <a>{{ secs_from_ms(current_time() - album.time_added) }} secs</a>
+                                {% endif %}
                             {% endif %}
                         </div>
-                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}
             </table>
         </div>
+        {% endif %}
+        {% if display_artists %}
         <div class="top_entries_container">
+            {% if sort_by == 'time_added' %}
+            <a class="top_entry_title">newest artists</a>
+            {% else %}
             <a class="top_entry_title">top artists</a>
+            {% endif %}
             <table>
                 <tr>
                     <th></th>
                     <th>artist</th>
+                    {% if sort_by == 'time_added' %}
+                    <th>time<br>(ago)</th>
+                    {% else %}
                     <th>time</th>
+                    {% endif %}
                 </tr>
                 {% for artist in top_artists %}
                 <tr>
@@ -113,24 +228,37 @@
                         </div>
                     </td>
                     <td class="centered">
-                        {% if artist.listened_ms %}
                         <div class="time_container">
-                            {% if hrs_from_ms(artist.listened_ms) %}
-                            <a>{{ hrs_from_ms(artist.listened_ms) }} hrs</a>
+                            {% if artist.listened_ms %}
+                                {% if hrs_from_ms(artist.listened_ms) %}
+                                <a>{{ hrs_from_ms(artist.listened_ms) }} hrs</a>
+                                {% endif %}
+                                {% if mins_from_ms(artist.listened_ms) %}
+                                <a>{{ mins_from_ms(artist.listened_ms) }} mins</a>
+                                {% endif %}
+                                {% if secs_from_ms(artist.listened_ms) %}
+                                <a>{{ secs_from_ms(artist.listened_ms) }} secs</a>
+                                {% endif %}
                             {% endif %}
-                            {% if mins_from_ms(artist.listened_ms) %}
-                            <a>{{ mins_from_ms(artist.listened_ms) }} mins</a>
-                            {% endif %}
-                            {% if secs_from_ms(artist.listened_ms) %}
-                            <a>{{ secs_from_ms(artist.listened_ms) }} secs</a>
+
+                            {% if hasattr(artist, 'time_added') %}
+                                {% if hrs_from_ms(current_time() - artist.time_added) %}
+                                <a>{{ hrs_from_ms(current_time() - artist.time_added) }} hrs</a>
+                                {% endif %}
+                                {% if mins_from_ms(current_time() - artist.time_added) %}
+                                <a>{{ mins_from_ms(current_time() - artist.time_added) }} mins</a>
+                                {% endif %}
+                                {% if secs_from_ms(current_time() - artist.time_added) %}
+                                <a>{{ secs_from_ms(current_time() - artist.time_added) }} secs</a>
+                                {% endif %}
                             {% endif %}
                         </div>
-                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}
             </table>
         </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
