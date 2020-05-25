@@ -48,8 +48,8 @@ CREATE TABLE IF NOT EXISTS albums (
   id VARCHAR(25) PRIMARY KEY, -- album ids are 22 chars
   album_name TEXT NOT NULL,
   album_type VARCHAR(10) NOT NULL, -- think values for this are album/single, gotta be safe
-  release_date VARCHAR(13) NOT NULL, -- max length is 10
-  release_date_precision VARCHAR(10) NOT NULL -- max length AFAIK is 4
+  release_date VARCHAR(13), -- max length is 10
+  release_date_precision VARCHAR(10) -- max length AFAIK is 4
 );
 
 CREATE TABLE IF NOT EXISTS album_images (
