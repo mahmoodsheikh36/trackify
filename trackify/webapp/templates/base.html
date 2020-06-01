@@ -15,11 +15,11 @@
         <div class="topnav" id="topnav">
             {% if g.user %}
             <a href="{{ url_for('home.index') }}">{{ g.user.username }}</a>
+            <a href="{{ url_for('settings.settings') }}">Settings</a>
             {% else %}
             <a href="{{ url_for('home.index') }}">Home</a>
             {% endif %}
             <a href="{{ url_for('spotify.top_users') }}">Top Users</a>
-            <a href="{{ url_for('settings.settings') }}">Settings</a>
             {% if g.user %}
             <a href="{{ url_for('auth.logout') }}">Logout</a>
             {% endif %}
