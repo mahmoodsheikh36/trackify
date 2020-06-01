@@ -13,7 +13,7 @@
         <form class="controls">
             {% for hrs,time in {24: "past day", 168: "past week", 0: "all time"}.items() %}
             {% if hrs == hrs_limit %}
-            <button name="time_limit" type="submit" value="{{ hrs }}" class="general_button highlighted">{{ time }}</button>
+            <button name="time_limit" type="submit" value="{{ hrs }}" class="general_button highlighted_button">{{ time }}</button>
             {% else %}
             <button name="time_limit" type="submit" value="{{ hrs }}" class="general_button">{{ time }}</button>
             {% endif %}

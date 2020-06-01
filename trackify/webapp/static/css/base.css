@@ -134,11 +134,12 @@ textarea, select, input, button { outline: none; }
     padding-bottom: 5px;
     font-size: 20px;
     background-color: #bbb;
+    border-width: 3px;
 }
 .general_button:hover {
     background-color: #bbb;
     border-color: rgb(242, 93, 93);
 }
-button.highlighted {
+.highlighted_button {
     border-color: rgb(242, 93, 93);
 }
