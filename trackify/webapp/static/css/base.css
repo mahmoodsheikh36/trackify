@@ -139,3 +139,6 @@ textarea, select, input, button { outline: none; }
     background-color: #bbb;
     border-color: rgb(242, 93, 93);
 }
+button.highlighted {
+    border-color: rgb(242, 93, 93);
+}

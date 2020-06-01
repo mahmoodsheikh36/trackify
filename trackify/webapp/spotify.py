@@ -232,7 +232,8 @@ def top_users():
                            top_users=top_users,
                            mins_from_ms=mins_from_ms,
                            hrs_from_ms=hrs_from_ms,
-                           secs_from_ms=secs_from_ms)
+                           secs_from_ms=secs_from_ms,
+                           hrs_limit=hrs_limit)
 
 @bp.route('/public_data', methods=('GET',))
 def public_data():
