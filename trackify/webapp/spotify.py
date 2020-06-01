@@ -205,7 +205,6 @@ def top_users():
         artists, albums, tracks, plays = g.music_provider.get_user_data(user)
         if not plays:
             continue
-        users_to_sort.append(user)
         for play in plays.values():
             listened_ms = play.listened_ms(begin_time)
             if hasattr(play.track, 'listened_ms'):
@@ -219,6 +218,8 @@ def top_users():
                 user.listened_ms = listened_ms
             else:
                 user.listened_ms += listened_ms
+        if user.listened_ms:
+            users_to_sort.append(user)
 
     def compare(user1, user2):
         if not hasattr(user1, 'listened_ms'):
