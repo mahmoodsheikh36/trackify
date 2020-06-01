@@ -179,7 +179,6 @@ def top_users():
     LIMIT = 10
 
     hrs_limit = request.args.get('time_limit')
-    print(hrs_limit)
     if not hrs_limit:
         hrs_limit = 7 * 24
     try:
