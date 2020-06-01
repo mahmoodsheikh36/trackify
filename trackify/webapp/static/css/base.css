@@ -51,6 +51,10 @@ tr:nth-child(even) {
 td.centered {
     text-align: center;
 }
+td.crossed {
+    background-image: linear-gradient(to bottom right,  transparent calc(50% - 1px), red, transparent calc(50% + 1px)); 
+    text-align: center;
+}
 
 /* the div that contains hrs,mins,secs all in a column */
 div.time_container {
@@ -75,6 +79,7 @@ textarea, select, input, button { outline: none; }
     padding: 14px 16px;
     text-decoration: none;
     font-size: 17px;
+    transition-duration: 0.4s;
 }
 
 .topnav a:hover {
@@ -98,6 +103,9 @@ textarea, select, input, button { outline: none; }
         float: right;
         display: block;
     }
+    body {
+        font-size: 15px;
+    }
 }
 
 @media screen and (max-width: 600px) {
@@ -115,7 +123,10 @@ textarea, select, input, button { outline: none; }
 }
 
 .general_button {
-    margin: 15px;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    margin-right: 5px;
+    margin-left: 5px;
     border-radius: 15px;
     padding-left: 20px;
     padding-right: 20px;

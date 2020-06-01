@@ -41,13 +41,6 @@ def create_app():
             g.spotify_client = SpotifyClient(Config.client_id, Config.client_secret,
                                              Config.redirect_uri, Config.scope)
 
-    @app.after_request
-    def add_header(r):
-        r.headers["Pragma"] = "no-cache"
-        r.headers["Expires"] = "0"
-        r.headers['Cache-Control'] = 'public, max-age=0'
-        return r
-
     from trackify.webapp.home import bp as home_bp
     app.register_blueprint(home_bp)
 
@@ -59,6 +52,9 @@ def create_app():
 
     from trackify.webapp.static import bp as static_bp
     app.register_blueprint(static_bp)
+
+    from trackify.webapp.settings import bp as settings_bp
+    app.register_blueprint(settings_bp)
 
     return app
 

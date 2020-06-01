@@ -10,11 +10,16 @@
 <div class="main_container"> <!-- used to center table_container -->
     <div class="table_container">
         <a class="table_title highlighted">top users</a>
+        <form class="controls">
+            <button name="time_limit" type="submit" value="24" class="general_button">past day</button>
+            <button name="time_limit" type="submit" value="168" class="general_button">past week</button>
+            <button name="time_limit" type="submit" value="0" class="general_button">all time</button>
+        </form>
         <table>
             <tr>
                 <th>user</th>
                 <th>time</th>
-                <th>favorite track</th>
+                <th>fav. track</th>
             </tr>
             {% for user in top_users %}
             <tr>
@@ -34,6 +39,7 @@
                         {% endif %}
                     </div>
                 </td>
+                {% if user.show_favorite_track and user.top_track.listened_ms %}
                 <td>
                     <div class="top_track">
                         <img style="width:50px;height:50px;" src="{{ user.top_track.album.images[0].url }}"></img>
@@ -43,6 +49,9 @@
                         </div>
                     </div>
                 </td>
+                {% else %}
+                <td class="crossed">not showing</td>
+                {% endif %}
             </tr>
             {% endfor %}
         </table>

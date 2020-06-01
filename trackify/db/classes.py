@@ -1,7 +1,7 @@
 import json
 
 from trackify.db.db import DBProvider
-from trackify.utils import current_time, generate_id
+from trackify.utils import current_time, generate_id, str_to_bool
 
 class Request:
     def __init__(self, flask_request, user):
@@ -323,6 +323,65 @@ class MusicProvider:
     def user_has_plays(self, user):
         return self.db_provider.user_has_plays(user.id)
 
+    def get_few_artists(self, limit):
+        artist_rows = self.db_provider.get_few_artists(limit)
+        artists = []
+        for row in artist_rows:
+            artist = Artist(row['id'], row['artist_name'], [])
+            artists.append(artist)
+        return artists
+
+    def get_few_albums(self, limit):
+        album_rows = self.db_provider.get_few_albums(limit)
+        albums = []
+        for row in album_rows:
+            album = Album(row['id'], row['album_name'], [], [], [], row['album_type'],
+                          row['release_date'], row['release_date_precision'])
+            albums.append(album)
+        return albums
+
+    def get_few_tracks(self, limit):
+        track_rows = self.db_provider.get_few_tracks(limit)
+        tracks = []
+        for row in track_rows:
+            track = Track(row['id'], row['track_name'], None, [], row['duration_ms'],
+                          row['popularity'], row['preview_url'], row['track_number'],
+                          row['explicit'])
+            tracks.append(track)
+        return tracks
+
+    def get_user_settings(self, user):
+        user_setting_rows = self.db_provider.get_user_settings(user.id)
+        setting_rows = self.db_provider.get_settings()
+        user_settings = {}
+        for setting_row in setting_rows:
+            user_setting_row = None
+            for tmp_user_setting_row in user_setting_rows:
+                if tmp_user_setting_row['setting_id'] == setting_row['id']:
+                    user_setting_row = tmp_user_setting_row
+            setting_value = setting_row['default_value']
+            if user_setting_row:
+                setting_value = user_setting_row['setting_value']
+            if setting_row['value_type'] == 'bool':
+                setting_value = str_to_bool(setting_value)
+            setting = Setting(setting_row['id'], setting_row['setting_name'],
+                              setting_row['description'], setting_value,
+                              setting_row['value_type'])
+            user_settings[setting_row['id']] = setting
+        return user_settings
+
+    def update_user_settings(self, user, settings):
+        for setting_id in settings:
+            setting = settings[setting_id]
+            value = setting.value
+            if setting.value_type == 'bool':
+                value = str(value)
+            if self.db_provider.get_user_setting(user.id, setting.id):
+                self.db_provider.update_user_setting(setting.id, user.id, value)
+            else:
+                self.db_provider.add_user_setting(setting.id, user.id, value)
+        self.commit()
+
 class AuthCode:
     def __init__(self, code_id, code, user, time_added):
         self.id = code_id
@@ -445,3 +504,11 @@ class Image:
         self.url = url
         self.width = width
         self.height = height
+
+class Setting:
+    def __init__(self, setting_id, name, description, value, value_type):
+        self.id = setting_id
+        self.name = name
+        self.description = description
+        self.value = value
+        self.value_type = value_type

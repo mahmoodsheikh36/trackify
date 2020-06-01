@@ -7,6 +7,7 @@ from trackify.utils import (
 )
 from trackify.webapp.auth import login_required
 from trackify.db.classes import AuthCode
+from trackify.utils import get_user_setting_by_name
 
 bp = Blueprint('spotify', __name__, url_prefix='/spotify')
 
@@ -177,14 +178,36 @@ def top_users():
     users = g.music_provider.get_users()
     LIMIT = 10
 
+    hrs_limit = request.args.get('time_limit')
+    print(hrs_limit)
+    if not hrs_limit:
+        hrs_limit = 7 * 24
+    try:
+        hrs_limit = int(hrs_limit)
+    except:
+        return ''
+    if hrs_limit > 7 * 24:
+        hrs_limit = 7 * 24
+
+    if hrs_limit == 0:
+        begin_time = None
+    else:
+        begin_time = current_time() - hrs_limit * 3600 * 1000
+
     users_to_sort = []
     for idx, user in enumerate(users):
+        user_settings = g.music_provider.get_user_settings(user)
+        if not get_user_setting_by_name(user_settings, 'show_on_top_users').value:
+            continue
+        user.show_favorite_track =\
+            get_user_setting_by_name(user_settings,
+                                     'show_favorite_track_on_top_users').value
         artists, albums, tracks, plays = g.music_provider.get_user_data(user)
         if not plays:
             continue
         users_to_sort.append(user)
         for play in plays.values():
-            listened_ms = play.listened_ms()
+            listened_ms = play.listened_ms(begin_time)
             if hasattr(play.track, 'listened_ms'):
                 play.track.listened_ms += listened_ms
             else:
@@ -203,10 +226,23 @@ def top_users():
         if not hasattr(user2, 'listened_ms'):
             return True
         return user1.listened_ms > user2.listened_ms
-    t_users = get_largest_elements(users_to_sort, LIMIT, compare)
+    top_users = get_largest_elements(users_to_sort, LIMIT, compare)
 
     return render_template('top_users.html',
-                           top_users=t_users,
+                           top_users=top_users,
                            mins_from_ms=mins_from_ms,
                            hrs_from_ms=hrs_from_ms,
                            secs_from_ms=secs_from_ms)
+
+@bp.route('/public_data', methods=('GET',))
+def public_data():
+    data = {}
+    data['artists'] = g.music_provider.db_provider.get_few_artists(10)
+    data['albums'] = g.music_provider.db_provider.get_few_albums(10)
+    data['tracks'] = g.music_provider.db_provider.get_few_tracks(10)
+    for album_data in data['albums']:
+        image_data = g.music_provider.db_provider.get_few_album_images(1)[0]
+        del image_data['album_id']
+        del image_data['id']
+        album_data['image'] = image_data
+    return data

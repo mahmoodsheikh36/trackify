@@ -14,7 +14,7 @@ div.table_container {
 
 a.table_title {
     font-size: 30px;
-    margin: 15px;
+    margin-top: 15px;
 }
 
 div.top_track {
@@ -27,4 +27,10 @@ div.top_track_title {
     display: flex;
     flex-flow: column nowrap;
     justify-content: space-evenly;
+}
+
+form.controls {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-around;
 }

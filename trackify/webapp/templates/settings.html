@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>Trackify Settings</title>
+<link rel="stylesheet" href="/static/css/settings.css">
+{% endblock %}
+
+{% block content %}
+<input type=hidden id="navbar_value" value="Settings">
+<form class="settings_container" method=post>
+    {% for setting_id in settings %}
+    {% if settings[setting_id].value_type == 'bool' %}
+    <div class="setting">
+        <p>{{ settings[setting_id].description }}</p>
+        <label class="switch">
+            {% if settings[setting_id].value == True %}
+            <input type="checkbox" name="{{ setting_id }}" value="True" checked>
+            {% else %}
+            <input type="checkbox" name="{{ setting_id }}" value="True">
+            {% endif %}
+            <span class="slider round"></span>
+        </label>
+    </div>
+    {% endif %}
+    {% endfor %}
+    <button class="general_button">save</button>
+</form>
+{% endblock %}

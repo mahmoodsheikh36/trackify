@@ -1,9 +1,33 @@
 CREATE TABLE IF NOT EXISTS users (
-  id VARCHAR(36) PRIMARY KEY,
+  id VARCHAR(36) NOT NULL PRIMARY KEY,
   username VARCHAR(30) NOT NULL,
   password VARCHAR(94) NOT NULL,
   email VARCHAR(255),
   time_added VARCHAR(13) NOT NULL
+);
+
+CREATE TABLE IF Not EXISTS settings (
+  id INT NOT NULL PRIMARY KEY,
+  description VARCHAR(100) NOT NULL,
+  setting_name VARCHAR(40) NOT NULL,
+  value_type VARCHAR(10) NOT NULL,
+  default_value VARCHAR(10) NOT NULL
+);
+
+INSERT INTO settings (id, description, setting_name, value_type, default_value) VALUES
+(1, 'show me on top users list', 'show_on_top_users', 'bool', 'True'),
+(2, 'show my favorite track on the top users list', 'show_favorite_track_on_top_users',
+ 'bool', 'False');
+-- (3, 'show my last played track on the top users list', 'show_last_played_on_top_users',
+--  'bool', 'False');
+
+CREATE TABLE IF NOT EXISTS user_settings (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  setting_value VARCHAR(10) NOT NULL,
+  setting_id INT NOT NULL,
+  user_id VARCHAR(36) NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users (id),
+  FOREIGN KEY (setting_id) REFERENCES settings (id)
 );
 
 CREATE TABLE IF NOT EXISTS requests (

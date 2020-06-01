@@ -322,3 +322,51 @@ class DBProvider:
         c = self.cursor()
         c.execute('SELECT id FROM plays WHERE user_id = %s LIMIT 1', (user_id,))
         return c.fetchone() is not None
+
+    def get_few_artists(self, limit):
+        c = self.cursor()
+        c.execute('SELECT * FROM artists LIMIT %s', (limit,))
+        return c.fetchall()
+
+    def get_few_albums(self, limit):
+        c = self.cursor()
+        c.execute('SELECT * FROM albums LIMIT %s', (limit,))
+        return c.fetchall()
+
+    def get_few_tracks(self, limit):
+        c = self.cursor()
+        c.execute('SELECT * FROM tracks LIMIT %s', (limit,))
+        return c.fetchall()
+
+    def get_few_album_images(self, limit):
+        c = self.cursor()
+        c.execute('SELECT * FROM album_images LIMIT %s', (limit,))
+        return c.fetchall()
+
+    def get_user_settings(self, user_id):
+        c = self.cursor()
+        c.execute('SELECT * FROM user_settings WHERE user_id = %s', (user_id,))
+        return c.fetchall()
+
+    def get_settings(self):
+        c = self.cursor()
+        c.execute('SELECT * FROM settings')
+        return c.fetchall()
+
+    def add_user_setting(self, setting_id, user_id, value):
+        self.execute('INSERT INTO user_settings (setting_value, setting_id, user_id)\
+                      VALUES (%s, %s, %s)',
+                     (value, setting_id, user_id))
+        self.commit()
+
+    def update_user_setting(self, setting_id, user_id, value):
+        self.execute('UPDATE user_settings SET setting_value = %s WHERE setting_id = %s\
+                      AND user_id = %s',
+                     (value, setting_id, user_id))
+        self.commit()
+
+    def get_user_setting(self, user_id, setting_id):
+        c = self.cursor()
+        c.execute('SELECT * FROM user_settings WHERE setting_id = %s AND\
+                   user_id = %s', (setting_id, user_id))
+        return c.fetchone()

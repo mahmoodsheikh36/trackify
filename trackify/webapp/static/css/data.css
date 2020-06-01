@@ -37,6 +37,10 @@ a.top_entry_title {
     margin-bottom: 10px;
 }
 
+div.display_options {
+    padding-top: 10px;
+}
+
 form.controls {
     display: flex;
     flex-flow: column nowrap;
@@ -53,8 +57,4 @@ form.controls select {
     font-size: 21px;
     border-color: rgb(242, 93, 93);
     border-width: 1px;
-}
-
-div.display_options {
-    padding-top: 10px;
 }

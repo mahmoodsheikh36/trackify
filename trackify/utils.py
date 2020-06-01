@@ -38,3 +38,14 @@ def mins_from_ms(ms):
 
 def secs_from_ms(ms):
     return (ms // 1000) % 60
+
+def str_to_bool(val):
+    if val == 'True':
+        return True
+    return False
+
+def get_user_setting_by_name(settings, setting_name):
+    for setting_id in settings:
+        if settings[setting_id].name == setting_name:
+            return settings[setting_id]
+    return None
