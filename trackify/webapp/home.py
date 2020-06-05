@@ -3,6 +3,8 @@ from flask import (
     Blueprint, render_template, g, redirect, url_for
 )
 
+from trackify.webapp.spotify import top_users
+
 bp = Blueprint('home', __name__, url_prefix='/')
 
 @bp.route('', methods=('GET',))
@@ -22,3 +24,7 @@ def index_page():
 @bp.route('home', methods=('GET',))
 def home():
     return index()
+
+@bp.route('top', methods=('GET',))
+def top_users_alias():
+    return top_users()

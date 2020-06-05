@@ -34,3 +34,15 @@ form.controls {
     flex-flow: row wrap;
     justify-content: space-around;
 }
+
+.general_button {
+    margin-top: 15px;
+}
+
+table {
+    margin-top: 15px;
+}
+
+.general_button {
+    margin-left: 5px;
+}
