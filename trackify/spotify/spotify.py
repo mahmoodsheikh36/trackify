@@ -65,13 +65,12 @@ class SpotifyClient:
 
         r_json = json.loads(r.text)
         if not 'is_playing' in r_json or not r_json['item']\
-           or not 'id' in r_json['item']['album'] or not r_json['item']['album']['id']:
+           or not 'id' in r_json['item']['album'] or not r_json['item']['album']['id']\
+           or not r_json['device']['id']:
             return None, None
 
         device = Device(r_json['device']['id'], r_json['device']['name'],
                         r_json['device']['type'])
-        if device.id == None:
-            device.id = generate_id()
 
         context = None
         if r_json['context']:
