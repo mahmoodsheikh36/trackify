@@ -11,7 +11,7 @@
     <div class="table_container">
         <a class="table_title highlighted">top users</a>
         <form class="controls">
-            {% for hrs,time in {24: "past day", 168: "past week", 0: "all time"}.items() %}
+            {% for hrs,time in {24: "past day", 168: "past week", 720: "past month"}.items() %}
             {% if hrs == hrs_limit %}
             <button name="time_limit" type="submit" value="{{ hrs }}" class="general_button highlighted_button">{{ time }}</button>
             {% else %}
