@@ -186,7 +186,7 @@ def top_users():
     except:
         return ''
     if hrs_limit > 7 * 24:
-        hrs_limit = 7 * 24
+        hrs_limit = 30 * 24 # past month is the limit
 
     if hrs_limit == 0:
         begin_time = None
