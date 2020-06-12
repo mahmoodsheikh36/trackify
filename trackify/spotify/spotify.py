@@ -63,7 +63,11 @@ class SpotifyClient:
         if r.text == '':
             return None, None
 
-        r_json = json.loads(r.text)
+        try:
+            r_json = json.loads(r.text)
+        except:
+            return None, None
+
         if not 'is_playing' in r_json or not r_json['item']\
            or not 'id' in r_json['item']['album'] or not r_json['item']['album']['id']\
            or not r_json['device']['id']:
