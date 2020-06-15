@@ -13,7 +13,7 @@
         <tr>
             <th></th>
             <th>track</th>
-            <th>played on</th>
+            <th>time played</th>
             <th>played for</th>
         </tr>
         {% for play in plays %}
@@ -33,8 +33,8 @@
             </td>
             <td class="centered">
                 <div class="time_container">
-                    <a>{{ play.played_on_time }}</a>
-                    <a>{{ play.played_on_date }}</a>
+                    <a>{{ play.played_time }}</a>
+                    <a>{{ play.played_date }}</a>
                 </div>
             </td>
             <td class="centered">

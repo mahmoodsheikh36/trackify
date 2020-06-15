@@ -254,8 +254,8 @@ def history():
     artists, albums, tracks, plays = g.music_provider.get_user_data(g.user)
     for play in plays.values():
         play.listened_ms_cached = play.listened_ms()
-        play.played_on_date = timestamp_to_date(play.time_started).strftime('%d/%m/%Y')
-        play.played_on_time = timestamp_to_date(play.time_started).strftime('%H:%M:%S')
+        play.played_date = timestamp_to_date(play.time_started).strftime('%d/%m/%Y')
+        play.played_time = timestamp_to_date(play.time_started).strftime('%H:%M:%S')
 
     def compare(play1, play2):
         return play1.time_started > play2.time_started
