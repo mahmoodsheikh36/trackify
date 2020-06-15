@@ -11,12 +11,16 @@
     <a class="title highlighted">playback history</a>
     <table>
         <tr>
+            <th></th>
             <th>track</th>
             <th>played on</th>
             <th>played for</th>
         </tr>
         {% for play in plays %}
         <tr>
+            <td class="centered">
+                {{ loop.index }}
+            </td>
             <td>
                 <div class="music_entry">
                     <img style="height:50px;width:50px;"

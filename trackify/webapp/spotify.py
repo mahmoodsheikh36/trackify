@@ -261,7 +261,8 @@ def history():
         return play1.time_started > play2.time_started
     sorted_tracks = get_largest_elements(list(plays.values()), -1, compare)
 
-    return render_template('history.html', plays=sorted_tracks,
+    return render_template('history.html',
+                           plays=sorted_tracks,
                            hrs_from_ms=hrs_from_ms,
                            mins_from_ms=mins_from_ms,
                            secs_from_ms=secs_from_ms)
