@@ -156,5 +156,5 @@ textarea, select, input, button { outline: none; }
     display: flex;
     flex-flow: column nowrap;
     justify-content: space-evenly;
-    max-width: 350px;
+    max-width: 400px;
 }
