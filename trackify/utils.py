@@ -3,7 +3,6 @@ import time
 import urllib.parse
 import string
 import random
-import datetime
 
 def generate_id(length=None):
     if not length:
@@ -19,10 +18,7 @@ def uri_encode(text):
 def get_largest_elements(list_to_sort, limit, compare):
     mylist = list_to_sort.copy()
     final_list = []
-    cnt = 0
-    while True:
-        if limit > -1 and cnt >= limit:
-            return final_list
+    for i in range(limit):
         if not mylist:
             return final_list
         biggest = mylist[0]
@@ -32,7 +28,6 @@ def get_largest_elements(list_to_sort, limit, compare):
                 biggest = element
         final_list.append(biggest)
         mylist.remove(biggest)
-        cnt += 1
     return final_list
 
 def hrs_from_ms(ms):
@@ -54,9 +49,3 @@ def get_user_setting_by_name(settings, setting_name):
         if settings[setting_id].name == setting_name:
             return settings[setting_id]
     return None
-
-def timestamp_to_date(timestamp):
-    digits = len(str(timestamp))
-    # get rid of extra digits if timestamp is in milliseconds/nanoseconds
-    timestamp = int(timestamp / (10 ** (digits - 10)))
-    return datetime.datetime.fromtimestamp(timestamp)

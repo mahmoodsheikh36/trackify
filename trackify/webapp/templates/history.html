@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<title>playback history</title>
+<link rel="stylesheet" type="text/css" href="/static/css/history.css"/>
+{% endblock %}
+
+{% block content %}
+<input type=hidden id="navbar_value" value="History">
+<div class="table_container">
+    <a class="title highlighted">playback history</a>
+    <table>
+        <tr>
+            <th>track</th>
+            <th>played on</th>
+            <th>played for</th>
+        </tr>
+        {% for play in plays %}
+        <tr>
+            <td>
+                <div class="music_entry">
+                    <img style="height:50px;width:50px;"
+                         src="{{ play.track.album.images[0].url }}">
+                    <div class="music_entry_info">
+                        <span class="highlighted">{{ play.track.name }}</span>
+                        <a>{{ play.track.artists[0].name }}</a>
+                    </div>
+                </div>
+            </td>
+            <td class="centered">
+                <div class="time_container">
+                    <a>{{ play.played_on_time }}</a>
+                    <a>{{ play.played_on_date }}</a>
+                </div>
+            </td>
+            <td class="centered">
+                <div class="time_container">
+                    {% if play.listened_ms_cached %}
+                        {% if hrs_from_ms(play.listened_ms_cached) %}
+                        <a>{{ hrs_from_ms(play.listened_ms_cached) }} hrs</a>
+                        {% endif %}
+                        {% if mins_from_ms(play.listened_ms_cached) %}
+                        <a>{{ mins_from_ms(play.listened_ms_cached) }} mins</a>
+                        {% endif %}
+                        {% if secs_from_ms(play.listened_ms_cached) %}
+                        <a>{{ secs_from_ms(play.listened_ms_cached) }} secs</a>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}
