@@ -249,6 +249,7 @@ def public_data():
     return data
 
 @bp.route('/history', methods=('GET',))
+@login_required
 def history():
     artists, albums, tracks, plays = g.music_provider.get_user_data(g.user)
     for play in plays.values():
