@@ -93,9 +93,9 @@
                         {{ loop.index }}
                     </td>
                     <td>
-                        <div class="top_entry">
+                        <div class="music_entry">
                             <img style="width:50px;height:50px;" alt="img" src="{{ track.album.images[0].url }}">
-                            <div class="info">
+                            <div class="music_entry_info">
                                 <span class="highlighted">{{ track.name }}</span>
                                 <a>{{ track.artists[0].name }}</a>
                             </div>
@@ -156,9 +156,9 @@
                 <tr>
                     <td class="centered">{{ loop.index }}</td>
                     <td>
-                        <div class="top_entry">
+                        <div class="music_entry">
                             <img style="width:50px;height:50px;" alt="img" src="{{ album.images[0].url }}">
-                            <div class="info">
+                            <div class="music_entry_info">
                                 <span class="highlighted">{{ album.name }}</span>
                                 <a>{{ album.artists[0].name }}</a>
                             </div>
@@ -221,11 +221,11 @@
                         {{ loop.index }}
                     </td>
                     <td>
-                        <div class="top_entry">
+                        <div class="music_entry">
                             {% if artist.albums %}
                             <img style="width:50px;height:50px;" alt="img" src="{{ artist.albums[0].images[0].url }}">
                             {% endif %}
-                            <div class="info">
+                            <div class="music_entry_info">
                                 <span class="highlighted">{{ artist.name }}</span>
                             </div>
                         </div>

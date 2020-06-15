@@ -17,18 +17,6 @@ a.table_title {
     margin-top: 15px;
 }
 
-div.top_track {
-    display: flex;
-    flex-flow: row nowrap;
-}
-
-div.top_track_title {
-    margin-left: 5px;
-    display: flex;
-    flex-flow: column nowrap;
-    justify-content: space-evenly;
-}
-
 form.controls {
     display: flex;
     flex-flow: row wrap;
