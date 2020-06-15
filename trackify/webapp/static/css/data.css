@@ -12,19 +12,6 @@ div.main_container {
     width: 100%;
 }
 
-div.top_entry {
-    display: flex;
-    flex-flow: row nowrap;
-}
-
-div.info {
-    margin-left: 5px;
-    display: flex;
-    flex-flow: column nowrap;
-    justify-content: space-evenly;
-    max-width: 400px;
-}
-
 div.top_entries_container {
     display: flex;
     flex-flow: column nowrap;

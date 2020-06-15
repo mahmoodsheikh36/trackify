@@ -145,3 +145,16 @@ textarea, select, input, button { outline: none; }
 .highlighted_button {
     border-color: rgb(242, 93, 93);
 }
+
+.music_entry {
+    display: flex;
+    flex-flow: row nowrap;
+}
+
+.music_entry_info {
+    margin-left: 5px;
+    display: flex;
+    flex-flow: column nowrap;
+    justify-content: space-evenly;
+    max-width: 350px;
+}

@@ -7,7 +7,7 @@ from trackify.utils import (
 )
 from trackify.webapp.auth import login_required
 from trackify.db.classes import AuthCode
-from trackify.utils import get_user_setting_by_name
+from trackify.utils import get_user_setting_by_name, timestamp_to_date
 
 bp = Blueprint('spotify', __name__, url_prefix='/spotify')
 
@@ -247,3 +247,20 @@ def public_data():
         del image_data['id']
         album_data['image'] = image_data
     return data
+
+@bp.route('/history', methods=('GET',))
+def history():
+    artists, albums, tracks, plays = g.music_provider.get_user_data(g.user)
+    for play in plays.values():
+        play.listened_ms_cached = play.listened_ms()
+        play.played_on_date = timestamp_to_date(play.time_started).strftime('%d/%m/%Y')
+        play.played_on_time = timestamp_to_date(play.time_started).strftime('%H:%M:%S')
+
+    def compare(play1, play2):
+        return play1.time_started > play2.time_started
+    sorted_tracks = get_largest_elements(list(plays.values()), -1, compare)
+
+    return render_template('history.html', plays=sorted_tracks,
+                           hrs_from_ms=hrs_from_ms,
+                           mins_from_ms=mins_from_ms,
+                           secs_from_ms=secs_from_ms)
