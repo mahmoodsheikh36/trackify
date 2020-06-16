@@ -12,7 +12,7 @@ function navbarFunction() {
     }
 }
 
-window.onload = function() {
+function highlightCurrentNavbarTab() {
     // the element that contains the name of the tab in the navbar to be selected
     let elementWithValue = $('#navbar_value')
     if (elementWithValue) {
