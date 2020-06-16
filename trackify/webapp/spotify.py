@@ -64,6 +64,8 @@ def data():
         return ''
     if entry_limit > 500:
         entry_limit = 500
+    if hrs_limit > 24 * 30:
+        hrs_limit = 24 * 30
 
     if hrs_limit == 0:
         begin_time = None # the listened_ms function will handle it correctly
