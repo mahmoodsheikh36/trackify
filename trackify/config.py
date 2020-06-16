@@ -12,6 +12,7 @@ def load_config():
         Config.client_id = config_dict['client_id']
         Config.client_secret = config_dict['client_secret']
         Config.scope = config_dict['scope']
+        Config.jwt_secret_key = config_dict['jwt_secret_key']
 
 class Config:
     database = 'trackify'
@@ -23,5 +24,6 @@ class Config:
     client_secret = None
     scope = None
     redirect_uri = None
+    jwt_secret_key = None
 
 load_config()

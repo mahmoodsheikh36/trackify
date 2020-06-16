@@ -1,8 +1,7 @@
 from flask import Flask, request, g, session
-import os
+from flask_jwt_extended import JWTManager
 
 from trackify.db.classes import MusicProvider, Request
-from trackify.config import Config
 from trackify.spotify.spotify import SpotifyClient
 from trackify.config import Config
 
@@ -10,8 +9,11 @@ def create_app():
     # create and configure the app
     app = Flask(__name__)
     app.config.from_mapping(
-        SECRET_KEY=Config.secret_key, # shouldnt be used in production!
+        SECRET_KEY=Config.secret_key,
+        JWT_SECRET_KEY=Config.jwt_secret_key
     )
+
+    jwt = JWTManager(app)
 
     def terminate(e=None):
         if 'music_provider' in g:
@@ -25,6 +27,8 @@ def create_app():
                                              Config.database_password,
                                              Config.database,
                                              Config.database_host)
+        if not 'jwt' in g:
+            g.jwt = jwt
         db_request = Request(request, None)
 
         user_id = session.get('user_id')
@@ -55,6 +59,9 @@ def create_app():
 
     from trackify.webapp.settings import bp as settings_bp
     app.register_blueprint(settings_bp)
+
+    from trackify.webapp.api import bp as api_bp
+    app.register_blueprint(api_bp)
 
     return app
 
