@@ -1,5 +1,7 @@
 import functools
-from flask import Blueprint, request, flash, g, redirect, session, render_template, url_for
+from flask import (
+    Blueprint, request, flash, g, redirect, session, render_template, url_for
+)
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from trackify.utils import current_time, generate_id

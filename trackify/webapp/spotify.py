@@ -1,4 +1,3 @@
-import functools
 from flask import Blueprint, render_template, g, redirect, request, url_for
 
 from trackify.utils import (
