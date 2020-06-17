@@ -5,7 +5,7 @@ from flask_jwt_extended import (
 )
 
 from trackify.webapp.auth import check_credentials
-from trackify.utils import get_largest_elements, timestamp_to_date
+from trackify.utils import get_largest_elements, timestamp_to_date, current_time
 
 bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -62,23 +62,26 @@ def random_track():
 @bp.route('/history', methods=('GET',))
 @jwt_required
 def history():
-    limit = request.args.get('limit')
-    if not limit:
-        limit = 50
+    hrs_limit = request.args.get('hrs_limit', default=24*7)
     try:
-        limit = int(limit)
+        hrs_limit = int(hrs_limit)
     except:
-        return jsonify({"msg": "limit must be an integer"}), 401
-    if limit < 1:
-        limit = 50
-    if limit > 500:
-        limit = 500
+        return jsonify({"msg": "hrs_limit should be a positive integer"}), 401
+    if hrs_limit < 1:
+        return jsonify({"msg": "hrs_limit should be a positive integer"}), 401
+
+    begin_time = current_time() - hrs_limit * 3600 * 1000
 
     artists, albums, tracks, plays = g.music_provider.get_user_data(get_user())
+
+    plays_to_sort = []
+    for play in plays.values():
+        if play.time_started > begin_time:
+            plays_to_sort.append(play)
             
     def compare(play1, play2):
         return play1.time_started > play2.time_started
-    sorted_plays = get_largest_elements(list(plays.values()), limit, compare)
+    sorted_plays = get_largest_elements(plays_to_sort, -1, compare)
 
     data = []
     for play in sorted_plays:
@@ -86,8 +89,7 @@ def history():
             'play_time': timestamp_to_date(play.time_started).strftime('%d/%m/%Y %H:%M:%S'),
             'name': play.track.name,
             'artist': play.track.artists[0].name,
-            'cover': play.track.album.images[0].url,
-            'album': play.track.album.name
+            'cover': play.track.album.images[0].url
         })
 
     return jsonify(data)
