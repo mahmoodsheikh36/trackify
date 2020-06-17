@@ -28,18 +28,18 @@ def login():
     if not check_credentials(username, password):
         return jsonify({"msg": "Bad username or password"}), 401
 
-    return {
+    return jsonify({
         'access_token': create_access_token(identity=username),
         'refresh_token': create_refresh_token(identity=username)
-    }
+    })
 
 @bp.route('/refresh', methods=('POST',))
 @jwt_refresh_token_required
 def refresh():
     current_user = get_jwt_identity()
-    return {
+    return jsonify({
         'access_token': create_access_token(identity=current_user)
-    }
+    })
 
 @bp.route('/protected', methods=('GET',))
 @jwt_required
@@ -52,12 +52,12 @@ def protected():
 def random_track():
     artists, albums, tracks, plays = g.music_provider.get_user_data(get_user())
     tracks = list(tracks.values())
-    return {
+    return jsonify({
         "name": tracks[0].name,
         "artist": tracks[0].artists[0].name,
         "album": tracks[0].album.name,
         "cover": tracks[0].album.images[0].url
-    }
+    })
 
 @bp.route('/history', methods=('GET',))
 @jwt_required
