@@ -9,6 +9,10 @@ from trackify.db.classes import User
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
+def check_credentials(username, password):
+    user = g.music_provider.get_user_by_username(username)
+    return user and check_password_hash(user.password, password)
+
 @bp.route('/register', methods=('GET', 'POST'))
 def register():
     if g.user:
@@ -59,9 +63,7 @@ def login():
         elif not password:
             error = 'password is required'
 
-        user = g.music_provider.get_user_by_username(username)
-
-        if not user or not check_password_hash(user.password, password):
+        if not check_credentials(username, password):
             error = 'password/username incorrect'
 
         if not error:

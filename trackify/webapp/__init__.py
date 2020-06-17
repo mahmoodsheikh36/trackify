@@ -11,7 +11,8 @@ def create_app():
     app.config.from_mapping(
         SECRET_KEY=config.secret_key,
         JWT_SECRET_KEY=config.jwt_secret_key,
-        JWT_ACCESS_TOKEN_EXPIRES=config.jwt_access_token_expires
+        JWT_ACCESS_TOKEN_EXPIRES=config.jwt_access_token_expires,
+        JWT_REFRESH_TOKEN_EXPIRES=config.jwt_refresh_token_expires
     )
 
     jwt = JWTManager(app)
