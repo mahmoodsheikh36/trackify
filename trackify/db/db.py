@@ -1,11 +1,11 @@
 import mysql.connector
 
 from trackify.utils import current_time, generate_id
-from trackify.config import Config
+import config
 
 class DBProvider:
-    def __init__(self, user=Config.database_user, passwd=Config.database_password,
-                 database=Config.database, host=Config.database_host):
+    def __init__(self, user=config.database_user, passwd=config.database_password,
+                 database=config.database, host=config.database_host):
         self.user = user
         self.passwd = passwd
         self.database = database

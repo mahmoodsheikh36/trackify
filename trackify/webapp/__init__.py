@@ -3,14 +3,15 @@ from flask_jwt_extended import JWTManager
 
 from trackify.db.classes import MusicProvider, Request
 from trackify.spotify.spotify import SpotifyClient
-from trackify.config import Config
+import config
 
 def create_app():
     # create and configure the app
     app = Flask(__name__)
     app.config.from_mapping(
-        SECRET_KEY=Config.secret_key,
-        JWT_SECRET_KEY=Config.jwt_secret_key
+        SECRET_KEY=config.secret_key,
+        JWT_SECRET_KEY=config.jwt_secret_key,
+        JWT_ACCESS_TOKEN_EXPIRES=config.jwt_access_token_expires
     )
 
     jwt = JWTManager(app)
@@ -23,10 +24,10 @@ def create_app():
     @app.before_request
     def before_request():
         if not 'music_provider' in g:
-            g.music_provider = MusicProvider(Config.database_user,
-                                             Config.database_password,
-                                             Config.database,
-                                             Config.database_host)
+            g.music_provider = MusicProvider(config.database_user,
+                                             config.database_password,
+                                             config.database,
+                                             config.database_host)
         if not 'jwt' in g:
             g.jwt = jwt
         db_request = Request(request, None)
@@ -42,8 +43,8 @@ def create_app():
         g.music_provider.add_request(db_request)
 
         if not 'spotify_client' in g:
-            g.spotify_client = SpotifyClient(Config.client_id, Config.client_secret,
-                                             Config.redirect_uri, Config.scope)
+            g.spotify_client = SpotifyClient(config.client_id, config.client_secret,
+                                             config.redirect_uri, config.scope)
 
     from trackify.webapp.home import bp as home_bp
     app.register_blueprint(home_bp)

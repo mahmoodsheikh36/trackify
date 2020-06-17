@@ -1,0 +1,11 @@
+database = 'trackify'
+database_user = 'trackify'
+database_password = 'password'
+database_host = '0.0.0.0'
+secret_key = 'my_super_secret_key'
+client_id = None
+client_secret = None
+scope = None
+redirect_uri = None
+jwt_secret_key = None
+jwt_access_token_expires = 60

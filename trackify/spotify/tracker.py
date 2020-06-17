@@ -98,14 +98,14 @@ class SpotifyTracker:
             sleep(ITERATION_TIMEOUT)
 
 if __name__ == '__main__':
-    from trackify.config import Config
     from trackify.spotify.spotify import SpotifyClient
     from trackify.db.classes import MusicProvider
+    import config
 
-    music_provider = MusicProvider(Config.database_user, Config.database_password,
-                                   Config.database, Config.database_host)
-    spotify_client = SpotifyClient(Config.client_id, Config.client_secret,
-                                   Config.redirect_uri, Config.scope)
+    music_provider = MusicProvider(config.database_user, config.database_password,
+                                   config.database, config.database_host)
+    spotify_client = SpotifyClient(config.client_id, config.client_secret,
+                                   config.redirect_uri, config.scope)
 
     spotify_tracker = SpotifyTracker(music_provider, spotify_client)
     spotify_tracker.start_tracking()
