@@ -4,7 +4,7 @@ from flask_jwt_extended import (
     get_jwt_identity, jwt_refresh_token_required
 )
 
-from trackify.webapp.auth import check_credentials
+from trackify.webapp.auth import try_credentials
 from trackify.utils import get_largest_elements, timestamp_to_date, current_time
 
 bp = Blueprint('api', __name__, url_prefix='/api')
@@ -25,7 +25,7 @@ def login():
     if not password:
         return jsonify({"msg": "Missing password parameter"}), 400
 
-    if not check_credentials(username, password):
+    if not try_credentials(username, password):
         return jsonify({"msg": "Bad username or password"}), 401
 
     return jsonify({
