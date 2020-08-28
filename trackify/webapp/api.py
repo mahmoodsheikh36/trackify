@@ -15,15 +15,13 @@ def get_user():
 
 @bp.route('/login', methods=('POST',))
 def login():
-    if not request.is_json:
-        return jsonify({"msg": "Missing JSON in request"}), 400
-
-    username = request.json.get('username', None)
-    password = request.json.get('password', None)
-    if not username:
+    if not 'username' in request.form:
         return jsonify({"msg": "Missing username parameter"}), 400
-    if not password:
+    if not 'password' in request.form:
         return jsonify({"msg": "Missing password parameter"}), 400
+
+    username = request.form['username']
+    password = request.form['password']
 
     if not try_credentials(username, password):
         return jsonify({"msg": "Bad username or password"}), 401
@@ -62,7 +60,7 @@ def random_track():
 @bp.route('/history', methods=('GET',))
 @jwt_required
 def history():
-    hrs_limit = request.args.get('hrs_limit', default=24*7)
+    hrs_limit = request.args.get('hrs_limit', default=24*1000)
     try:
         hrs_limit = int(hrs_limit)
     except:
@@ -86,10 +84,67 @@ def history():
     data = []
     for play in sorted_plays:
         data.append({
-            'play_time': timestamp_to_date(play.time_started).strftime('%d/%m/%Y %H:%M:%S'),
-            'name': play.track.name,
-            'artist': play.track.artists[0].name,
-            'cover': play.track.album.images[0].url
+            'id': play.id,
+            'play_time': timestamp_to_date(play.time_started).strftime('%Y-%m-%d %H:%M:%S'),
+            'track': {
+                'id': play.track.id,
+                'name': play.track.name,
+                'artist': {
+                    'name': play.track.artists[0].name,
+                    'id': play.track.artists[0].id
+                },
+                'album': {
+                    'id': play.track.album.id,
+                    'cover': play.track.album.smallest_image().url,
+                    'name': play.track.album.name,
+                }
+            },
         })
 
     return jsonify(data)
+
+@bp.route('/top_tracks', methods=('GET',))
+@jwt_required
+def top_track():
+    hrs_limit = request.args.get('hrs_limit', 24 * 7)
+    try:
+        hrs_limit = int(hrs_limit)
+    except:
+        return jsonify({"msg": "hrs_limit should be a positive integer"}), 401
+
+    if hrs_limit == 0:
+        begin_time = None
+    else:
+        begin_time = current_time() - hrs_limit * 3600 * 100
+
+    artists, albums, tracks, plays = g.music_provider.get_user_data(get_user())
+
+    for play in plays.values():
+        if hasattr(play.track, 'listened_ms'):
+            play.track.listened_ms += play.listened_ms(begin_time)
+        else:
+            play.track.listened_ms = play.listened_ms(begin_time)
+
+    def compare(track1, track2):
+        return track1.listened_ms > track2.listened_ms
+
+    top_tracks = get_largest_elements(list(tracks.values()), 3, compare)
+
+    tracks_to_return = []
+    for track in top_tracks:
+        tracks_to_return.append({
+            'id': track.id,
+            'name': track.name,
+            'listened_ms': track.listened_ms,
+            'artist': {
+                'name': track.artists[0].name,
+                'id': track.artists[0].id
+            },
+            'album': {
+                'id': track.album.id,
+                'cover': track.album.smallest_image().url,
+                'name': track.album.name,
+            }
+        })
+
+    return jsonify(tracks_to_return)
