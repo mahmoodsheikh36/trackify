@@ -68,6 +68,13 @@ class Album:
         self.release_date = release_date
         self.release_date_precision = release_date_precision
 
+    def smallest_image(self):
+        smallest = self.images[0]
+        for idx, image in enumerate(self.images[1:]):
+            if image.width < smallest.width:
+                smallest = image
+        return smallest
+
 class MusicProvider:
     def __init__(self, *args, **kwargs):
         self.db_provider = DBProvider(*args, **kwargs)
