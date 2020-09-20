@@ -191,7 +191,7 @@ def top_users():
         hrs_limit = 30 * 24 # past month is the limit
 
     if hrs_limit == 0:
-        begin_time = None
+        begin_time = 0
     else:
         begin_time = current_time() - hrs_limit * 3600 * 1000
 

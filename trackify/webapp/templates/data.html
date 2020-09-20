@@ -94,7 +94,7 @@
                     </td>
                     <td>
                         <div class="music_entry">
-                            <img style="width:50px;height:50px;" alt="img" src="{{ track.album.images[0].url }}">
+                            <img style="width:50px;height:50px;" alt="img" src="{{ track.album.smallest_image().url }}">
                             <div class="music_entry_info">
                                 <span class="highlighted">{{ track.name }}</span>
                                 <a>{{ track.artists[0].name }}</a>
@@ -157,7 +157,7 @@
                     <td class="centered">{{ loop.index }}</td>
                     <td>
                         <div class="music_entry">
-                            <img style="width:50px;height:50px;" alt="img" src="{{ album.images[0].url }}">
+                            <img style="width:50px;height:50px;" alt="img" src="{{ album.smallest_image().url }}">
                             <div class="music_entry_info">
                                 <span class="highlighted">{{ album.name }}</span>
                                 <a>{{ album.artists[0].name }}</a>
@@ -223,7 +223,7 @@
                     <td>
                         <div class="music_entry">
                             {% if artist.albums %}
-                            <img style="width:50px;height:50px;" alt="img" src="{{ artist.albums[0].images[0].url }}">
+                            <img style="width:50px;height:50px;" alt="img" src="{{ artist.albums[0].smallest_image().url }}">
                             {% endif %}
                             <div class="music_entry_info">
                                 <span class="highlighted">{{ artist.name }}</span>
