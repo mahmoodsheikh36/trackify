@@ -45,18 +45,6 @@ def protected():
     current_user = get_jwt_identity()
     return jsonify(logged_in_as=current_user), 200
 
-@bp.route('/random_track', methods=('GET',))
-@jwt_required
-def random_track():
-    artists, albums, tracks, plays = g.music_provider.get_user_data(get_user())
-    tracks = list(tracks.values())
-    return jsonify({
-        "name": tracks[0].name,
-        "artist": tracks[0].artists[0].name,
-        "album": tracks[0].album.name,
-        "cover": tracks[0].album.images[0].url
-    })
-
 @bp.route('/history', methods=('GET',))
 @jwt_required
 def history():

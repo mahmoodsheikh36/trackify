@@ -92,7 +92,7 @@ class MusicProvider:
         user_row = self.db_provider.get_user_by_username(username)
         if user_row:
             return User(user_row['id'], user_row['username'], user_row['password'],
-                        user_row['email'], int(user_row['time_added']))
+                        user_row['email'], user_row['time_added'])
         return None
 
     def add_user(self, user):
@@ -126,28 +126,28 @@ class MusicProvider:
         user_row = self.db_provider.get_user(user_id)
         if user_row:
             return User(user_row['id'], user_row['username'], user_row['password'],
-                        user_row['email'], int(user_row['time_added']))
+                        user_row['email'], user_row['time_added'])
         return None
 
     def get_user_auth_code(self, user):
         code_row = self.db_provider.get_user_auth_code(user.id)
         if code_row:
             return AuthCode(code_row['id'], code_row['code'], user,
-                            int(code_row['time_added']))
+                            code_row['time_added'])
         return None
 
     def get_user_access_token(self, user):
         token_row = self.db_provider.get_user_access_token(user.id)
         if token_row:
             return AccessToken(token_row['id'], token_row['token'], user,
-                               int(token_row['time_added']))
+                               token_row['time_added'])
         return None
 
     def get_user_refresh_token(self, user):
         token_row = self.db_provider.get_user_refresh_token(user.id)
         if token_row:
             return RefreshToken(token_row['id'], token_row['token'], user,
-                                int(token_row['time_added']))
+                                token_row['time_added'])
         return None
 
     def get_users(self):
@@ -155,40 +155,40 @@ class MusicProvider:
         users = []
         for user_row in user_rows:
             user = User(user_row['id'], user_row['username'], user_row['password'],
-                        user_row['email'], int(user_row['time_added']))
+                        user_row['email'], user_row['time_added'])
             users.append(user)
         return users
 
     def get_user_access_token(self, user):
         row = self.db_provider.get_user_access_token(user.id)
         if row:
-            return AccessToken(row['id'], row['token'], user, int(row['time_added']))
+            return AccessToken(row['id'], row['token'], user, row['time_added'])
         return None
 
     def get_user_refresh_token(self, user):
         row = self.db_provider.get_user_refresh_token(user.id)
-        return RefreshToken(row['id'], row['token'], user, int(row['time_added']))
+        return RefreshToken(row['id'], row['token'], user, row['time_added'])
 
     def get_users_with_tokens(self):
         rows = self.db_provider.get_users_with_tokens()
         users = []
         for row in rows:
             user = User(row['id'], row['username'], row['password'], row['email'],
-                        int(row['time_added']))
+                        row['time_added'])
             user.access_token = AccessToken(row['id'], row['token'], user,
-                                            int(row['time_added']))
+                                            row['time_added'])
             user.refresh_token = RefreshToken(row['id'], row['token'], user,
-                                              int(row['time_added']))
+                                              row['time_added'])
             users.append(user)
         return users
 
-    def get_user_music(self, user):
-        track_rows = self.db_provider.get_user_tracks(user.id)
-        artist_rows = self.db_provider.get_user_artists(user.id)
-        album_rows = self.db_provider.get_user_albums(user.id)
-        album_image_rows = self.db_provider.get_user_album_images(user.id)
-        album_artist_rows = self.db_provider.get_user_album_artists(user.id)
-        track_artist_rows = self.db_provider.get_user_track_artists(user.id)
+    def get_user_music(self, user, from_time, to_time):
+        track_rows = self.db_provider.get_user_tracks(user.id, from_time, to_time)
+        artist_rows = self.db_provider.get_user_artists(user.id, from_time, to_time)
+        album_rows = self.db_provider.get_user_albums(user.id, from_time, to_time)
+        album_image_rows = self.db_provider.get_user_album_images(user.id, from_time, to_time)
+        album_artist_rows = self.db_provider.get_user_album_artists(user.id, from_time, to_time)
+        track_artist_rows = self.db_provider.get_user_track_artists(user.id, from_time, to_time)
 
         # map each object's id to the object to make lookup faster
         tracks = {}
@@ -297,65 +297,38 @@ class MusicProvider:
         self.db_provider.add_seek(seek.id, seek.time_added, seek.position, seek.play.id)
         self.commit()
 
-    def get_user_data(self, user):
-        play_rows = self.db_provider.get_user_plays(user.id)
-        pause_rows = self.db_provider.get_user_pauses(user.id)
-        resume_rows = self.db_provider.get_user_resumes(user.id)
-        seek_rows = self.db_provider.get_user_seeks(user.id)
+    def get_user_data(self, user, from_time=0, to_time=9999999999999):
+        play_rows = self.db_provider.get_user_plays(user.id, from_time, to_time)
+        pause_rows = self.db_provider.get_user_pauses(user.id, from_time, to_time)
+        resume_rows = self.db_provider.get_user_resumes(user.id, from_time, to_time)
+        seek_rows = self.db_provider.get_user_seeks(user.id, from_time, to_time)
 
         # map each play id to its object to make lookup faster
         plays = {}
 
-        artists, albums, tracks = self.get_user_music(user)
+        artists, albums, tracks = self.get_user_music(user, from_time, to_time)
 
         for row in play_rows:
-            plays[row['id']] = Play(row['id'], int(row['time_started']),
-                                    int(row['time_ended']), [], [], [], user,
+            plays[row['id']] = Play(row['id'], row['time_started'],
+                                    row['time_ended'], [], [], [], user,
                                     tracks[row['track_id']], None, row['volume_percent'])
 
         for row in pause_rows:
             plays[row['play_id']].pauses.append(Pause(row['id'], None,
-                                                      int(row['time_added'])))
+                                                      row['time_added']))
 
         for row in resume_rows:
             plays[row['play_id']].resumes.append(Resume(row['id'], None,
-                                                        int(row['time_added'])))
+                                                        row['time_added']))
 
         for row in seek_rows:
             plays[row['play_id']].seeks.append(Seek(row['id'], None, row['position'],
-                                                    int(row['time_added'])))
+                                                    row['time_added']))
 
         return artists, albums, tracks, plays
 
     def user_has_plays(self, user):
         return self.db_provider.user_has_plays(user.id)
-
-    def get_few_artists(self, limit):
-        artist_rows = self.db_provider.get_few_artists(limit)
-        artists = []
-        for row in artist_rows:
-            artist = Artist(row['id'], row['artist_name'], [])
-            artists.append(artist)
-        return artists
-
-    def get_few_albums(self, limit):
-        album_rows = self.db_provider.get_few_albums(limit)
-        albums = []
-        for row in album_rows:
-            album = Album(row['id'], row['album_name'], [], [], [], row['album_type'],
-                          row['release_date'], row['release_date_precision'])
-            albums.append(album)
-        return albums
-
-    def get_few_tracks(self, limit):
-        track_rows = self.db_provider.get_few_tracks(limit)
-        tracks = []
-        for row in track_rows:
-            track = Track(row['id'], row['track_name'], None, [], row['duration_ms'],
-                          row['popularity'], row['preview_url'], row['track_number'],
-                          row['explicit'])
-            tracks.append(track)
-        return tracks
 
     def get_user_settings(self, user):
         user_setting_rows = self.db_provider.get_user_settings(user.id)

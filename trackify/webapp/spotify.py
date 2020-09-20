@@ -67,11 +67,12 @@ def data():
         hrs_limit = 24 * 30
 
     if hrs_limit == 0:
-        begin_time = None # the listened_ms function will handle it correctly
+        begin_time = 0 # the listened_ms function will handle it correctly
     else:
         begin_time = current_time() - hrs_limit * 3600 * 1000
+    print('begin_time: {}'.format(begin_time))
 
-    artists, albums, tracks, plays = g.music_provider.get_user_data(g.user)
+    artists, albums, tracks, plays = g.music_provider.get_user_data(g.user, from_time=begin_time)
 
     if sort_by == 'time_listened':
         for play in plays.values():
@@ -202,7 +203,7 @@ def top_users():
         user.show_favorite_track =\
             get_user_setting_by_name(user_settings,
                                      'show_favorite_track_on_top_users').value
-        artists, albums, tracks, plays = g.music_provider.get_user_data(user)
+        artists, albums, tracks, plays = g.music_provider.get_user_data(user, from_time=begin_time)
         if not plays:
             continue
         for play in plays.values():
@@ -235,19 +236,6 @@ def top_users():
                            hrs_from_ms=hrs_from_ms,
                            secs_from_ms=secs_from_ms,
                            hrs_limit=hrs_limit)
-
-@bp.route('/public_data', methods=('GET',))
-def public_data():
-    data = {}
-    data['artists'] = g.music_provider.db_provider.get_few_artists(10)
-    data['albums'] = g.music_provider.db_provider.get_few_albums(10)
-    data['tracks'] = g.music_provider.db_provider.get_few_tracks(10)
-    for album_data in data['albums']:
-        image_data = g.music_provider.db_provider.get_few_album_images(1)[0]
-        del image_data['album_id']
-        del image_data['id']
-        album_data['image'] = image_data
-    return data
 
 @bp.route('/history', methods=('GET',))
 @login_required

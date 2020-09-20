@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS users (
   username VARCHAR(30) NOT NULL,
   password VARCHAR(94) NOT NULL,
   email VARCHAR(255),
-  time_added VARCHAR(13) NOT NULL
+  time_added BIGINT NOT NULL
 );
 
 CREATE TABLE IF Not EXISTS settings (
@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS user_settings (
 
 CREATE TABLE IF NOT EXISTS requests (
   id VARCHAR(36) PRIMARY KEY,
-  time_added VARCHAR(13) NOT NULL,
+  time_added BIGINT NOT NULL,
   ip TEXT NOT NULL,
   url TEXT NOT NULL,
   headers TEXT NOT NULL,
@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS requests (
 
 CREATE TABLE IF NOT EXISTS auth_codes (
   id VARCHAR(36) PRIMARY KEY,
-  time_added VARCHAR(13) NOT NULL,
+  time_added BIGINT NOT NULL,
   code TEXT NOT NULL,
   user_id VARCHAR(36) NOT NULL,
   FOREIGN KEY (user_id) REFERENCES users (id)
@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS auth_codes (
 
 CREATE TABLE IF NOT EXISTS access_tokens (
   id VARCHAR(36) PRIMARY KEY,
-  time_added VARCHAR(13) NOT NULL,
+  time_added BIGINT NOT NULL,
   token VARCHAR(310) NOT NULL, -- access token length is 303, gotta be safe
   user_id VARCHAR(36) NOT NULL,
   FOREIGN KEY (user_id) REFERENCES users (id)
@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS access_tokens (
 
 CREATE TABLE IF NOT EXISTS refresh_tokens (
   id VARCHAR(36) PRIMARY KEY,
-  time_added VARCHAR(13) NOT NULL,
+  time_added BIGINT NOT NULL,
   token VARCHAR(140) NOT NULL, -- refresh token length is 131 chars but gotta be safe
   user_id VARCHAR(36) NOT NULL,
   FOREIGN KEY (user_id) REFERENCES users (id)
@@ -131,8 +131,8 @@ CREATE TABLE IF NOT EXISTS contexts (
 
 CREATE TABLE IF NOT EXISTS plays (
   id VARCHAR(36) PRIMARY KEY,
-  time_started VARCHAR(13) NOT NULL,
-  time_ended VARCHAR(13) NOT NULL,
+  time_started BIGINT NOT NULL,
+  time_ended BIGINT NOT NULL,
   user_id VARCHAR(36) NOT NULL,
   track_id VARCHAR(25) NOT NULL,
   device_id VARCHAR(45) NOT NULL,
@@ -146,21 +146,21 @@ CREATE TABLE IF NOT EXISTS plays (
 
 CREATE TABLE IF NOT EXISTS pauses (
   id VARCHAR(36) PRIMARY KEY,
-  time_added VARCHAR(13) NOT NULL,
+  time_added BIGINT NOT NULL,
   play_id VARCHAR(36) NOT NULL,
   FOREIGN KEY (play_id) REFERENCES plays (id)
 );
 
 CREATE TABLE IF NOT EXISTS resumes (
   id VARCHAR(36) PRIMARY KEY,
-  time_added VARCHAR(13) NOT NULL,
+  time_added BIGINT NOT NULL,
   play_id VARCHAR(36) NOT NULL,
   FOREIGN KEY (play_id) REFERENCES plays (id)
 );
 
 CREATE TABLE IF NOT EXISTS seeks (
   id VARCHAR(36) PRIMARY KEY,
-  time_added VARCHAR(13) NOT NULL,
+  time_added BIGINT NOT NULL,
   position INT NOT NULL,
   play_id VARCHAR(36) NOT NULL,
   FOREIGN KEY (play_id) REFERENCES plays (id)
