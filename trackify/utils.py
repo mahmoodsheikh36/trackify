@@ -17,6 +17,7 @@ def uri_encode(text):
     return urllib.parse.quote(text)
 
 def get_largest_elements(list_to_sort, limit, compare):
+    begin = current_time()
     mylist = list_to_sort.copy()
     final_list = []
     cnt = 0
@@ -48,12 +49,6 @@ def str_to_bool(val):
     if val == 'True':
         return True
     return False
-
-def get_user_setting_by_name(settings, setting_name):
-    for setting_id in settings:
-        if settings[setting_id].name == setting_name:
-            return settings[setting_id]
-    return None
 
 def timestamp_to_date(timestamp):
     digits = len(str(timestamp))

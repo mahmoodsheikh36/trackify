@@ -70,7 +70,6 @@ def data():
         begin_time = 0 # the listened_ms function will handle it correctly
     else:
         begin_time = current_time() - hrs_limit * 3600 * 1000
-    print('begin_time: {}'.format(begin_time))
 
     artists, albums, tracks, plays = g.music_provider.get_user_data(g.user, from_time=begin_time)
 
@@ -177,7 +176,6 @@ def data():
 
 @bp.route('/top_users', methods=('GET',))
 def top_users():
-    users = g.music_provider.get_users()
     LIMIT = 10
 
     hrs_limit = request.args.get('time_limit')
@@ -195,32 +193,32 @@ def top_users():
     else:
         begin_time = current_time() - hrs_limit * 3600 * 1000
 
+    users, artists, albums, tracks, plays =\
+        g.music_provider.get_all_users_data(begin_time, current_time())
+
     users_to_sort = []
-    for idx, user in enumerate(users):
-        user_settings = g.music_provider.get_user_settings(user)
-        if not get_user_setting_by_name(user_settings, 'show_on_top_users').value:
-            continue
-        user.show_favorite_track =\
-            get_user_setting_by_name(user_settings,
-                                     'show_favorite_track_on_top_users').value
-        artists, albums, tracks, plays = g.music_provider.get_user_data(user, from_time=begin_time)
-        if not plays:
-            continue
-        for play in plays.values():
-            listened_ms = play.listened_ms(begin_time)
+    for user in users.values():
+        if user.settings.get_by_name('show_on_top_users').value:
+            if user.plays:
+                users_to_sort.append(user)
+
+    for user in users_to_sort:
+        for play in user.plays:
+            listened_ms = play.listened_ms(from_time=begin_time)
             if hasattr(play.track, 'listened_ms'):
-                play.track.listened_ms += listened_ms
+                if user.id in play.track.listened_ms:
+                    play.track.listened_ms[user.id] += listened_ms
+                else:
+                    play.track.listened_ms[user.id] = listened_ms
             else:
-                play.track.listened_ms = listened_ms
+                play.track.listened_ms = {user.id: listened_ms}
             if not hasattr(user, 'top_track') or\
-               play.track.listened_ms > user.top_track.listened_ms:
+               play.track.listened_ms[user.id] > user.top_track.listened_ms[user.id]:
                 user.top_track = play.track
             if not hasattr(user, 'listened_ms'):
                 user.listened_ms = listened_ms
             else:
                 user.listened_ms += listened_ms
-        if user.listened_ms:
-            users_to_sort.append(user)
 
     def compare(user1, user2):
         if not hasattr(user1, 'listened_ms'):
@@ -240,7 +238,14 @@ def top_users():
 @bp.route('/history', methods=('GET',))
 @login_required
 def history():
-    artists, albums, tracks, plays = g.music_provider.get_user_data(g.user)
+    hrs_limit = request.args.get("hrs_limit", default=24, type=int)
+    if hrs_limit < 1:
+        hrs_limit = 24
+    if hrs_limit > 30 * 24:
+        hrs_limit = 30 * 24 # past month is the limit
+
+    artists, albums, tracks, plays =\
+        g.music_provider.get_user_data(g.user, current_time() - hrs_limit * 3600 * 1000)
     for play in plays.values():
         play.listened_ms_cached = play.listened_ms()
         play.played_date = timestamp_to_date(play.time_started).strftime('%d/%m/%Y')
@@ -254,4 +259,5 @@ def history():
                            plays=sorted_plays,
                            hrs_from_ms=hrs_from_ms,
                            mins_from_ms=mins_from_ms,
-                           secs_from_ms=secs_from_ms)
+                           secs_from_ms=secs_from_ms,
+                           hrs_limit=hrs_limit)

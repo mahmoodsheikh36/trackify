@@ -9,3 +9,18 @@ a.title {
     margin-bottom: 20px;
     font-size: 25px;
 }
+
+form.controls {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    margin-bottom: 25px;
+}
+form.controls select {
+    background: #222;
+    outline: none;
+    height: 30px;
+    font-size: 21px;
+    border-color: rgb(242, 93, 93);
+    border-width: 1px;
+}

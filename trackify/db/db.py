@@ -292,16 +292,15 @@ class DBProvider:
 
     def get_user_artists(self, user_id, from_time, to_time):
         c = self.cursor()
-        c.execute('SELECT * FROM artists WHERE artists.id IN\
-                   (SELECT artist_id FROM track_artists WHERE track_id IN\
-                   (SELECT id FROM tracks WHERE id IN\
-                   (SELECT track_id FROM plays WHERE user_id = %s AND \
-                   ((time_started >= %s AND time_started <= %s) OR (time_ended >= %s AND time_ended <= %s))))) OR artists.id IN\
-                   (SELECT artist_id FROM album_artists WHERE album_id IN\
-                   (SELECT album_id FROM tracks WHERE tracks.id IN\
-                   (SELECT track_id FROM plays WHERE user_id = %s AND\
-                   ((time_started >= %s AND time_started <= %s) OR (time_ended >= %s AND time_ended <= %s)))))',
-                  (user_id, from_time, to_time, from_time, to_time, user_id, from_time, to_time, from_time, to_time))
+        c.execute('SELECT a.* \
+FROM plays p \
+INNER JOIN tracks t ON t.id = p.track_id \
+INNER JOIN track_artists ta ON ta.track_id = t.id \
+LEFT JOIN album_artists aa ON aa.album_id = t.album_id \
+INNER JOIN artists a ON a.id IN (ta.artist_id, aa.artist_id) \
+WHERE p.user_id = %s AND ((p.time_started >= %s AND p.time_started <= %s) OR (p.time_ended >= %s AND p.time_ended <= %s))\
+',
+                  (user_id, from_time, to_time, from_time, to_time))
         return c.fetchall()
 
     def get_user_album_images(self, user_id, from_time, to_time):
@@ -365,12 +364,115 @@ class DBProvider:
                    user_id = %s', (setting_id, user_id))
         return c.fetchone()
 
-    def execute_fetchall(self, sql, values):
+    def execute_fetchall(self, sql, values=[]):
         c = self.cursor()
         c.execute(sql, values)
         return c.fetchall()
 
-    def execute_fetchone(self, sql, values):
+    def execute_fetchone(self, sql, values=[]):
         c = self.cursor()
         c.execute(sql, values)
         return c.fetchone()
+
+    def get_user_data(self, user_id, from_time, to_time):
+        return self.execute_fetchall('''
+        SELECT
+        p.id as play_id,
+        p.time_started as play_time_started,
+        p.time_ended as play_time_ended,
+        p.user_id as play_user_id,
+        p.track_id as play_track_id,
+        p.device_id as play_device_id,
+        p.context_uri as play_context_uri,
+        p.volume_percent as play_volume_percent,
+        a.id as artist_id,
+        a.artist_name as artist_name,
+        t.id as track_id,
+        t.duration_ms as track_duration_ms,
+        t.popularity as track_popularity,
+        t.preview_url as track_preview_url,
+        t.explicit as track_explicit,
+        t.album_id as track_album_id,
+        t.track_name as track_name,
+        t.track_number as track_number,
+        al.id as album_id,
+        al.release_date as album_release_date,
+        al.release_date_precision as album_release_date_precision,
+        al.album_name as album_name,
+        al.album_type as album_type,
+        pa.id as pause_id,
+        pa.time_added as pause_time_added,
+        r.id as resume_id,
+        r.time_added as resume_time_added,
+        s.id as seek_id,
+        s.time_added as seek_time_added,
+        s.position as seek_position,
+        ali.id as album_image_id,
+        ali.width as album_image_width,
+        ali.height as album_image_height,
+        ali.url as album_image_url
+        FROM plays p
+        JOIN tracks t ON t.id = p.track_id
+        JOIN track_artists ta ON t.id = ta.track_id
+        JOIN artists a ON a.id = ta.artist_id
+        JOIN albums al ON al.id = t.album_id
+        JOIN album_images ali on ali.album_id = t.album_id
+        LEFT JOIN pauses pa ON pa.play_id = p.id
+        LEFT JOIN resumes r ON r.play_id = p.id
+        LEFT JOIN seeks s ON s.play_id = p.id
+        WHERE p.user_id = %s AND ((p.time_started >= %s AND p.time_started <= %s) OR
+                                    (p.time_ended >= %s AND p.time_ended <= %s))
+        ''', (user_id, from_time, to_time, from_time, to_time)) 
+
+    def get_all_users_data(self, from_time, to_time):
+        return self.execute_fetchall('''
+        SELECT
+        u.id as user_id,
+        u.username as user_username,
+        u.time_added as user_time_added,
+        p.id as play_id,
+        p.time_started as play_time_started,
+        p.time_ended as play_time_ended,
+        p.user_id as play_user_id,
+        p.track_id as play_track_id,
+        p.device_id as play_device_id,
+        p.context_uri as play_context_uri,
+        p.volume_percent as play_volume_percent,
+        a.id as artist_id,
+        a.artist_name as artist_name,
+        t.id as track_id,
+        t.duration_ms as track_duration_ms,
+        t.popularity as track_popularity,
+        t.preview_url as track_preview_url,
+        t.explicit as track_explicit,
+        t.album_id as track_album_id,
+        t.track_name as track_name,
+        t.track_number as track_number,
+        al.id as album_id,
+        al.release_date as album_release_date,
+        al.release_date_precision as album_release_date_precision,
+        al.album_name as album_name,
+        al.album_type as album_type,
+        pa.id as pause_id,
+        pa.time_added as pause_time_added,
+        r.id as resume_id,
+        r.time_added as resume_time_added,
+        s.id as seek_id,
+        s.time_added as seek_time_added,
+        s.position as seek_position,
+        ali.id as album_image_id,
+        ali.width as album_image_width,
+        ali.height as album_image_height,
+        ali.url as album_image_url
+        FROM users u
+        JOIN plays p ON p.user_id = u.id AND ((p.time_started >= %s AND p.time_started <= %s) OR (p.time_ended >= %s AND p.time_ended <= %s))
+        JOIN tracks t ON t.id = p.track_id
+        JOIN track_artists ta ON t.id = ta.track_id
+        JOIN artists a ON a.id = ta.artist_id
+        JOIN albums al ON al.id = t.album_id
+        JOIN album_artists aa ON al.id = aa.album_id
+        JOIN album_images ali on ali.album_id = t.album_id
+        LEFT JOIN pauses pa ON pa.play_id = p.id
+        LEFT JOIN resumes r ON r.play_id = p.id
+        LEFT JOIN seeks s ON s.play_id = p.id
+        ''', (from_time, to_time, from_time, to_time))

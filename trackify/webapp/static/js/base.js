@@ -27,3 +27,16 @@ function highlightCurrentNavbarTab() {
         }
     }
 }
+
+function showMessage(msg, timeout) {
+    $('.message').innerHTML = msg
+    $('.message').style.display = "block"
+    if (timeout !== undefined) {
+        setTimeout(function() {
+            $('.message').style.display = 'none'
+        }, timeout * 1000);
+    }
+}
+function hideMessage() {
+    $('.message').style.display = 'none'
+}

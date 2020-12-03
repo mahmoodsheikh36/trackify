@@ -30,6 +30,7 @@ class User:
         self.access_token = access_token
         self.refresh_token = refresh_token
         self.plays = plays
+        self.settings = Settings()
 
 class Artist:
     def __init__(self, artist_id, name, albums):
@@ -182,48 +183,145 @@ class MusicProvider:
             users.append(user)
         return users
 
-    def get_user_music(self, user, from_time, to_time):
-        track_rows = self.db_provider.get_user_tracks(user.id, from_time, to_time)
-        artist_rows = self.db_provider.get_user_artists(user.id, from_time, to_time)
-        album_rows = self.db_provider.get_user_albums(user.id, from_time, to_time)
-        album_image_rows = self.db_provider.get_user_album_images(user.id, from_time, to_time)
-        album_artist_rows = self.db_provider.get_user_album_artists(user.id, from_time, to_time)
-        track_artist_rows = self.db_provider.get_user_track_artists(user.id, from_time, to_time)
+    def get_user_data(self, user, from_time=0, to_time=9999999999999):
+        db_rows = self.db_provider.get_user_data(user.id, from_time, to_time)
 
-        # map each object's id to the object to make lookup faster
         tracks = {}
         albums = {}
         artists = {}
+        plays = {}
 
-        for row in artist_rows:
-            artist = Artist(row['id'], row['artist_name'], [])
-            artists[artist.id] = artist
+        seeks = {}
+        pauses = {}
+        resumes = {}
 
-        for row in album_rows:
-            album = Album(row['id'], row['album_name'], [], [], [], row['album_type'],
-                          row['release_date'], row['release_date_precision'])
-            albums[album.id] = album
-        
-        for row in track_rows:
-            track = Track(row['id'], row['track_name'], None, [], row['duration_ms'],
-                          row['popularity'], row['preview_url'], row['track_number'],
-                          row['explicit'])
-            track.album = albums[row['album_id']]
-            track.album.tracks.append(track)
-            tracks[track.id] = track
+        for row in db_rows:
+            if row['artist_id'] in artists:
+                artist = artists[row['artist_id']]
+            else:
+                artist = Artist(row['artist_id'], row['artist_name'], [])
+                artists[artist.id] = artist
 
-        for row in album_image_rows:
-            image = Image(row['id'], row['url'], row['width'], row['height'])
-            albums[row['album_id']].images.append(image)
+            if row['album_id'] in albums:
+                album = albums[row['album_id']]
+            else:
+                image = Image(row['album_image_id'], row['album_image_url'],
+                              row['album_image_width'], row['album_image_height'])
+                album = Album(row['album_id'], row['album_name'], [], [artist], [image],
+                              row['album_type'], row['album_release_date'],
+                              row['album_release_date_precision'])
+                albums[album.id] = album
+                artist.albums.append(album)
 
-        for row in album_artist_rows:
-            albums[row['album_id']].artists.append(artists[row['artist_id']])
-            artists[row['artist_id']].albums.append(albums[row['album_id']])
+            if row['track_id'] in tracks:
+                track = tracks[row['track_id']]
+            else:
+                track = Track(row['track_id'], row['track_name'], album, [artist],
+                              row['track_duration_ms'], row['track_popularity'],
+                              row['track_preview_url'], row['track_number'],
+                              row['track_explicit'])
+                album.tracks.append(track)
+                tracks[track.id] = track
 
-        for row in track_artist_rows:
-            tracks[row['track_id']].artists.append(artists[row['artist_id']])
+            if not row['play_id'] in plays:
+                play = Play(row['play_id'], row['play_time_started'],
+                            row['play_time_ended'], [], [], [],
+                            user, track, None, row['play_volume_percent'])
+                plays[play.id] = play
+            else:
+                play = plays[row['play_id']]
 
-        return artists, albums, tracks
+            if not row['seek_id'] in seeks and row['seek_id']:
+                seek = Seek(row['seek_id'], play, row['seek_position'],
+                            row['seek_time_added'])
+                play.seeks.append(seek)
+                seeks[seek.id] = seek
+            if not row['pause_id'] in pauses and row['pause_id']:
+                pause = Pause(row['pause_id'], play, row['pause_time_added'])
+                play.pauses.append(pause)
+                pauses[pause.id] = pause
+            if not row['resume_id'] in resumes and row['resume_id']:
+                resume = Resume(row['resume_id'], play, row['resume_time_added'])
+                play.resumes.append(resume)
+                resumes[resume.id] = resume
+
+        return artists, albums, tracks, plays
+
+    def get_all_users_data(self, from_time=0, to_time=9999999999999):
+        begin = current_time()
+        db_rows = self.db_provider.get_all_users_data(from_time, to_time)
+
+        tracks = {}
+        albums = {}
+        artists = {}
+        plays = {}
+        users = {}
+
+        seeks = {}
+        pauses = {}
+        resumes = {}
+
+        for row in db_rows:
+            if row['user_id'] in users:
+                user = users[row['user_id']]
+            else:
+                user = User(row['user_id'], row['user_username'], None, None,
+                            row['user_time_added'], plays=[])
+                user.settings.append_all([setting for setting in
+                                          self.get_user_settings(user).values()])
+                users[user.id] = user
+
+            if row['artist_id'] in artists:
+                artist = artists[row['artist_id']]
+            else:
+                artist = Artist(row['artist_id'], row['artist_name'], [])
+                artists[artist.id] = artist
+
+            if row['album_id'] in albums:
+                album = albums[row['album_id']]
+            else:
+                image = Image(row['album_image_id'], row['album_image_url'],
+                              row['album_image_width'], row['album_image_height'])
+                album = Album(row['album_id'], row['album_name'], [], [artist], [image],
+                              row['album_type'], row['album_release_date'],
+                              row['album_release_date_precision'])
+                albums[album.id] = album
+                artist.albums.append(album)
+
+            if row['track_id'] in tracks:
+                track = tracks[row['track_id']]
+            else:
+                track = Track(row['track_id'], row['track_name'], album, [artist],
+                              row['track_duration_ms'], row['track_popularity'],
+                              row['track_preview_url'], row['track_number'],
+                              row['track_explicit'])
+                album.tracks.append(track)
+                tracks[track.id] = track
+
+            if not row['play_id'] in plays:
+                play = Play(row['play_id'], row['play_time_started'],
+                            row['play_time_ended'], [], [], [],
+                            user, track, None, row['play_volume_percent'])
+                plays[play.id] = play
+                user.plays.append(play)
+            else:
+                play = plays[row['play_id']]
+
+            if not row['seek_id'] in seeks and row['seek_id']:
+                seek = Seek(row['seek_id'], play, row['seek_position'],
+                            row['seek_time_added'])
+                play.seeks.append(seek)
+                seeks[seek.id] = seek
+            if not row['pause_id'] in pauses and row['pause_id']:
+                pause = Pause(row['pause_id'], play, row['pause_time_added'])
+                play.pauses.append(pause)
+                pauses[pause.id] = pause
+            if not row['resume_id'] in resumes and row['resume_id']:
+                resume = Resume(row['resume_id'], play, row['resume_time_added'])
+                play.resumes.append(resume)
+                resumes[resume.id] = resume
+
+        return users, artists, albums, tracks, plays
 
     def add_album(self, album):
         self.db_provider.add_album(album.id, album.name, album.type, album.release_date,
@@ -296,36 +394,6 @@ class MusicProvider:
     def add_seek(self, seek):
         self.db_provider.add_seek(seek.id, seek.time_added, seek.position, seek.play.id)
         self.commit()
-
-    def get_user_data(self, user, from_time=0, to_time=9999999999999):
-        play_rows = self.db_provider.get_user_plays(user.id, from_time, to_time)
-        pause_rows = self.db_provider.get_user_pauses(user.id, from_time, to_time)
-        resume_rows = self.db_provider.get_user_resumes(user.id, from_time, to_time)
-        seek_rows = self.db_provider.get_user_seeks(user.id, from_time, to_time)
-
-        # map each play id to its object to make lookup faster
-        plays = {}
-
-        artists, albums, tracks = self.get_user_music(user, from_time, to_time)
-
-        for row in play_rows:
-            plays[row['id']] = Play(row['id'], row['time_started'],
-                                    row['time_ended'], [], [], [], user,
-                                    tracks[row['track_id']], None, row['volume_percent'])
-
-        for row in pause_rows:
-            plays[row['play_id']].pauses.append(Pause(row['id'], None,
-                                                      row['time_added']))
-
-        for row in resume_rows:
-            plays[row['play_id']].resumes.append(Resume(row['id'], None,
-                                                        row['time_added']))
-
-        for row in seek_rows:
-            plays[row['play_id']].seeks.append(Seek(row['id'], None, row['position'],
-                                                    row['time_added']))
-
-        return artists, albums, tracks, plays
 
     def user_has_plays(self, user):
         return self.db_provider.user_has_plays(user.id)
@@ -492,3 +560,20 @@ class Setting:
         self.description = description
         self.value = value
         self.value_type = value_type
+
+class Settings:
+    def __init__(self, settings=[]):
+        self.settings = settings
+
+    def append(self, setting):
+        self.settings.append(setting)
+
+    def append_all(self, settings):
+        for setting in settings:
+            self.settings.append(setting)
+
+    def get_by_name(self, setting_name):
+        for setting in self.settings:
+            if setting.name == setting_name:
+                return setting
+        return None

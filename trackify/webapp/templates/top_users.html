@@ -43,7 +43,7 @@
                         {% endif %}
                     </div>
                 </td>
-                {% if user.show_favorite_track and user.top_track.listened_ms %}
+                {% if user.settings.get_by_name('show_favorite_track_on_top_users').value %}
                 <td>
                     <div class="music_entry">
                         <img style="width:50px;height:50px;" src="{{ user.top_track.album.images[0].url }}"></img>

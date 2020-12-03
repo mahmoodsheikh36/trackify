@@ -28,6 +28,10 @@ div.display_options {
     padding-top: 10px;
 }
 
+table {
+    padding-bottom: 15px;
+}
+
 form.controls {
     display: flex;
     flex-flow: column nowrap;
@@ -45,8 +49,3 @@ form.controls select {
     border-color: rgb(242, 93, 93);
     border-width: 1px;
 }
-
-table {
-    padding-bottom: 15px;
-}
-

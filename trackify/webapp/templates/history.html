@@ -3,12 +3,28 @@
 {% block head %}
 <title>playback history</title>
 <link rel="stylesheet" type="text/css" href="/static/css/history.css"/>
+<script src="/static/js/history.js"></script>
 {% endblock %}
 
 {% block content %}
 <input type=hidden id="navbar_value" value="History">
 <div class="table_container">
     <a class="title highlighted">Playback History</a>
+    <form class="controls">
+        <div>
+            <a>limit time</a>
+            <select name="hrs_limit" class="highlighted" onchange="onChange(this)">
+                {% for hrs,time in {'1': 'past hour', '24': 'past day',
+                '168': 'past week', 30*24: 'past month'}.items() %}
+                {% if hrs|int == hrs_limit %}
+                <option value="{{ hrs }}" selected="selected">{{ time }}</option>
+                {% else %}
+                <option value="{{ hrs }}">{{ time }}</option>
+                {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+    </form>
     <table>
         <tr>
             <th></th>
