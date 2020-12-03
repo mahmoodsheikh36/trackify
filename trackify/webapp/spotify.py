@@ -6,7 +6,7 @@ from trackify.utils import (
 )
 from trackify.webapp.auth import login_required
 from trackify.db.classes import AuthCode
-from trackify.utils import get_user_setting_by_name, timestamp_to_date
+from trackify.utils import timestamp_to_date
 
 bp = Blueprint('spotify', __name__, url_prefix='/spotify')
 

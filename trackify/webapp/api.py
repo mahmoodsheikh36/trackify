@@ -5,7 +5,7 @@ from flask_jwt_extended import (
 )
 
 from trackify.webapp.auth import try_credentials
-from trackify.utils import get_largest_elements, timestamp_to_date, current_time, get_user_setting_by_name
+from trackify.utils import get_largest_elements, timestamp_to_date, current_time
 
 bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -163,11 +163,6 @@ def top_users():
     users_to_sort = []
     for idx, user in enumerate(users):
         user_settings = g.music_provider.get_user_settings(user)
-        if not get_user_setting_by_name(user_settings, 'show_on_top_users').value:
-            continue
-        user.show_favorite_track =\
-            get_user_setting_by_name(user_settings,
-                                     'show_favorite_track_on_top_users').value
         artists, albums, tracks, plays = g.music_provider.get_user_data(user)
         if not plays:
             continue
