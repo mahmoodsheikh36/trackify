@@ -1,10 +1,10 @@
 database = 'trackify'
 database_user = 'mahmooz'
-database_password = 'mahmooz'
+database_password = 'test'
 database_host = '0.0.0.0'
 secret_key = 'my_super_secret_key'
-client_id = "9084e51545cd454c8436bc9b7ddfd88c"
-client_secret = "09624ad86bf44b32bcfa1bf5c9ccc7da"
+client_id = None
+client_secret = None
 scope = "user-library-read playlist-read-private user-read-playback-state user-read-currently-playing user-modify-playback-state"
 redirect_uri = "http://localhost:5000/spotify/callback"
 jwt_secret_key = "dev"
