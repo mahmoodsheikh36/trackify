@@ -94,51 +94,62 @@ def history():
 @bp.route('/top_tracks', methods=('GET',))
 @jwt_required
 def top_track():
-    hrs_limit = request.args.get('hrs_limit', 24 * 7)
-    try:
-        hrs_limit = int(hrs_limit)
-    except:
-        return jsonify({"msg": "hrs_limit should be a positive integer"}), 401
+    hrs_str = request.args.get('hrs', default='24,{},{}'.format(24*7, 24*30), type=str)
+    hrs = []
+    for hr_str in hrs_str.split(','):
+        try:
+            hrs.append(int(hr_str))
+        except:
+            return jsonify({'msg': "'hrs' should be a list of comma-separated integers"}), 401
+    oldest_hr = hrs[0]
+    for i in range(len(hrs)):
+        try:
+            hrs[i] = int(hrs[i])
+        except:
+            return jsonify({'msg': "'hrs' should be an array of positive integers"}), 401
+        if hrs[i] <= 0:
+            return jsonify({'msg': "'hrs' should be an array of positive integers"}), 401
+        if hrs[i] > oldest_hr:
+            oldest_hr = hrs[i]
 
-    if hrs_limit == 0:
-        begin_time = None
-    else:
-        begin_time = current_time() - hrs_limit * 3600 * 1000
-
-    if begin_time and begin_time < 0:
-        begin_time = 0
+    begin_time = current_time() - oldest_hr * 3600 * 1000
 
     artists, albums, tracks, plays = g.music_provider.get_user_data(get_user())
 
-    for play in plays.values():
-        if hasattr(play.track, 'listened_ms'):
-            play.track.listened_ms += play.listened_ms(begin_time)
-        else:
-            play.track.listened_ms = play.listened_ms(begin_time)
+    data = {}
+    for hr in hrs:
+        begin_time = current_time() - hr * 3600 * 1000
+        for play in plays.values():
+           if hasattr(play.track, 'listened_ms'):
+               play.track.listened_ms += play.listened_ms(begin_time)
+           else:
+               play.track.listened_ms = play.listened_ms(begin_time)
 
-    def compare(track1, track2):
-        return track1.listened_ms > track2.listened_ms
+        def compare(track1, track2):
+            return track1.listened_ms > track2.listened_ms
 
-    top_tracks = get_largest_elements(list(tracks.values()), 3, compare)
+        top_tracks = get_largest_elements(list(tracks.values()), 3, compare)
 
-    tracks_to_return = []
-    for track in top_tracks:
-        tracks_to_return.append({
-            'id': track.id,
-            'name': track.name,
-            'listened_ms': track.listened_ms,
-            'artist': {
-                'name': track.artists[0].name,
-                'id': track.artists[0].id
-            },
-            'album': {
-                'id': track.album.id,
-                'cover': track.album.smallest_image().url,
-                'name': track.album.name,
-            }
-        })
+        data[hr] = []
+        for track in top_tracks:
+            if track.listened_ms == 0:
+                continue
+            data[hr].append({
+                'id': track.id,
+                'name': track.name,
+                'listened_ms': track.listened_ms,
+                'artist': {
+                    'name': track.artists[0].name,
+                    'id': track.artists[0].id
+                },
+                'album': {
+                    'id': track.album.id,
+                    'cover': track.album.smallest_image().url,
+                    'name': track.album.name,
+                }
+            })
 
-    return jsonify(tracks_to_return)
+    return jsonify(data)
 
 @bp.route('/top_users', methods=('GET',))
 @jwt_required
@@ -173,7 +184,7 @@ def top_users():
             else:
                 play.track.listened_ms = listened_ms
             if not hasattr(user, 'top_track') or\
-               play.track.listened_ms > user.top_track.listened_ms:
+                play.track.listened_ms > user.top_track.listened_ms:
                 user.top_track = play.track
             if not hasattr(user, 'listened_ms'):
                 user.listened_ms = listened_ms

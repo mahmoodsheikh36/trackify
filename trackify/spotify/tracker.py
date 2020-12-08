@@ -102,10 +102,10 @@ if __name__ == '__main__':
     from trackify.db.classes import MusicProvider
     import config
 
-    music_provider = MusicProvider(config.database_user, config.database_password,
-                                   config.database, config.database_host)
-    spotify_client = SpotifyClient(config.client_id, config.client_secret,
-                                   config.redirect_uri, config.scope)
+    music_provider = MusicProvider(config.CONFIG['database_user'], config.CONFIG['database_password'],
+                                   config.CONFIG['database'], config.CONFIG['database_host'])
+    spotify_client = SpotifyClient(config.CONFIG['client_id'], config.CONFIG['client_secret'],
+                                   config.CONFIG['redirect_uri'], config.CONFIG['scope'])
 
     spotify_tracker = SpotifyTracker(music_provider, spotify_client)
     spotify_tracker.start_tracking()

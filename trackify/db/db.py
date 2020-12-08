@@ -4,8 +4,8 @@ from trackify.utils import current_time, generate_id
 import config
 
 class DBProvider:
-    def __init__(self, user=config.database_user, passwd=config.database_password,
-                 database=config.database, host=config.database_host):
+    def __init__(self, user=config.CONFIG['database_user'], passwd=config.CONFIG['database_password'],
+                 database=config.CONFIG['database'], host=config.CONFIG['database_host']):
         self.user = user
         self.passwd = passwd
         self.database = database

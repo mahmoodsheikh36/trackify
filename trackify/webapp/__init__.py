@@ -9,11 +9,9 @@ def create_app():
     # create and configure the app
     app = Flask(__name__)
     app.config.from_mapping(
-        SECRET_KEY=config.secret_key,
-        JWT_SECRET_KEY=config.jwt_secret_key,
-        JWT_ACCESS_TOKEN_EXPIRES=config.jwt_access_token_expires,
-        JWT_REFRESH_TOKEN_EXPIRES=config.jwt_refresh_token_expires
+        config.CONFIG_UPPERCASE
     )
+    print(app.config['SECRET_KEY'])
 
     jwt = JWTManager(app)
 
@@ -24,11 +22,14 @@ def create_app():
 
     @app.before_request
     def before_request():
+        if config.CONFIG['permanent_session']:
+            session.permanent = True
+
         if not 'music_provider' in g:
-            g.music_provider = MusicProvider(config.database_user,
-                                             config.database_password,
-                                             config.database,
-                                             config.database_host)
+            g.music_provider = MusicProvider(config.CONFIG['database_user'],
+                                             config.CONFIG['database_password'],
+                                             config.CONFIG['database'],
+                                             config.CONFIG['database_host'])
         if not 'jwt' in g:
             g.jwt = jwt
         db_request = Request(request, None)
@@ -44,8 +45,8 @@ def create_app():
         g.music_provider.add_request(db_request)
 
         if not 'spotify_client' in g:
-            g.spotify_client = SpotifyClient(config.client_id, config.client_secret,
-                                             config.redirect_uri, config.scope)
+            g.spotify_client = SpotifyClient(config.CONFIG['client_id'], config.CONFIG['client_secret'],
+                                             config.CONFIG['redirect_uri'], config.CONFIG['scope'])
 
     from trackify.webapp.home import bp as home_bp
     app.register_blueprint(home_bp)
