@@ -11,7 +11,6 @@ def create_app():
     app.config.from_mapping(
         config.CONFIG_UPPERCASE
     )
-    print(app.config['SECRET_KEY'])
 
     jwt = JWTManager(app)
 
