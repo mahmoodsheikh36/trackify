@@ -144,7 +144,7 @@ def top_track():
                 },
                 'album': {
                     'id': track.album.id,
-                    'cover': track.album.biggest_image().url,
+                    'cover': track.album.mid_sized_image().url,
                     'name': track.album.name,
                 }
             })

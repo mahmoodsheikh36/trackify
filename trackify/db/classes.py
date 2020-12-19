@@ -83,6 +83,22 @@ class Album:
                 biggest = image
         return biggest
 
+    def add_image(self, new_image):
+        if not self.images:
+            self.images.append(new_image)
+        else:
+            found_idx = False
+            for idx, image in enumerate(self.images):
+                if new_image.width < image.width:
+                    self.images.insert(idx, new_image)
+                    found_idx = True
+                    break
+            if not found_idx:
+                self.images.append(new_image)
+
+    def mid_sized_image(self):
+        return self.images[len(self.images) // 2]
+
 class MusicProvider:
     def __init__(self, *args, **kwargs):
         self.db_provider = DBProvider(*args, **kwargs)
@@ -197,6 +213,7 @@ class MusicProvider:
         albums = {}
         artists = {}
         plays = {}
+        album_images = {}
 
         seeks = {}
         pauses = {}
@@ -212,9 +229,7 @@ class MusicProvider:
             if row['album_id'] in albums:
                 album = albums[row['album_id']]
             else:
-                image = Image(row['album_image_id'], row['album_image_url'],
-                              row['album_image_width'], row['album_image_height'])
-                album = Album(row['album_id'], row['album_name'], [], [artist], [image],
+                album = Album(row['album_id'], row['album_name'], [], [artist], [],
                               row['album_type'], row['album_release_date'],
                               row['album_release_date_precision'])
                 albums[album.id] = album
@@ -251,6 +266,12 @@ class MusicProvider:
                 resume = Resume(row['resume_id'], play, row['resume_time_added'])
                 play.resumes.append(resume)
                 resumes[resume.id] = resume
+
+            if row['album_image_id'] and not row['album_image_id'] in album_images:
+                image = Image(row['album_image_id'], row['album_image_url'],
+                              row['album_image_width'], row['album_image_height'])
+                album_images[row['album_image_id']] = image
+                albums[row['album_id']].add_image(image)
 
         return artists, albums, tracks, plays
 
