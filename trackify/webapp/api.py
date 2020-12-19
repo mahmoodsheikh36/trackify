@@ -128,7 +128,7 @@ def top_track():
         def compare(track1, track2):
             return track1.listened_ms > track2.listened_ms
 
-        top_tracks = get_largest_elements(list(tracks.values()), 3, compare)
+        top_tracks = get_largest_elements(list(tracks.values()), 20, compare)
 
         data[hr] = []
         for track in top_tracks:
@@ -144,7 +144,7 @@ def top_track():
                 },
                 'album': {
                     'id': track.album.id,
-                    'cover': track.album.smallest_image().url,
+                    'cover': track.album.biggest_image().url,
                     'name': track.album.name,
                 }
             })

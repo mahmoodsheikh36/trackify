@@ -76,6 +76,13 @@ class Album:
                 smallest = image
         return smallest
 
+    def biggest_image(self):
+        biggest = self.images[0]
+        for idx, image in enumerate(self.images[1:]):
+            if image.width > biggest.width:
+                biggest = image
+        return biggest
+
 class MusicProvider:
     def __init__(self, *args, **kwargs):
         self.db_provider = DBProvider(*args, **kwargs)
