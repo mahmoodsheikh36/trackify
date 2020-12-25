@@ -458,6 +458,14 @@ class MusicProvider:
                 self.db_provider.add_user_setting(setting.id, user.id, value)
         self.commit()
 
+    def get_user_track_plays(self, user, track, from_time=0, to_time=9999999999999):
+        rows = self.db_provider.get_user_track_plays(user.id, track.id, from_time, to_time)
+        plays = []
+        for row in rows:
+            plays.append(Play(row['id'], row['time_added'], row['time_ended'], None, None, None,
+                              user, None, None, row['volume_percent']))
+        return plays
+
 class AuthCode:
     def __init__(self, code_id, code, user, time_added):
         self.id = code_id

@@ -48,7 +48,7 @@ def protected():
 @bp.route('/history', methods=('GET',))
 @jwt_required
 def history():
-    hrs_limit = request.args.get('hrs_limit', default=24*1000)
+    hrs_limit = request.args.get('hrs_limit', 24*7)
     try:
         hrs_limit = int(hrs_limit)
     except:
@@ -209,3 +209,25 @@ def top_users():
         })
 
     return jsonify(users_to_return)
+
+@bp.route('/track_history', methods=('GET',))
+@jwt_required
+def track_history():
+    hrs_limit = request.args.get('hrs_limit', default=24*7, type=int)
+    if hrs_limit < 1:
+        return jsonify({"msg": "hrs_limit should be a positive integer"}), 401
+    track_id = request.args.get('track_id')
+
+    from_time = current_time() - hrs_limit * 3600 * 1000
+
+    artists, albums, tracks, plays = g.music_provider.get_user_data(get_user(), from_time=from_time)
+
+    data = []
+    for play in plays.values():
+        data.append({
+            #'id': play.id,
+            'listened_ms': play.listened_ms(from_time=from_time),
+            'play_time': timestamp_to_date(play.time_started).strftime('%Y-%m-%d %H:%M:%S'),
+        })
+
+    return jsonify(data)

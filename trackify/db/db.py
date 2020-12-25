@@ -476,3 +476,10 @@ WHERE p.user_id = %s AND ((p.time_started >= %s AND p.time_started <= %s) OR (p.
         LEFT JOIN resumes r ON r.play_id = p.id
         LEFT JOIN seeks s ON s.play_id = p.id
         ''', (from_time, to_time, from_time, to_time))
+
+    def get_user_track_plays(self, user_id, track_id, from_time, to_time):
+        return self.execute_fetchall('''
+        SELECT * FROM plays WHERE id = %s AND
+        ((time_started >= %s AND time_started <= %s) OR (time_ended >= %s AND time_ended <= %s)) AND
+        user_id = %s
+        ''', (track_id, from_time, to_time, from_time, to_time))
