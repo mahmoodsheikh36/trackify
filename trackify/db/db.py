@@ -481,5 +481,5 @@ WHERE p.user_id = %s AND ((p.time_started >= %s AND p.time_started <= %s) OR (p.
         return self.execute_fetchall('''
         SELECT * FROM plays WHERE id = %s AND
         ((time_started >= %s AND time_started <= %s) OR (time_ended >= %s AND time_ended <= %s)) AND
-        user_id = %s
+        user_id = %s ORDER BY time_added
         ''', (track_id, from_time, to_time, from_time, to_time))
