@@ -195,7 +195,6 @@ def top_users():
 
     users, artists, albums, tracks, plays =\
         g.music_provider.get_all_users_data(begin_time, current_time())
-    print(len(plays))
 
     users_to_sort = []
     for user in users.values():
