@@ -167,3 +167,4 @@ CREATE TABLE IF NOT EXISTS seeks (
 );
 
 CREATE INDEX time_started_index ON plays(time_started);
+CREATE INDEX time_ended_index ON plays(time_ended);
