@@ -165,3 +165,5 @@ CREATE TABLE IF NOT EXISTS seeks (
   play_id VARCHAR(36) NOT NULL,
   FOREIGN KEY (play_id) REFERENCES plays (id)
 );
+
+CREATE INDEX time_started_index ON plays(time_started);
