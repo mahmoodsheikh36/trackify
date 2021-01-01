@@ -220,10 +220,10 @@ def track_history():
 
     from_time = current_time() - hrs_limit * 3600 * 1000
 
-    artists, albums, tracks, plays = g.music_provider.get_user_data(get_user(), from_time=from_time)
+    plays = g.music_provider.get_user_track_plays(get_user(), from_time=from_time, track_id=track_id)
 
     data = []
-    for play in plays.values():
+    for play in plays:
         data.append({
             #'id': play.id,
             'listened_ms': play.listened_ms(from_time=from_time),

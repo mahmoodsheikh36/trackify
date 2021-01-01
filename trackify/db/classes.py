@@ -276,7 +276,6 @@ class MusicProvider:
         return artists, albums, tracks, plays
 
     def get_all_users_data(self, from_time=0, to_time=9999999999999):
-        begin = current_time()
         db_rows = self.db_provider.get_all_users_data(from_time, to_time)
 
         tracks = {}
@@ -458,13 +457,33 @@ class MusicProvider:
                 self.db_provider.add_user_setting(setting.id, user.id, value)
         self.commit()
 
-    def get_user_track_plays(self, user, track, from_time=0, to_time=9999999999999):
-        rows = self.db_provider.get_user_track_plays(user.id, track.id, from_time, to_time)
-        plays = []
+    def get_user_track_plays(self, user, track_id, from_time=0, to_time=9999999999999):
+        rows = self.db_provider.get_user_track_plays(user.id, track_id, from_time, to_time)
+
+        # gotta use list to keep order of plays and map for efficient access of a play using its id
+        plays = {}
+        resumes = {}
+        pauses = {}
+
         for row in rows:
-            plays.append(Play(row['id'], row['time_added'], row['time_ended'], None, None, None,
-                              user, None, None, row['volume_percent']))
-        return plays
+            if row['play_id'] not in plays:
+                play = Play(row['play_id'], row['play_time_started'], row['play_time_ended'], [], [], None,
+                            user, None, None, None)
+                plays[play.id] = play
+            else:
+                play = plays[row['play_id']]
+
+            if not row['resume_id'] in resumes and row['resume_id']:
+                resume = Resume(row['resume_id'], play, row['resume_time_added'])
+                play.resumes.append(resume)
+                resumes[resume.id] = resume
+
+            if not row['pause_id'] in pauses and row['pause_id']:
+                pause = Pause(row['pause_id'], play, row['pause_time_added'])
+                play.pauses.append(pause)
+                pauses[pause.id] = pause
+
+        return plays.values()
 
 class AuthCode:
     def __init__(self, code_id, code, user, time_added):
