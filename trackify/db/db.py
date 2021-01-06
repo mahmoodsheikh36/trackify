@@ -263,30 +263,30 @@ class DBProvider:
     def get_user_plays(self, user_id, from_time, to_time):
         c = self.cursor()
         c.execute('SELECT * FROM plays WHERE user_id = %s AND\
-                   ((time_started >= %s AND time_started <= %s) OR (time_ended >= %s AND time_ended <= %s))',
-                (user_id, from_time, to_time, from_time, to_time))
+                  ((time_started >= %s AND time_started <= %s) OR (time_ended >= %s AND time_ended <= %s))',
+                  (user_id, from_time, to_time, from_time, to_time))
         return c.fetchall()
 
     def get_user_devices(self, user_id):
         c = self.cursor()
         c.execute('SELECT * FROM devices WHERE id IN\
-                   (SELECT device_id FROM plays WHERE user_id = %s)', [user_id])
+                  (SELECT device_id FROM plays WHERE user_id = %s)', [user_id])
         return c.fetchall()
 
     def get_user_tracks(self, user_id, from_time, to_time):
         c = self.cursor()
         c.execute('SELECT * FROM tracks WHERE tracks.id IN\
-                   (SELECT track_id FROM plays WHERE user_id = %s AND\
-                   ((time_started >= %s AND time_started <= %s) OR (time_ended >= %s AND time_ended <= %s)))',
+                  (SELECT track_id FROM plays WHERE user_id = %s AND\
+                  ((time_started >= %s AND time_started <= %s) OR (time_ended >= %s AND time_ended <= %s)))',
                   (user_id, from_time, to_time, from_time, to_time))
         return c.fetchall()
 
     def get_user_albums(self, user_id, from_time, to_time):
         c = self.cursor()
         c.execute('SELECT * FROM albums WHERE albums.id IN\
-                   (SELECT album_id FROM tracks WHERE tracks.id IN\
-                   (SELECT track_id FROM plays WHERE user_id = %s AND\
-                   ((time_started >= %s AND time_started <= %s) OR (time_ended >= %s AND time_ended <= %s))))',
+                  (SELECT album_id FROM tracks WHERE tracks.id IN\
+                  (SELECT track_id FROM plays WHERE user_id = %s AND\
+                  ((time_started >= %s AND time_started <= %s) OR (time_ended >= %s AND time_ended <= %s))))',
                   (user_id, from_time, to_time, from_time, to_time))
         return c.fetchall()
 
@@ -306,28 +306,28 @@ WHERE p.user_id = %s AND ((p.time_started >= %s AND p.time_started <= %s) OR (p.
     def get_user_album_images(self, user_id, from_time, to_time):
         c = self.cursor()
         c.execute('SELECT * FROM album_images WHERE album_id IN\
-                   (SELECT id FROM albums WHERE album_id IN\
-                   (SELECT album_id FROM tracks WHERE tracks.id IN\
-                   (SELECT track_id FROM plays WHERE user_id = %s AND\
-                   ((time_started >= %s AND time_started <= %s) OR (time_ended >= %s AND time_ended <= %s)))))',
+                  (SELECT id FROM albums WHERE album_id IN\
+                  (SELECT album_id FROM tracks WHERE tracks.id IN\
+                  (SELECT track_id FROM plays WHERE user_id = %s AND\
+                  ((time_started >= %s AND time_started <= %s) OR (time_ended >= %s AND time_ended <= %s)))))',
                   (user_id, from_time, to_time, from_time, to_time))
         return c.fetchall()
 
     def get_user_album_artists(self, user_id, from_time, to_time):
         c = self.cursor()
         c.execute('SELECT * FROM album_artists WHERE album_id IN\
-                   (SELECT id FROM albums WHERE album_id IN\
-                   (SELECT album_id FROM tracks WHERE tracks.id IN\
-                   (SELECT track_id FROM plays WHERE user_id = %s AND\
-                   ((time_started >= %s AND time_started <= %s) OR (time_ended >= %s AND time_ended <= %s)))))',
+                  (SELECT id FROM albums WHERE album_id IN\
+                  (SELECT album_id FROM tracks WHERE tracks.id IN\
+                  (SELECT track_id FROM plays WHERE user_id = %s AND\
+                  ((time_started >= %s AND time_started <= %s) OR (time_ended >= %s AND time_ended <= %s)))))',
                   (user_id, from_time, to_time, from_time, to_time))
         return c.fetchall()
 
     def get_user_track_artists(self, user_id, from_time, to_time):
         c = self.cursor()
         c.execute('SELECT * FROM track_artists WHERE track_id IN\
-                   (SELECT track_id FROM plays WHERE user_id = %s AND\
-                   ((time_started >= %s AND time_started <= %s) OR (time_ended >= %s AND time_ended <= %s)))',
+                  (SELECT track_id FROM plays WHERE user_id = %s AND\
+                  ((time_started >= %s AND time_started <= %s) OR (time_ended >= %s AND time_ended <= %s)))',
                   (user_id, from_time, to_time, from_time, to_time))
         return c.fetchall()
 

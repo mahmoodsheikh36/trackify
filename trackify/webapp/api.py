@@ -231,3 +231,56 @@ def track_history():
         })
 
     return jsonify(data)
+
+@bp.route('/data', methods=('GET',))
+@jwt_required
+def data():
+    from_time = request.args.get('from_time', default=0, type=int)
+    to_time = request.args.get('to_time', default=9999999999999, type=int)
+    if from_time < 0:
+        return jsonify({"msg": "from_time should be a positive integer"}), 401
+    if to_time < 0:
+        return jsonify({"msg": "to_time should be a positive integer"}), 401
+
+    artists, albums, tracks, plays = g.music_provider.get_user_data(get_user(),
+                                                                    from_time=from_time,
+                                                                    to_time=to_time)
+
+    data = []
+    for play in plays.values():
+        data.append({
+            'id': play.id,
+            'time_started': play.time_started,
+            'time_ended': play.time_ended,
+            'track': {
+                'id': play.track.id,
+                'name': play.track.name,
+                'artists': [{
+                    'id': artist.id,
+                    'name': artist.name,
+                } for artist in play.track.artists],
+                'album': {
+                    'id': play.track.album.id,
+                    'name': play.track.album.name,
+                    'covers': [{
+                        'url': cover.url,
+                        'width': cover.width,
+                        'height': cover.height
+                    } for cover in play.track.album.images],
+                    'artists': [{
+                        'id': artist.id,
+                        'name': artist.name
+                    } for artist in play.track.album.artists]
+                }
+            },
+            'pauses': [{
+                'id': pause.id,
+                'time_added': pause.time_added,
+            } for pause in play.pauses],
+            'resumes': [{
+                'id': resume.id,
+                'time_added': resume.time_added,
+            } for resume in play.resumes]
+        })
+
+    return jsonify(data)
