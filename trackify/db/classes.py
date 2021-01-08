@@ -1,7 +1,7 @@
 import json
 
 from trackify.db.db import DBProvider
-from trackify.utils import current_time, generate_id, str_to_bool
+from trackify.utils import current_time, generate_id, str_to_bool, get_largest_elements
 
 class Request:
     def __init__(self, flask_request, user):
@@ -484,6 +484,44 @@ class MusicProvider:
                 pauses[pause.id] = pause
 
         return plays.values()
+
+    def get_top_users(self, from_time=0, to_time=9999999999999, limit=10):
+        users, artists, albums, tracks, plays =\
+            self.get_all_users_data(from_time, to_time)
+
+        users_to_sort = []
+        for user in users.values():
+            if user.settings.get_by_name('show_on_top_users').value:
+                if user.plays:
+                    users_to_sort.append(user)
+
+        for user in users_to_sort:
+            for play in user.plays:
+                listened_ms = play.listened_ms(from_time=from_time, to_time=to_time)
+                if hasattr(play.track, 'listened_ms'):
+                    if user.id in play.track.listened_ms:
+                        play.track.listened_ms[user.id] += listened_ms
+                    else:
+                        play.track.listened_ms[user.id] = listened_ms
+                else:
+                    play.track.listened_ms = {user.id: listened_ms}
+                if not hasattr(user, 'top_track') or\
+                play.track.listened_ms[user.id] > user.top_track.listened_ms[user.id]:
+                    user.top_track = play.track
+                if not hasattr(user, 'listened_ms'):
+                    user.listened_ms = listened_ms
+                else:
+                    user.listened_ms += listened_ms
+
+        def compare(user1, user2):
+            if not hasattr(user1, 'listened_ms'):
+                return False
+            if not hasattr(user2, 'listened_ms'):
+                return True
+            return user1.listened_ms > user2.listened_ms
+        top_users = get_largest_elements(users_to_sort, limit, compare)
+
+        return top_users
 
 class AuthCode:
     def __init__(self, code_id, code, user, time_added):

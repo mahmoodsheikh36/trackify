@@ -154,61 +154,19 @@ def top_track():
 @bp.route('/top_users', methods=('GET',))
 @jwt_required
 def top_users():
-    hrs_limit = request.args.get('hrs_limit', 24 * 7)
-    try:
-        hrs_limit = int(hrs_limit)
-    except:
-        return jsonify({"msg": "hrs_limit should be a positive integer"}), 401
+    from_time = request.args.get('from_time', default=0, type=int)
+    to_time = request.args.get('to_time', default=9999999999999, type=int)
+    if from_time < 0:
+        return jsonify({"msg": "from_time should be a positive integer"}), 401
+    if to_time < 0:
+        return jsonify({"msg": "to_time should be a positive integer"}), 401
 
-    if hrs_limit == 0:
-        begin_time = None
-    else:
-        begin_time = current_time() - hrs_limit * 3600 * 1000
+    top_users = g.music_provider.get_top_users(from_time, to_time, 10)
 
-    if begin_time and begin_time < 0:
-        begin_time = 0
-
-    users = g.music_provider.get_users()
-    LIMIT = 10
-
-    users_to_sort = []
-    for idx, user in enumerate(users):
-        user_settings = g.music_provider.get_user_settings(user)
-        artists, albums, tracks, plays = g.music_provider.get_user_data(user)
-        if not plays:
-            continue
-        for play in plays.values():
-            listened_ms = play.listened_ms(begin_time)
-            if hasattr(play.track, 'listened_ms'):
-                play.track.listened_ms += listened_ms
-            else:
-                play.track.listened_ms = listened_ms
-            if not hasattr(user, 'top_track') or\
-                play.track.listened_ms > user.top_track.listened_ms:
-                user.top_track = play.track
-            if not hasattr(user, 'listened_ms'):
-                user.listened_ms = listened_ms
-            else:
-                user.listened_ms += listened_ms
-        if user.listened_ms:
-            users_to_sort.append(user)
-
-    def compare(user1, user2):
-        if not hasattr(user1, 'listened_ms'):
-            return False
-        if not hasattr(user2, 'listened_ms'):
-            return True
-        return user1.listened_ms > user2.listened_ms
-    top_users = get_largest_elements(users_to_sort, LIMIT, compare)
-
-    users_to_return = []
-    for user in top_users:
-        users_to_return.append({
-            'username': user.username,
-            'listened_ms': user.listened_ms,
-        })
-
-    return jsonify(users_to_return)
+    return jsonify([{
+        'username': user.username,
+        'listened_ms': user.listened_ms
+    } for user in top_users])
 
 @bp.route('/track_history', methods=('GET',))
 @jwt_required
