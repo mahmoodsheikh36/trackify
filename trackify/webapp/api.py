@@ -188,7 +188,6 @@ def top_users():
             else:
                 user.listened_ms += listened_ms
             if hasattr(user, 'top_tracks'):
-                print('{} == {} : {}'.format(play.track.name, [track.name for track in user.top_tracks], play.track in user.top_tracks))
                 if not play.track in user.top_tracks:
                     added = False
                     for idx, track in enumerate(user.top_tracks):
