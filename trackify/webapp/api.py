@@ -161,11 +161,88 @@ def top_users():
     if to_time < 0:
         return jsonify({"msg": "to_time should be a positive integer"}), 401
 
-    top_users = g.music_provider.get_top_users(from_time, to_time, 10)
+    limit = 10
+    top_tracks_limit = 3
+
+    users, artists, albums, tracks, plays =\
+        g.music_provider.get_all_users_data(from_time, to_time)
+
+    users_to_sort = []
+    for user in users.values():
+        if user.settings.get_by_name('show_on_top_users').value:
+            if user.plays:
+                users_to_sort.append(user)
+
+    for user in users_to_sort:
+        for play in user.plays:
+            listened_ms = play.listened_ms(from_time, to_time)
+            if hasattr(play.track, 'listened_ms'):
+                if user.id in play.track.listened_ms:
+                    play.track.listened_ms[user.id] += listened_ms
+                else:
+                    play.track.listened_ms[user.id] = listened_ms
+            else:
+                play.track.listened_ms = {user.id: listened_ms}
+            if not hasattr(user, 'listened_ms'):
+                user.listened_ms = listened_ms
+            else:
+                user.listened_ms += listened_ms
+            if hasattr(user, 'top_tracks'):
+                print('{} == {} : {}'.format(play.track.name, [track.name for track in user.top_tracks], play.track in user.top_tracks))
+                if not play.track in user.top_tracks:
+                    added = False
+                    for idx, track in enumerate(user.top_tracks):
+                        if track.listened_ms[user.id] < play.track.listened_ms[user.id]:
+                            user.top_tracks.insert(idx, play.track)
+                            added = True
+                            if len(user.top_tracks) > top_tracks_limit:
+                                del user.top_tracks[-1]
+                            break
+                    if not added:
+                        if len(user.top_tracks) < top_tracks_limit:
+                            user.top_tracks.append(play.track)
+                else:
+                    idx = user.top_tracks.index(play.track)
+                    for i in range(idx):
+                        if play.track.listened_ms[user.id] > user.top_tracks[i].listened_ms[user.id]:
+                            user.top_tracks[idx], user.top_tracks[i] = user.top_tracks[i], user.top_tracks[idx]
+                            break
+            else:
+                user.top_tracks = [play.track]
+
+    def compare(user1, user2):
+        if not hasattr(user1, 'listened_ms'):
+            return False
+        if not hasattr(user2, 'listened_ms'):
+            return True
+        return user1.listened_ms > user2.listened_ms
+    top_users = get_largest_elements(users_to_sort, limit, compare)
 
     return jsonify([{
         'username': user.username,
-        'listened_ms': user.listened_ms
+        'listened_ms': user.listened_ms,
+        'top_tracks': [{
+            'listened_ms': track.listened_ms[user.id],
+            'id': track.id,
+            'name': track.name,
+            'artists': [{
+                'id': artist.id,
+                'name': artist.name,
+            } for artist in track.artists],
+            'album': {
+                'id': track.album.id,
+                'name': track.album.name,
+                'covers': [{
+                    'url': cover.url,
+                    'width': cover.width,
+                    'height': cover.height
+                } for cover in track.album.images],
+                'artists': [{
+                    'id': artist.id,
+                    'name': artist.name
+                } for artist in track.album.artists]
+            }
+        } for track in user.top_tracks]
     } for user in top_users])
 
 @bp.route('/track_history', methods=('GET',))
