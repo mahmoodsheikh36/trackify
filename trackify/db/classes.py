@@ -485,6 +485,11 @@ class MusicProvider:
 
         return plays.values()
 
+    def get_user_first_play(self, user):
+        row = self.db_provider.get_user_first_play(user.id)
+        return Play(row['id'], row['time_started'], row['time_ended'], [], [], None,
+                    user, None, None, None)
+
 class AuthCode:
     def __init__(self, code_id, code, user, time_added):
         self.id = code_id

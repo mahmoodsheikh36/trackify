@@ -494,3 +494,8 @@ WHERE p.user_id = %s AND ((p.time_started >= %s AND p.time_started <= %s) OR (p.
         WHERE ((p.time_started >= %s AND p.time_started <= %s) OR (p.time_ended >= %s AND p.time_ended <= %s)) AND p.track_id = %s
         ORDER BY p.time_started DESC
         ''', (from_time, to_time, from_time, to_time, track_id))
+
+    def get_user_first_play(self, user_id):
+        return self.execute_fetchone('''
+        SELECT * FROM plays ORDER BY time_started LIMIT 1
+        ''')
