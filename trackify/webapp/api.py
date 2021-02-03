@@ -280,16 +280,9 @@ def data():
     artists, albums, tracks, plays = g.music_provider.get_user_data(user,
                                                                     from_time=from_time,
                                                                     to_time=to_time)
-    first_play = g.music_provider.get_user_first_play(user)
-
     data = {
         'plays': [
         ],
-        'first_play': {
-            'time_started': first_play.time_started,
-            'time_ended': first_play.time_ended,
-            'id': first_play.id
-        }
     }
     for play in plays.values():
         data['plays'].append({
