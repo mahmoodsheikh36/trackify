@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS requests (
   FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
-CREATE TABLE IF NOT EXISTS auth_codes (
+CREATE TABLE IF NOT EXISTS spotify_auth_codes (
   id VARCHAR(36) PRIMARY KEY,
   time_added BIGINT NOT NULL,
   code TEXT NOT NULL,
@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS auth_codes (
   FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
-CREATE TABLE IF NOT EXISTS access_tokens (
+CREATE TABLE IF NOT EXISTS spotify_access_tokens (
   id VARCHAR(36) PRIMARY KEY,
   time_added BIGINT NOT NULL,
   token VARCHAR(310) NOT NULL, -- access token length is 303, gotta be safe
@@ -60,7 +60,7 @@ CREATE TABLE IF NOT EXISTS access_tokens (
   FOREIGN KEY (user_id) REFERENCES users (id)
 );
 
-CREATE TABLE IF NOT EXISTS refresh_tokens (
+CREATE TABLE IF NOT EXISTS spotify_refresh_tokens (
   id VARCHAR(36) PRIMARY KEY,
   time_added BIGINT NOT NULL,
   token VARCHAR(140) NOT NULL, -- refresh token length is 131 chars but gotta be safe
@@ -164,6 +164,20 @@ CREATE TABLE IF NOT EXISTS seeks (
   position INT NOT NULL,
   play_id VARCHAR(36) NOT NULL,
   FOREIGN KEY (play_id) REFERENCES plays (id)
+);
+
+CREATE TABLE IF NOT EXISTS api_refresh_tokens (
+  id VARCHAR(36) PRIMARY KEY,
+  time_added BIGINT NOT NULL,
+  user_id VARCHAR(36) NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users (id)
+);
+
+CREATE TABLE IF NOT EXISTS api_access_tokens (
+  id VARCHAR(36) PRIMARY KEY,
+  time_added BIGINT NOT NULL,
+  refresh_token_id VARCHAR(36) NOT NULL,
+  FOREIGN KEY (refresh_token_id) REFERENCES api_refresh_tokens (id)
 );
 
 CREATE INDEX time_started_index ON plays(time_started);

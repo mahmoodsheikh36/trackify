@@ -3,7 +3,8 @@ import requests.exceptions
 import json
 
 from trackify.db.classes import (
-    RefreshToken, AccessToken, Device, Artist, Play, Image, Context, Album, Track
+    SpotifyRefreshToken, SpotifyAccessToken, Device, Artist, Play,
+    Image, Context, Album, Track
 )
 from trackify.utils import generate_id, current_time
 
@@ -26,8 +27,8 @@ class SpotifyClient:
         if r.status_code != 200:
             return None, None
         r_json = json.loads(r.text)
-        access_token = AccessToken(generate_id(), r_json['access_token'], auth_code.user,
-                                   current_time())
+        access_token = SpotifyAccessToken(generate_id(), r_json['access_token'],
+                                          auth_code.user, current_time())
         refresh_token = RefreshToken(generate_id(), r_json['refresh_token'],
                                      auth_code.user, current_time())
         return refresh_token, access_token
@@ -43,8 +44,8 @@ class SpotifyClient:
         if r.status_code != 200:
             return None
         r_json = json.loads(r.text)
-        access_token = AccessToken(generate_id(), r_json['access_token'],
-                                   refresh_token.user, current_time())
+        access_token = SpotifyAccessToken(generate_id(), r_json['access_token'],
+                                          refresh_token.user, current_time())
         return access_token
 
     def get_current_play(self, access_token):

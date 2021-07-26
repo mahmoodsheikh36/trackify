@@ -1,17 +1,9 @@
 from flask import Flask, jsonify, request, Blueprint, current_app, g
-from flask_jwt_extended import (
-    JWTManager, jwt_required, create_access_token, create_refresh_token,
-    get_jwt_identity, jwt_refresh_token_required
-)
 
-from trackify.webapp.auth import try_credentials
 from trackify.utils import get_largest_elements, timestamp_to_date, current_time
+from trackify.webapp.jwt import access_token_required, refresh_token_required, get_user, get_refresh_token
 
 bp = Blueprint('api', __name__, url_prefix='/api')
-
-def get_user():
-    username = get_jwt_identity()
-    return g.music_provider.get_user_by_username(username)
 
 @bp.route('/login', methods=('POST',))
 def login():
@@ -23,30 +15,41 @@ def login():
     username = request.form['username']
     password = request.form['password']
 
-    if not try_credentials(username, password):
+    user = g.music_provider.get_user_by_credentials(username, password)
+    if not user:
         return jsonify({"msg": "Bad username or password"}), 401
 
+    refresh_token = g.music_provider.create_api_refresh_token(user)
+    access_token = g.music_provider.create_api_access_token(refresh_token)
     return jsonify({
-        'access_token': create_access_token(identity=username),
-        'refresh_token': create_refresh_token(identity=username)
+        'access_token': {
+            'id': access_token.id,
+            'expiry_time': access_token.expiry_time()
+        },
+        'refresh_token': {
+            'id': refresh_token.id,
+        }
     })
 
 @bp.route('/refresh', methods=('POST',))
-@jwt_refresh_token_required
+@refresh_token_required
 def refresh():
-    current_user = get_jwt_identity()
+    refresh_token = get_refresh_token()
+    new_access_token = g.music_provider.create_api_access_token(refresh_token)
     return jsonify({
-        'access_token': create_access_token(identity=current_user)
+        'access_token': {
+            'id': new_access_token.id,
+            'expiry_time': new_access_token.expiry_time()
+        }
     })
 
 @bp.route('/protected', methods=('GET',))
-@jwt_required
+@access_token_required
 def protected():
-    current_user = get_jwt_identity()
-    return jsonify(logged_in_as=current_user), 200
+    return jsonify(logged_in_as=get_user().username), 200
 
 @bp.route('/history', methods=('GET',))
-@jwt_required
+@access_token_required
 def history():
     hrs_limit = request.args.get('hrs_limit', 24*7)
     try:
@@ -92,7 +95,7 @@ def history():
     return jsonify(data)
 
 @bp.route('/top_tracks', methods=('GET',))
-@jwt_required
+@access_token_required
 def top_track():
     hrs_str = request.args.get('hrs', default='24,{},{}'.format(24*7, 24*30), type=str)
     hrs = []
@@ -152,9 +155,10 @@ def top_track():
     return jsonify(data)
 
 @bp.route('/top_users', methods=('GET',))
-@jwt_required
+@access_token_required
 def top_users():
-    from_time = request.args.get('from_time', default=0, type=int)
+    from_time = request.args.get('from_time', default=current_time() - 1000 * 60 * 60 * 24,
+                                 type=int)
     to_time = request.args.get('to_time', default=9999999999999, type=int)
     if from_time < 0:
         return jsonify({"msg": "from_time should be a positive integer"}), 401
@@ -245,7 +249,7 @@ def top_users():
     } for user in top_users])
 
 @bp.route('/track_history', methods=('GET',))
-@jwt_required
+@access_token_required
 def track_history():
     hrs_limit = request.args.get('hrs_limit', default=24*7, type=int)
     if hrs_limit < 1:
@@ -267,7 +271,7 @@ def track_history():
     return jsonify(data)
 
 @bp.route('/data', methods=('GET',))
-@jwt_required
+@access_token_required
 def data():
     from_time = request.args.get('from_time', default=0, type=int)
     to_time = request.args.get('to_time', default=9999999999999, type=int)

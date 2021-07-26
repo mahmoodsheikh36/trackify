@@ -24,15 +24,15 @@ class SpotifyTracker:
                 users = self.music_provider.get_users()
                 try:
                     for user in users:
-                        user.access_token = self.music_provider.get_user_access_token(user)
+                        user.access_token = self.music_provider.get_user_spotify_access_token(user)
                         if not user.access_token:
                             continue
                         if user.access_token.expired():
                             user.refresh_token =\
-                                self.music_provider.get_user_refresh_token(user)
+                                self.music_provider.get_user_spotify_refresh_token(user)
                             user.access_token = self.spotify_client.fetch_access_token(
                                 user.refresh_token)
-                            self.music_provider.add_access_token(user.access_token)
+                            self.music_provider.add_spotify_access_token(user.access_token)
 
                         play, retry_after = self.spotify_client.get_current_play(
                             user.access_token)

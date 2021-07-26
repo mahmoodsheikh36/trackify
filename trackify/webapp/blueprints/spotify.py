@@ -4,8 +4,8 @@ from trackify.utils import (
     uri_encode, generate_id, current_time, get_largest_elements, mins_from_ms,
     hrs_from_ms, secs_from_ms
 )
-from trackify.webapp.auth import login_required
-from trackify.db.classes import AuthCode
+from trackify.webapp.blueprints.auth import login_required
+from trackify.db.classes import SpotifyAuthCode
 from trackify.utils import timestamp_to_date
 
 bp = Blueprint('spotify', __name__, url_prefix='/spotify')
@@ -24,7 +24,7 @@ def auth():
 @login_required
 def callback():
     try:
-        auth_code = AuthCode(generate_id(), request.args['code'],
+        auth_code = SpotifyAuthCode(generate_id(), request.args['code'],
                              g.user, current_time())
         g.music_provider.add_auth_code(auth_code)
         refresh_token, access_token = g.spotify_client.fetch_refresh_token(auth_code)

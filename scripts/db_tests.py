@@ -13,23 +13,9 @@ from trackify.utils import current_time
 
 user_id = 'af38a714-bcba-419e-804c-96d910d0e975'
 
-def speed_test():
-    user = User(user_id, None, None, None, None)
-    provider = MusicProvider()
-    begin = current_time()
-    data = provider.get_user_data(user)
-    old = current_time() - begin
-    print('with old method it took {} milliseconds'.format(old))
-    begin = current_time()
-    data = provider.get_user_data_new(user)
-    new = current_time() - begin
-    print('with new method it took {} milliseconds'.format(new))
-
-def speed_test2():
+def test3():
     provider = DBProvider()
-    begin = current_time()
-    data = provider.get_user_data(user_id)
-    time = current_time() - begin
-    print(time)
+    row = provider.get_api_access_token('a4a3873b-6721-493a-8aaa-ab7fdbe02691')
+    print(row)
 
-speed_test2()
+test3()

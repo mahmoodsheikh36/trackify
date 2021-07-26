@@ -1,7 +1,7 @@
 from flask import (
     Blueprint, render_template, g, request
 )
-from trackify.webapp.auth import login_required
+from trackify.webapp.blueprints.auth import login_required
 from trackify.utils import str_to_bool
 
 bp = Blueprint('settings', __name__, url_prefix='/settings/')

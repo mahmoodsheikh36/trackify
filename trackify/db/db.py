@@ -36,7 +36,7 @@ class DBProvider:
     def commit(self):
         self.conn.commit()
 
-    def execute(self, sql, values):
+    def execute(self, sql, values=[]):
         self.cursor().execute(sql, values)
 
     def add_request(self, request_id, time_added, ip, url, headers, data, form, referrer,
@@ -52,17 +52,17 @@ class DBProvider:
                       VALUES (%s, %s, %s, %s, %s)', (user_id, username, password, email,
                                                      time_added))
 
-    def add_auth_code(self, auth_code_id, time_added, code, user_id):
-        self.execute('INSERT INTO auth_codes (id, time_added, code, user_id)\
+    def add_spotify_auth_code(self, auth_code_id, time_added, code, user_id):
+        self.execute('INSERT INTO spotify_auth_codes (id, time_added, code, user_id)\
                       VALUES (%s, %s, %s, %s)', (auth_code_id, time_added, code, user_id))
 
-    def add_access_token(self, access_token_id, token, user_id, time_added):
-        self.execute('INSERT INTO access_tokens (id, time_added, user_id, token)\
+    def add_spotify_access_token(self, access_token_id, token, user_id, time_added):
+        self.execute('INSERT INTO spotify_access_tokens (id, time_added, user_id, token)\
                       VALUES (%s, %s, %s, %s)', (access_token_id, time_added, user_id,
                                                  token))
 
-    def add_refresh_token(self, refresh_token_id, token, user_id, time_added):
-        self.execute('INSERT INTO refresh_tokens (id, time_added, user_id, token)\
+    def add_spotify_refresh_token(self, refresh_token_id, token, user_id, time_added):
+        self.execute('INSERT INTO spotify_refresh_tokens (id, time_added, user_id, token)\
                       VALUES (%s, %s, %s, %s)', (refresh_token_id, time_added, user_id,
                                                  token))
 
@@ -136,23 +136,23 @@ class DBProvider:
         c.execute('SELECT * FROM users WHERE id = %s', (user_id,))
         return c.fetchone()
 
-    def get_user_auth_code(self, user_id):
+    def get_user_spotify_auth_code(self, user_id):
         c = self.cursor()
-        c.execute('SELECT * FROM auth_codes WHERE user_id = %s ORDER BY time_added DESC\
+        c.execute('SELECT * FROM spotify_auth_codes WHERE user_id = %s ORDER BY time_added DESC\
                    LIMIT 1',
                   (user_id,))
         return c.fetchone()
 
-    def get_user_access_token(self, user_id):
+    def get_user_spotify_access_token(self, user_id):
         c = self.cursor()
-        c.execute('SELECT * FROM access_tokens WHERE user_id = %s\
+        c.execute('SELECT * FROM spotify_access_tokens WHERE user_id = %s\
                    ORDER BY time_added DESC LIMIT 1',
                   (user_id,))
         return c.fetchone()
 
-    def get_user_refresh_token(self, user_id):
+    def get_user_spotify_refresh_token(self, user_id):
         c = self.cursor()
-        c.execute('SELECT * FROM refresh_tokens WHERE user_id = %s\
+        c.execute('SELECT * FROM spotify_refresh_tokens WHERE user_id = %s\
                    ORDER BY time_added DESC LIMIT 1',
                   (user_id,))
         return c.fetchone()
@@ -162,14 +162,14 @@ class DBProvider:
         c.execute('SELECT * FROM users')
         return c.fetchall()
 
-    def get_users_with_tokens(self):
+    def get_users_with_spotify_tokens(self):
         c = self.cursor()
         c.execute('\
-        SELECT * FROM users, access_tokens, refresh_tokens\
-        WHERE users.id = refresh_tokens.user_id AND refresh_tokens.id =\
-        (SELECT id FROM refresh_tokens ORDER BY time_added DESC LIMIT 1) AND\
-        users.id = access_tokens.user_id AND access_tokens.id =\
-        (SELECT id from access_tokens ORDER BY time_added DESC LIMIT 1)\
+        SELECT * FROM users, spotify_access_tokens, spotify_refresh_tokens\
+        WHERE users.id = spotify_refresh_tokens.user_id AND spotify_refresh_tokens.id =\
+        (SELECT id FROM spotify_refresh_tokens ORDER BY time_added DESC LIMIT 1) AND\
+        users.id = spotify_access_tokens.user_id AND spotify_access_tokens.id =\
+        (SELECT id from spotify_access_tokens ORDER BY time_added DESC LIMIT 1)\
         ')
         return c.fetchall()
 
@@ -367,8 +367,8 @@ WHERE p.user_id = %s AND ((p.time_started >= %s AND p.time_started <= %s) OR (p.
     def execute_fetchall(self, sql, values=[]):
         c = self.cursor()
         c.execute(sql, values)
-        #with open('query.txt', 'w+') AS query_file:
-            #query_file.write(c._executed.decode('utf-8'))
+        with open('query.txt', 'w+') as query_file:
+            query_file.write(c._executed.decode('utf-8'))
         return c.fetchall()
 
     def execute_fetchone(self, sql, values=[]):
@@ -437,35 +437,21 @@ WHERE p.user_id = %s AND ((p.time_started >= %s AND p.time_started <= %s) OR (p.
         p.time_ended AS play_time_ended,
         p.user_id AS play_user_id,
         p.track_id AS play_track_id,
-        p.device_id AS play_device_id,
-        p.context_uri AS play_context_uri,
-        p.volume_percent AS play_volume_percent,
         a.id AS artist_id,
         a.artist_name AS artist_name,
         t.id AS track_id,
-        t.duration_ms AS track_duration_ms,
-        t.popularity AS track_popularity,
-        t.preview_url AS track_preview_url,
-        t.explicit AS track_explicit,
         t.album_id AS track_album_id,
         t.track_name AS track_name,
-        t.track_number AS track_number,
         al.id AS album_id,
-        al.release_date AS album_release_date,
-        al.release_date_precision AS album_release_date_precision,
         al.album_name AS album_name,
-        al.album_type AS album_type,
         pa.id AS pause_id,
         pa.time_added AS pause_time_added,
         r.id AS resume_id,
         r.time_added AS resume_time_added,
-        s.id AS seek_id,
-        s.time_added AS seek_time_added,
-        s.position AS seek_position,
-        ali.id AS album_image_id,
-        ali.width AS album_image_width,
-        ali.height AS album_image_height,
-        ali.url AS album_image_url
+        ali.id as album_image_id,
+        ali.width as album_image_width,
+        ali.height as album_image_height,
+        ali.url as album_image_url
         FROM users u
         JOIN plays p ON p.user_id = u.id AND ((p.time_started >= %s AND p.time_started <= %s) OR (p.time_ended >= %s AND p.time_ended <= %s))
         JOIN tracks t ON t.id = p.track_id
@@ -473,10 +459,9 @@ WHERE p.user_id = %s AND ((p.time_started >= %s AND p.time_started <= %s) OR (p.
         JOIN artists a ON a.id = ta.artist_id
         JOIN albums al ON al.id = t.album_id
         JOIN album_artists aa ON al.id = aa.album_id
-        JOIN album_images ali on ali.album_id = t.album_id
+        JOIN album_images ali ON ali.album_id = al.id
         LEFT JOIN pauses pa ON pa.play_id = p.id
         LEFT JOIN resumes r ON r.play_id = p.id
-        LEFT JOIN seeks s ON s.play_id = p.id
         ''', (from_time, to_time, from_time, to_time))
 
     def get_user_track_plays(self, user_id, track_id, from_time, to_time):
@@ -499,3 +484,40 @@ WHERE p.user_id = %s AND ((p.time_started >= %s AND p.time_started <= %s) OR (p.
         return self.execute_fetchone('''
         SELECT * FROM plays ORDER BY time_started LIMIT 1
         ''')
+
+    def add_api_access_token(self, token_id, refresh_token_id, time_added):
+        self.execute('INSERT INTO api_access_tokens (id, refresh_token_id, time_added)\
+                      VALUES (%s, %s, %s)',
+                     (token_id, refresh_token_id, time_added))
+        self.commit()
+
+    def add_api_refresh_token(self, token_id, user_id, time_added):
+        self.execute('INSERT INTO api_refresh_tokens (id, user_id, time_added)\
+                      VALUES (%s, %s, %s)',
+                     (token_id, user_id, time_added))
+        self.commit()
+
+    def get_api_refresh_token(self, token_id):
+        return self.execute_fetchone('''
+        SELECT
+        art.id as id,
+        art.time_added as time_added,
+        u.id as user_id
+        FROM api_refresh_tokens art
+        JOIN users u ON u.id = art.user_id
+        WHERE art.id = %s
+        ''', [token_id])
+
+    def get_api_access_token(self, token_id):
+        return self.execute_fetchone('''
+        SELECT
+        act.id as access_token_id,
+        act.time_added as access_token_time_added,
+        art.id as refresh_token_id,
+        art.time_added as refresh_token_time_added,
+        art.user_id as user_id
+        FROM api_access_tokens act
+        JOIN api_refresh_tokens art ON act.refresh_token_id = art.id
+        JOIN users u ON art.user_id = u.id
+        WHERE act.id = %s
+        ''', [token_id])

@@ -2,6 +2,7 @@ import json
 
 from trackify.db.db import DBProvider
 from trackify.utils import current_time, generate_id, str_to_bool, get_largest_elements
+from werkzeug.security import check_password_hash
 
 class Request:
     def __init__(self, flask_request, user):
@@ -153,24 +154,24 @@ class MusicProvider:
                         user_row['email'], user_row['time_added'])
         return None
 
-    def get_user_auth_code(self, user):
-        code_row = self.db_provider.get_user_auth_code(user.id)
+    def get_user_spotify_auth_code(self, user):
+        code_row = self.db_provider.get_user_spotify_auth_code(user.id)
         if code_row:
-            return AuthCode(code_row['id'], code_row['code'], user,
+            return SpotifyAuthCode(code_row['id'], code_row['code'], user,
                             code_row['time_added'])
         return None
 
-    def get_user_access_token(self, user):
-        token_row = self.db_provider.get_user_access_token(user.id)
+    def get_user_spotify_access_token(self, user):
+        token_row = self.db_provider.get_user_spotify_access_token(user.id)
         if token_row:
-            return AccessToken(token_row['id'], token_row['token'], user,
+            return SpotifyAccessToken(token_row['id'], token_row['token'], user,
                                token_row['time_added'])
         return None
 
-    def get_user_refresh_token(self, user):
-        token_row = self.db_provider.get_user_refresh_token(user.id)
+    def get_user_spotify_refresh_token(self, user):
+        token_row = self.db_provider.get_user_spotify_refresh_token(user.id)
         if token_row:
-            return RefreshToken(token_row['id'], token_row['token'], user,
+            return SpotifyRefreshToken(token_row['id'], token_row['token'], user,
                                 token_row['time_added'])
         return None
 
@@ -183,25 +184,25 @@ class MusicProvider:
             users.append(user)
         return users
 
-    def get_user_access_token(self, user):
-        row = self.db_provider.get_user_access_token(user.id)
+    def get_user_spotify_access_token(self, user):
+        row = self.db_provider.get_user_spotify_access_token(user.id)
         if row:
-            return AccessToken(row['id'], row['token'], user, row['time_added'])
+            return SpotifyAccessToken(row['id'], row['token'], user, row['time_added'])
         return None
 
-    def get_user_refresh_token(self, user):
-        row = self.db_provider.get_user_refresh_token(user.id)
-        return RefreshToken(row['id'], row['token'], user, row['time_added'])
+    def get_user_spotify_refresh_token(self, user):
+        row = self.db_provider.get_user_spotify_refresh_token(user.id)
+        return SpotifyRefreshToken(row['id'], row['token'], user, row['time_added'])
 
-    def get_users_with_tokens(self):
-        rows = self.db_provider.get_users_with_tokens()
+    def get_users_with_spotify_tokens(self):
+        rows = self.db_provider.get_users_with_spotify_tokens()
         users = []
         for row in rows:
             user = User(row['id'], row['username'], row['password'], row['email'],
                         row['time_added'])
-            user.access_token = AccessToken(row['id'], row['token'], user,
+            user.spotify_access_token = SpotifyAccessToken(row['id'], row['token'], user,
                                             row['time_added'])
-            user.refresh_token = RefreshToken(row['id'], row['token'], user,
+            user.spotify_refresh_token = SpotifyRefreshToken(row['id'], row['token'], user,
                                               row['time_added'])
             users.append(user)
         return users
@@ -310,8 +311,7 @@ class MusicProvider:
                 image = Image(row['album_image_id'], row['album_image_url'],
                               row['album_image_width'], row['album_image_height'])
                 album = Album(row['album_id'], row['album_name'], [], [artist], [image],
-                              row['album_type'], row['album_release_date'],
-                              row['album_release_date_precision'])
+                              None, None, None)
                 albums[album.id] = album
                 artist.albums.append(album)
 
@@ -319,26 +319,24 @@ class MusicProvider:
                 track = tracks[row['track_id']]
             else:
                 track = Track(row['track_id'], row['track_name'], album, [artist],
-                              row['track_duration_ms'], row['track_popularity'],
-                              row['track_preview_url'], row['track_number'],
-                              row['track_explicit'])
+                              None, None, None, None, None)
                 album.tracks.append(track)
                 tracks[track.id] = track
 
             if not row['play_id'] in plays:
                 play = Play(row['play_id'], row['play_time_started'],
                             row['play_time_ended'], [], [], [],
-                            user, track, None, row['play_volume_percent'])
+                            user, track, None, None)
                 plays[play.id] = play
                 user.plays.append(play)
             else:
                 play = plays[row['play_id']]
 
-            if not row['seek_id'] in seeks and row['seek_id']:
-                seek = Seek(row['seek_id'], play, row['seek_position'],
-                            row['seek_time_added'])
-                play.seeks.append(seek)
-                seeks[seek.id] = seek
+            #if not row['seek_id'] in seeks and row['seek_id']:
+            #    seek = Seek(row['seek_id'], play, row['seek_position'],
+            #                row['seek_time_added'])
+            #    play.seeks.append(seek)
+            #    seeks[seek.id] = seek
             if not row['pause_id'] in pauses and row['pause_id']:
                 pause = Pause(row['pause_id'], play, row['pause_time_added'])
                 play.pauses.append(pause)
@@ -490,21 +488,52 @@ class MusicProvider:
         return Play(row['id'], row['time_started'], row['time_ended'], [], [], None,
                     user, None, None, None)
 
-class AuthCode:
+    def get_user_by_credentials(self, username, password):
+        user = self.get_user_by_username(username)
+        if user and check_password_hash(user.password, password):
+            return user
+        return None
+
+    def create_api_refresh_token(self, user):
+        token = APIRefreshToken(generate_id(), user, current_time())
+        self.db_provider.add_api_refresh_token(token.id, token.user.id, token.time_created)
+        return token
+
+    def create_api_access_token(self, refresh_token):
+        token = APIAccessToken(generate_id(), refresh_token, current_time())
+        self.db_provider.add_api_access_token(token.id, token.refresh_token.id, token.time_created)
+        return token
+
+    def get_api_refresh_token(self, token_id):
+        row = self.db_provider.get_api_refresh_token(token_id)
+        user = User(row['user_id'], None, None, None, None)
+        refresh_token = APIRefreshToken(row['id'], user, row['time_added'])
+        return refresh_token
+
+    def get_api_access_token(self, token_id):
+        row = self.db_provider.get_api_access_token(token_id)
+        user = User(row['user_id'], None, None, None, None)
+        refresh_token = APIRefreshToken(row['refresh_token_id'], user,
+                                        row['refresh_token_time_added'])
+        access_token = APIAccessToken(row['access_token_id'], refresh_token,
+                                      row['access_token_time_added'])
+        return access_token
+
+class SpotifyAuthCode:
     def __init__(self, code_id, code, user, time_added):
         self.id = code_id
         self.code = code
         self.user = user
         self.time_added = time_added
 
-class RefreshToken:
+class SpotifyRefreshToken:
     def __init__(self, token_id, token, user, time_added):
         self.id = token_id
         self.token = token
         self.time_added = time_added
         self.user = user
 
-class AccessToken:
+class SpotifyAccessToken:
     def __init__(self, token_id, token, user, time_added):
         self.id = token_id
         self.token = token
@@ -514,6 +543,16 @@ class AccessToken:
     def expired(self):
         # expiry time is actually 3600 not 2500 but gotta be safe
         return self.time_added < current_time() - 2500 * 1000
+
+class Play:
+    def __init__(self, play_id, time_started, time_ended, pauses, resumes, seeks, user,
+                 track, device, volume_percent, context=None, is_playing=False,
+                 progress_ms=-1):
+        self.id = play_id
+        self.time_started = time_started
+        self.time_ended = time_ended
+        self.user = user
+        self.track = track
 
 class Play:
     def __init__(self, play_id, time_started, time_ended, pauses, resumes, seeks, user,
@@ -630,10 +669,28 @@ class Settings:
 
     def append_all(self, settings):
         for setting in settings:
-            self.settings.append(setting)
+            self.append(setting)
 
     def get_by_name(self, setting_name):
         for setting in self.settings:
             if setting.name == setting_name:
                 return setting
         return None
+
+class APIAccessToken:
+    def __init__(self, token_id, refresh_token, time_created):
+        self.id = token_id
+        self.refresh_token = refresh_token
+        self.time_created = time_created
+
+    def expired(self):
+        return self.time_created < current_time() - 3600 * 1000 # hardcoded for now
+
+    def expiry_time(self):
+        return self.time_created + 3600 * 1000 # hardcoded for now
+
+class APIRefreshToken:
+    def __init__(self, token_id, user, time_created):
+        self.id = token_id
+        self.user = user
+        self.time_created = time_created

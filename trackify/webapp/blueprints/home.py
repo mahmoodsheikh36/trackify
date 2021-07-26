@@ -2,7 +2,7 @@ from flask import (
     Blueprint, render_template, g, redirect, url_for
 )
 
-from trackify.webapp.spotify import top_users
+from trackify.webapp.blueprints.spotify import top_users
 
 bp = Blueprint('home', __name__, url_prefix='/')
 
@@ -10,7 +10,7 @@ bp = Blueprint('home', __name__, url_prefix='/')
 def index():
     if not g.user:
         return redirect(url_for('auth.login'))
-    if not g.music_provider.get_user_access_token(g.user):
+    if not g.music_provider.get_user_spotify_access_token(g.user):
         return render_template('index.html')
     if not g.music_provider.user_has_plays(g.user):
         return render_template('index.html')

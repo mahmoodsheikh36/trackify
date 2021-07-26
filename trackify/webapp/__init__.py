@@ -47,22 +47,22 @@ def create_app():
             g.spotify_client = SpotifyClient(config.CONFIG['client_id'], config.CONFIG['client_secret'],
                                              config.CONFIG['redirect_uri'], config.CONFIG['scope'])
 
-    from trackify.webapp.home import bp as home_bp
+    from trackify.webapp.blueprints.home import bp as home_bp
     app.register_blueprint(home_bp)
 
-    from trackify.webapp.auth import bp as auth_bp
+    from trackify.webapp.blueprints.auth import bp as auth_bp
     app.register_blueprint(auth_bp)
 
-    from trackify.webapp.spotify import bp as spotify_bp
+    from trackify.webapp.blueprints.spotify import bp as spotify_bp
     app.register_blueprint(spotify_bp)
 
-    from trackify.webapp.static import bp as static_bp
+    from trackify.webapp.blueprints.static import bp as static_bp
     app.register_blueprint(static_bp)
 
-    from trackify.webapp.settings import bp as settings_bp
+    from trackify.webapp.blueprints.settings import bp as settings_bp
     app.register_blueprint(settings_bp)
 
-    from trackify.webapp.api import bp as api_bp
+    from trackify.webapp.blueprints.api import bp as api_bp
     app.register_blueprint(api_bp)
 
     return app
