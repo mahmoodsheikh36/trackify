@@ -135,16 +135,16 @@ class MusicProvider:
                                      request.access_route, user_id)
         self.commit()
 
-    def add_auth_code(self, code):
-        self.db_provider.add_auth_code(code.id, code.time_added, code.code, code.user.id)
+    def add_spotify_auth_code(self, code):
+        self.db_provider.add_spotify_auth_code(code.id, code.time_added, code.code, code.user.id)
         self.commit()
 
-    def add_access_token(self, t):
-        self.db_provider.add_access_token(t.id, t.token, t.user.id, t.time_added)
+    def add_spotify_access_token(self, t):
+        self.db_provider.add_spotify_access_token(t.id, t.token, t.user.id, t.time_added)
         self.commit()
 
-    def add_refresh_token(self, t):
-        self.db_provider.add_refresh_token(t.id, t.token, t.user.id, t.time_added)
+    def add_spotify_refresh_token(self, t):
+        self.db_provider.add_spotify_refresh_token(t.id, t.token, t.user.id, t.time_added)
         self.commit()
 
     def get_user(self, user_id):
