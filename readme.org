@@ -3,7 +3,7 @@ trackify tracks your spotify activity and displays it in beautiful charts for yo
 * dependencies
   #+BEGIN_SRC bash
   pip3 install flask requests mysql-connector
-  apt-get install mariadb nginx
+  apt-get install mariadb nginx redis
   #+END_SRC
 * how to run
 ** clone the repo & cd into it
