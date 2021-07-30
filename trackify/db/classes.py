@@ -1,8 +1,8 @@
 import json
+from werkzeug.security import check_password_hash
 
 from trackify.db.db import DBProvider
 from trackify.utils import current_time, generate_id, str_to_bool, get_largest_elements
-from werkzeug.security import check_password_hash
 
 class Request:
     def __init__(self, flask_request, user):

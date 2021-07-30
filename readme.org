@@ -19,3 +19,7 @@ trackify tracks your spotify activity and displays it in beautiful charts for yo
    #+BEGIN_SRC bash
    sudo mysql -u database_user -p -D database_name < trackify/db/schema.sql
    #+END_SRC
+
+* todo
+  1. in the function that fetches data for all users instead of fetching settings for each user
+  use the data fetched from the original query

@@ -1,3 +1,4 @@
+import json
 from flask import Blueprint, render_template, g, redirect, request, url_for
 
 from trackify.utils import (
@@ -5,8 +6,9 @@ from trackify.utils import (
     hrs_from_ms, secs_from_ms
 )
 from trackify.webapp.blueprints.auth import login_required
-from trackify.db.classes import SpotifyAuthCode
+from trackify.db.classes import SpotifyAuthCode, User, Track, Artist, Image, Album, Setting
 from trackify.utils import timestamp_to_date
+from trackify.cache import cache
 
 bp = Blueprint('spotify', __name__, url_prefix='/spotify')
 
@@ -176,8 +178,6 @@ def data():
 
 @bp.route('/top_users', methods=('GET',))
 def top_users():
-    LIMIT = 10
-
     hrs_limit = request.args.get('time_limit')
     if not hrs_limit:
         hrs_limit = 7 * 24
@@ -188,46 +188,36 @@ def top_users():
     if hrs_limit > 7 * 24:
         hrs_limit = 30 * 24 # past month is the limit
 
-    if hrs_limit == 0:
-        begin_time = 0
-    else:
-        begin_time = current_time() - hrs_limit * 3600 * 1000
+    if hrs_limit not in [24, 24*7, 24*30]:
+        return ''
 
-    users, artists, albums, tracks, plays =\
-        g.music_provider.get_all_users_data(begin_time, current_time())
-
-    users_to_sort = []
-    for user in users.values():
-        if user.settings.get_by_name('show_on_top_users').value:
-            if user.plays:
-                users_to_sort.append(user)
-
-    for user in users_to_sort:
-        for play in user.plays:
-            listened_ms = play.listened_ms(from_time=begin_time)
-            if hasattr(play.track, 'listened_ms'):
-                if user.id in play.track.listened_ms:
-                    play.track.listened_ms[user.id] += listened_ms
-                else:
-                    play.track.listened_ms[user.id] = listened_ms
-            else:
-                play.track.listened_ms = {user.id: listened_ms}
-            if not hasattr(user, 'top_track') or\
-               play.track.listened_ms[user.id] > user.top_track.listened_ms[user.id]:
-                user.top_track = play.track
-            if not hasattr(user, 'listened_ms'):
-                user.listened_ms = listened_ms
-            else:
-                user.listened_ms += listened_ms
-
-    def compare(user1, user2):
-        if not hasattr(user1, 'listened_ms'):
-            return False
-        if not hasattr(user2, 'listened_ms'):
-            return True
-        return user1.listened_ms > user2.listened_ms
-    top_users = get_largest_elements(users_to_sort, LIMIT, compare)
-
+    top_users_data = json.loads(cache.get(hrs_limit))
+    if top_users_data is None:
+        return ''
+        
+    top_users = []
+    for entry in top_users_data:
+        user = User(entry['id'], entry['username'], None, None, None)
+        album_artists = []
+        album_images = []
+        track_artists = []
+        for user_setting_entry in entry['settings']:
+            user.settings.append(Setting(user_setting_entry['id'], user_setting_entry['name'],
+                                         None, user_setting_entry['value'], None))
+        for album_artist_entry in entry['top_track']['album']['artists']:
+            album_artists.append(Artist(album_artist_entry['id'], album_artist_entry['name'], []))
+        for album_image_entry in entry['top_track']['album']['images']:
+            album_images.append(Image(album_image_entry['id'], album_image_entry['url'],
+                                      album_image_entry['width'], album_image_entry['height']))
+        for track_artist_entry in entry['top_track']['artists']:
+            track_artists.append(Artist(track_artist_entry['id'], track_artist_entry['name'], []))
+        album = Album(entry['top_track']['album']['id'], entry['top_track']['album']['name'],
+                      None, album_artists, album_images, None, None, None)
+        user.top_track = Track(entry['top_track']['id'], entry['top_track']['name'],
+                               album, track_artists, None, None, None, None, None)
+        user.listened_ms = entry['listened_ms']
+        top_users.append(user)
+        
     return render_template('top_users.html',
                            top_users=top_users,
                            mins_from_ms=mins_from_ms,
