@@ -451,8 +451,6 @@ WHERE p.user_id = %s AND ((p.time_started >= %s AND p.time_started <= %s) OR (p.
         ali.height as album_image_height,
         ali.url as album_image_url
         FROM users u
-        JOIN user_settings us ON us.user_id = u.id
-        JOIN settings s ON s.id = us.setting_id
         JOIN plays p ON p.user_id = u.id AND ((p.time_started >= %s AND p.time_started <= %s) OR (p.time_ended >= %s AND p.time_ended <= %s))
         JOIN tracks t ON t.id = p.track_id
         JOIN track_artists ta ON t.id = ta.track_id
