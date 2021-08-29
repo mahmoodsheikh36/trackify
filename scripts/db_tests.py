@@ -15,7 +15,13 @@ user_id = 'af38a714-bcba-419e-804c-96d910d0e975'
 
 def test3():
     provider = DBProvider()
-    row = provider.get_api_access_token('a4a3873b-6721-493a-8aaa-ab7fdbe02691')
+    row = provider.get_api_access_token(user_id)
     print(row)
 
-test3()
+def test4():
+    provider = DBProvider()
+    rows = provider.get_user_settings(user_id)
+    print(rows)
+
+#test3()
+test4()
