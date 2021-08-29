@@ -662,7 +662,8 @@ class Setting:
 
 class Settings:
     def __init__(self, settings=[]):
-        self.settings = settings
+        self.settings = []
+        self.append_all(settings)
 
     def append(self, setting):
         self.settings.append(setting)
