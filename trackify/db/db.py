@@ -367,8 +367,8 @@ WHERE p.user_id = %s AND ((p.time_started >= %s AND p.time_started <= %s) OR (p.
     def execute_fetchall(self, sql, values=[]):
         c = self.cursor()
         c.execute(sql, values)
-        with open('query.txt', 'w+') as query_file:
-            query_file.write(c._executed.decode('utf-8'))
+        #with open('query.txt', 'w+') as query_file:
+            #query_file.write(c._executed.decode('utf-8'))
         return c.fetchall()
 
     def execute_fetchone(self, sql, values=[]):
