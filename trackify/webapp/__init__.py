@@ -1,5 +1,4 @@
 from flask import Flask, request, g, session
-from flask_jwt_extended import JWTManager
 
 from trackify.db.classes import MusicProvider, Request
 from trackify.spotify.spotify import SpotifyClient
@@ -11,8 +10,6 @@ def create_app():
     app.config.from_mapping(
         config.CONFIG_UPPERCASE
     )
-
-    jwt = JWTManager(app)
 
     def terminate(e=None):
         if 'music_provider' in g:
@@ -29,8 +26,6 @@ def create_app():
                                              config.CONFIG['database_password'],
                                              config.CONFIG['database'],
                                              config.CONFIG['database_host'])
-        if not 'jwt' in g:
-            g.jwt = jwt
         db_request = Request(request, None)
 
         user_id = session.get('user_id')

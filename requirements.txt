@@ -1,4 +1,4 @@
 requests
 flask
-flask-jwt-extended
 mysql-connector
+redis
