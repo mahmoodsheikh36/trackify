@@ -9,7 +9,7 @@ bp = Blueprint('settings', __name__, url_prefix='/settings/')
 @bp.route('', methods=('GET', 'POST'))
 @login_required
 def settings():
-    settings = g.music_provider.get_user_settings(g.user)
+    settings = g.db_data_provider.get_user_settings(g.user)
     if request.method == 'POST':
         for setting_id in settings:
             setting = settings[int(setting_id)]
@@ -21,5 +21,5 @@ def settings():
                     setting.value = str_to_bool(request.form[str(setting_id)])
                 else:
                     setting.value = False
-        g.music_provider.update_user_settings(g.user, settings)
+        g.db_data_provider.update_user_settings(g.user, settings)
     return render_template('settings.html', settings=settings)

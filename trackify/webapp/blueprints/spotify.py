@@ -1,5 +1,5 @@
-import json
-from flask import Blueprint, render_template, g, redirect, request, url_for
+import requests
+from flask import Blueprint, render_template, g, redirect, request, url_for, jsonify
 
 from trackify.utils import (
     uri_encode, generate_id, current_time, get_largest_elements, mins_from_ms,
@@ -7,8 +7,8 @@ from trackify.utils import (
 )
 from trackify.webapp.blueprints.auth import login_required
 from trackify.db.classes import SpotifyAuthCode, User, Track, Artist, Image, Album, Setting
-from trackify.utils import timestamp_to_date
-from trackify.cache import cache
+from trackify.utils import timestamp_to_date, one_week_ago, current_time
+import config
 
 bp = Blueprint('spotify', __name__, url_prefix='/spotify')
 
@@ -28,11 +28,11 @@ def callback():
     try:
         auth_code = SpotifyAuthCode(generate_id(), request.args['code'],
                              g.user, current_time())
-        g.music_provider.add_auth_code(auth_code)
+        g.db_data_provider.add_auth_code(auth_code)
         refresh_token, access_token = g.spotify_client.fetch_refresh_token(auth_code)
         if access_token and refresh_token:
-            g.music_provider.add_refresh_token(refresh_token)
-            g.music_provider.add_access_token(access_token)
+            g.db_data_provider.add_refresh_token(refresh_token)
+            g.db_data_provider.add_access_token(access_token)
     except:
         pass
     return redirect(url_for('home.index'))
@@ -73,7 +73,7 @@ def data():
     else:
         begin_time = current_time() - hrs_limit * 3600 * 1000
 
-    artists, albums, tracks, plays = g.music_provider.get_user_data(g.user, from_time=begin_time)
+    artists, albums, tracks, plays = g.db_data_provider.get_user_data(g.user, from_time=begin_time)
 
     if sort_by == 'time_listened':
         for play in plays.values():
@@ -191,33 +191,8 @@ def top_users():
     if hrs_limit not in [24, 24*7, 24*30]:
         return ''
 
-    top_users_data = json.loads(cache.get(hrs_limit))
-    if top_users_data is None:
-        return ''
-        
-    top_users = []
-    for entry in top_users_data:
-        user = User(entry['id'], entry['username'], None, None, None)
-        album_artists = []
-        album_images = []
-        track_artists = []
-        for user_setting_entry in entry['settings']:
-            user.settings.append(Setting(user_setting_entry['id'], user_setting_entry['name'],
-                                         None, user_setting_entry['value'], None))
-        for album_artist_entry in entry['top_track']['album']['artists']:
-            album_artists.append(Artist(album_artist_entry['id'], album_artist_entry['name'], []))
-        for album_image_entry in entry['top_track']['album']['images']:
-            album_images.append(Image(album_image_entry['id'], album_image_entry['url'],
-                                      album_image_entry['width'], album_image_entry['height']))
-        for track_artist_entry in entry['top_track']['artists']:
-            track_artists.append(Artist(track_artist_entry['id'], track_artist_entry['name'], []))
-        album = Album(entry['top_track']['album']['id'], entry['top_track']['album']['name'],
-                      None, album_artists, album_images, None, None, None)
-        user.top_track = Track(entry['top_track']['id'], entry['top_track']['name'],
-                               album, track_artists, None, None, None, None, None)
-        user.listened_ms = entry['listened_ms']
-        top_users.append(user)
-        
+    top_users = g.cache_data_provider.get_top_users(hrs_limit)
+
     return render_template('top_users.html',
                            top_users=top_users,
                            mins_from_ms=mins_from_ms,
@@ -235,7 +210,7 @@ def history():
         hrs_limit = 30 * 24 # past month is the limit
 
     artists, albums, tracks, plays =\
-        g.music_provider.get_user_data(g.user, current_time() - hrs_limit * 3600 * 1000)
+        g.db_data_provider.get_user_data(g.user, current_time() - hrs_limit * 3600 * 1000)
     for play in plays.values():
         play.listened_ms_cached = play.listened_ms()
         play.played_date = timestamp_to_date(play.time_started).strftime('%d/%m/%Y')
@@ -251,3 +226,53 @@ def history():
                            mins_from_ms=mins_from_ms,
                            secs_from_ms=secs_from_ms,
                            hrs_limit=hrs_limit)
+
+@bp.route('/top_artists', methods=('GET',))
+def top_artists():
+    num_of_artists_to_return = request.args.get('num_of_artists_to_return', default=10, type=int)
+    top_artists = g.db_data_provider.get_top_artists(num_of_artists_to_return,
+                                                     one_week_ago(), current_time())
+    return jsonify([{
+        'name': artist.name,
+        'listened_ms': artist.listened_ms
+    } for artist in top_artists])
+
+@bp.route('/artist_discogs_data', methods=('GET',))
+def artist_discogs_data():
+    artist_name = request.args.get('artist_name', default=None, type=str)
+    if not artist_name:
+        return ''
+
+    cached_data = g.cache_data_provider.get_artist_discogs_data(artist_name)
+    if cached_data:
+        return cached_data
+
+    api_key = config.CONFIG['discogs_api_key']
+    api_secret = config.CONFIG['discogs_api_secret']
+
+    response = requests.get(f'https://api.discogs.com/database/search?q={artist_name}&type=artist&'
+                            f'key={api_key}&secret={api_secret}')
+    artist_data = response.json()['results'][0]
+
+    g.cache_data_provider.set_artist_discogs_data(artist_name, artist_data)
+
+    return jsonify(artist_data)
+
+@bp.route('/top_tracks', methods=('GET',))
+def top_tracks():
+    num_of_tracks_to_return = request.args.get('num_of_tracks_to_return', default=10, type=int)
+    top_tracks = g.db_data_provider.get_top_tracks(num_of_tracks_to_return,
+                                                   one_week_ago(), current_time())
+    return jsonify([{
+        'name': track.name,
+        'listened_ms': track.listened_ms,
+        'image_url': track.album.smallest_image().url,
+        'artist_name': track.artists[0].name
+    } for track in top_tracks])
+
+@bp.route('total_plays', methods=('GET',))
+def total_plays():
+    total_plays = g.db_data_provider.get_total_plays()
+    return jsonify({
+        'total': total_plays
+    })

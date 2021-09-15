@@ -10,7 +10,7 @@ from trackify.db.classes import User
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 def try_credentials(username, password):
-    user = g.music_provider.get_user_by_username(username)
+    user = g.db_data_provider.get_user_by_username(username)
     if user and check_password_hash(user.password, password):
         return user
     return None
@@ -38,13 +38,13 @@ def register():
             error = 'password too long'
         elif len(email) > 254:
             error = 'email too long'
-        elif g.music_provider.get_user_by_username(username):
+        elif g.db_data_provider.get_user_by_username(username):
             error = 'username is not available'
 
         if not error:
             user = User(generate_id(), username, generate_password_hash(password),
                         email, current_time())
-            g.music_provider.add_user(user)
+            g.db_data_provider.add_user(user)
             return redirect(url_for('auth.login'))
 
         flash(error)

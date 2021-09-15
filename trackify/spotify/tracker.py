@@ -11,8 +11,8 @@ REQUEST_TIMEOUT = 0.03
 ITERATION_TIMEOUT = 0.6
 
 class SpotifyTracker:
-    def __init__(self, music_provider, spotify_client):
-        self.music_provider = music_provider
+    def __init__(self, db_data_provider, spotify_client):
+        self.db_data_provider = db_data_provider
         self.spotify_client = spotify_client
 
     def start_tracking(self):
@@ -20,19 +20,19 @@ class SpotifyTracker:
         user_data = {}
         while True:
             try:
-                self.music_provider.new_conn()
-                users = self.music_provider.get_users()
+                self.db_data_provider.new_conn()
+                users = self.db_data_provider.get_users()
                 try:
                     for user in users:
-                        user.access_token = self.music_provider.get_user_spotify_access_token(user)
+                        user.access_token = self.db_data_provider.get_user_spotify_access_token(user)
                         if not user.access_token:
                             continue
                         if user.access_token.expired():
                             user.refresh_token =\
-                                self.music_provider.get_user_spotify_refresh_token(user)
+                                self.db_data_provider.get_user_spotify_refresh_token(user)
                             user.access_token = self.spotify_client.fetch_access_token(
                                 user.refresh_token)
-                            self.music_provider.add_spotify_access_token(user.access_token)
+                            self.db_data_provider.add_spotify_access_token(user.access_token)
 
                         play, retry_after = self.spotify_client.get_current_play(
                             user.access_token)
@@ -48,30 +48,30 @@ class SpotifyTracker:
                             last_play = None
 
                         if last_play is None:
-                            self.music_provider.add_play(play)
+                            self.db_data_provider.add_play(play)
                             if not play.is_playing:
                                 pause = Pause(generate_id(), play, current_time())
-                                self.music_provider.add_pause(pause)
+                                self.db_data_provider.add_pause(pause)
                         else:
                             track_changed = not play.has_same_track_as(last_play)
                             if not track_changed:
                                 play.id = last_play.id
                             if track_changed: # track changed
                                 last_play.time_ended = current_time()
-                                self.music_provider.update_play_time_ended(last_play)
-                                self.music_provider.add_play(play)
+                                self.db_data_provider.update_play_time_ended(last_play)
+                                self.db_data_provider.add_play(play)
                                 if not play.is_playing:
                                     pause = Pause(generate_id(), play, current_time())
-                                    self.music_provider.add_pause(pause)
+                                    self.db_data_provider.add_pause(pause)
                             elif not play.is_playing and last_play.is_playing: # track paused
                                 pause = Pause(generate_id(), play, current_time())
-                                self.music_provider.add_pause(pause)
+                                self.db_data_provider.add_pause(pause)
                             elif play.is_playing and not last_play.is_playing: # track resumed
                                 resume = Resume(generate_id(), play, current_time())
-                                self.music_provider.add_resume(resume)
+                                self.db_data_provider.add_resume(resume)
                             else: # if no actions just update time_ended
                                 play.time_ended = current_time()
-                                self.music_provider.update_play_time_ended(play)
+                                self.db_data_provider.update_play_time_ended(play)
 
                             # checking if a seek action (skip to position) was made
                             if not track_changed:
@@ -82,7 +82,7 @@ class SpotifyTracker:
                                 if gap > 5:
                                     seek = Seek(generate_id(), play, play.progress_ms,
                                                 current_time())
-                                    self.music_provider.add_seek(seek)
+                                    self.db_data_provider.add_seek(seek)
 
                         user_data[user.id] = play, current_time()
                         sleep(REQUEST_TIMEOUT)
@@ -99,13 +99,13 @@ class SpotifyTracker:
 
 if __name__ == '__main__':
     from trackify.spotify.spotify import SpotifyClient
-    from trackify.db.classes import MusicProvider
+    from trackify.db.classes import DbDataProvider
     import config
 
-    music_provider = MusicProvider(config.CONFIG['database_user'], config.CONFIG['database_password'],
+    db_data_provider = DbDataProvider(config.CONFIG['database_user'], config.CONFIG['database_password'],
                                    config.CONFIG['database'], config.CONFIG['database_host'])
     spotify_client = SpotifyClient(config.CONFIG['client_id'], config.CONFIG['client_secret'],
                                    config.CONFIG['redirect_uri'], config.CONFIG['scope'])
 
-    spotify_tracker = SpotifyTracker(music_provider, spotify_client)
+    spotify_tracker = SpotifyTracker(db_data_provider, spotify_client)
     spotify_tracker.start_tracking()

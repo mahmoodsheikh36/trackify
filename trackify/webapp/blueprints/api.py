@@ -15,12 +15,12 @@ def login():
     username = request.form['username']
     password = request.form['password']
 
-    user = g.music_provider.get_user_by_credentials(username, password)
+    user = g.db_data_provider.get_user_by_credentials(username, password)
     if not user:
         return jsonify({"msg": "Bad username or password"}), 401
 
-    refresh_token = g.music_provider.create_api_refresh_token(user)
-    access_token = g.music_provider.create_api_access_token(refresh_token)
+    refresh_token = g.db_data_provider.create_api_refresh_token(user)
+    access_token = g.db_data_provider.create_api_access_token(refresh_token)
     return jsonify({
         'access_token': {
             'id': access_token.id,
@@ -35,7 +35,7 @@ def login():
 @refresh_token_required
 def refresh():
     refresh_token = get_refresh_token()
-    new_access_token = g.music_provider.create_api_access_token(refresh_token)
+    new_access_token = g.db_data_provider.create_api_access_token(refresh_token)
     return jsonify({
         'access_token': {
             'id': new_access_token.id,
@@ -61,7 +61,7 @@ def history():
 
     begin_time = current_time() - hrs_limit * 3600 * 1000
 
-    artists, albums, tracks, plays = g.music_provider.get_user_data(get_user())
+    artists, albums, tracks, plays = g.db_data_provider.get_user_data(get_user())
 
     plays_to_sort = []
     for play in plays.values():
@@ -117,7 +117,7 @@ def top_track():
 
     begin_time = current_time() - oldest_hr * 3600 * 1000
 
-    artists, albums, tracks, plays = g.music_provider.get_user_data(get_user())
+    artists, albums, tracks, plays = g.db_data_provider.get_user_data(get_user())
 
     data = {}
     for hr in hrs:
@@ -169,7 +169,7 @@ def top_users():
     top_tracks_limit = 3
 
     users, artists, albums, tracks, plays =\
-        g.music_provider.get_all_users_data(from_time, to_time)
+        g.db_data_provider.get_all_users_data(from_time, to_time)
 
     users_to_sort = []
     for user in users.values():
@@ -258,7 +258,7 @@ def track_history():
 
     from_time = current_time() - hrs_limit * 3600 * 1000
 
-    plays = g.music_provider.get_user_track_plays(get_user(), from_time=from_time, track_id=track_id)
+    plays = g.db_data_provider.get_user_track_plays(get_user(), from_time=from_time, track_id=track_id)
 
     data = []
     for play in plays:
@@ -281,7 +281,7 @@ def data():
         return jsonify({"msg": "to_time should be a positive integer"}), 401
 
     user = get_user()
-    artists, albums, tracks, plays = g.music_provider.get_user_data(user,
+    artists, albums, tracks, plays = g.db_data_provider.get_user_data(user,
                                                                     from_time=from_time,
                                                                     to_time=to_time)
     data = {

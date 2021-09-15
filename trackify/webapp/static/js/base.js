@@ -17,14 +17,15 @@ function highlightCurrentNavbarTab() {
     let elementWithValue = $('#navbar_value')
     if (elementWithValue) {
         let value = elementWithValue.value
-        let navbar = $('#topnav')
-        for (let i = 0; i < navbar.children.length; ++i) {
-            navbarTab = navbar.children[i]
-            if (navbarTab.innerHTML === value) {
-                console.log(value)
-                navbarTab.className += 'active'
+        let navbars = [$('#topnav_left'), $('#topnav_right')];
+        navbars.forEach(navbar => {
+            for (let i = 0; i < navbar.children.length; ++i) {
+                navbarTab = navbar.children[i]
+                if (navbarTab.innerHTML === value) {
+                    navbarTab.className += 'active'
+                }
             }
-        }
+        })
     }
 }
 
@@ -39,4 +40,7 @@ function showMessage(msg, timeout) {
 }
 function hideMessage() {
     $('.message').style.display = 'none'
+}
+
+function fetchAPIData(backend) {
 }

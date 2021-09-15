@@ -3,7 +3,7 @@ import mysql.connector
 from trackify.utils import current_time, generate_id
 import config
 
-class DBProvider:
+class DbProvider:
     def __init__(self, user=config.CONFIG['database_user'], passwd=config.CONFIG['database_password'],
                  database=config.CONFIG['database'], host=config.CONFIG['database_host']):
         self.user = user
@@ -519,3 +519,28 @@ WHERE p.user_id = %s AND ((p.time_started >= %s AND p.time_started <= %s) OR (p.
         JOIN users u ON art.user_id = u.id
         WHERE act.id = %s
         ''', [token_id])
+
+    def get_artists_and_plays(self, from_time, to_time):
+        return self.execute_fetchall('''
+        SELECT
+        p.id as play_id,
+        p.time_started as play_time_started,
+        p.time_ended as play_time_ended,
+        a.id as artist_id,
+        a.artist_name as artist_name,
+        pa.id as pause_id,
+        pa.time_added as pause_time_added,
+        r.id as resume_id,
+        r.time_added as resume_time_added
+        from plays p
+        JOIN track_artists ta ON ta.track_id = p.track_id 
+        JOIN artists a ON a.id = ta.artist_id
+        LEFT JOIN pauses pa ON pa.play_id = p.id
+        LEFT JOIN resumes r ON r.play_id = p.id
+        WHERE ((p.time_started >= %s AND p.time_started <= %s) OR (p.time_ended >= %s AND p.time_ended <= %s))
+        ''', (from_time, to_time, from_time, to_time))
+
+    def get_count_of_table_rows(self, table_name):
+        return self.execute_fetchone('''
+        SELECT COUNT(*) FROM {table_name}
+        '''.format(table_name=table_name))

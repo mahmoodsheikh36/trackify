@@ -1,7 +1,10 @@
 from flask import Flask, request, g, session
 
-from trackify.db.classes import MusicProvider, Request
+from trackify.db.classes import Request
+from trackify.db.data import DbDataProvider
 from trackify.spotify.spotify import SpotifyClient
+from trackify.cache.data import CacheDataProvider
+
 import config
 
 def create_app():
@@ -12,8 +15,8 @@ def create_app():
     )
 
     def terminate(e=None):
-        if 'music_provider' in g:
-            g.music_provider.close()
+        if 'db_data_provider' in g:
+            g.db_data_provider.close()
     app.teardown_appcontext(terminate)
 
     @app.before_request
@@ -21,11 +24,14 @@ def create_app():
         if config.CONFIG['permanent_session']:
             session.permanent = True
 
-        if not 'music_provider' in g:
-            g.music_provider = MusicProvider(config.CONFIG['database_user'],
+        if not 'db_data_provider' in g:
+            g.db_data_provider = DbDataProvider(config.CONFIG['database_user'],
                                              config.CONFIG['database_password'],
                                              config.CONFIG['database'],
                                              config.CONFIG['database_host'])
+        if not 'cache_data_provider' in g:
+            g.cache_data_provider = CacheDataProvider()
+
         db_request = Request(request, None)
 
         user_id = session.get('user_id')
@@ -33,10 +39,10 @@ def create_app():
             g.user = None
         else:
             # here g.user could be None if no user with that id was in database
-            g.user = g.music_provider.get_user(user_id)
+            g.user = g.db_data_provider.get_user(user_id)
 
         db_request.user = g.user
-        g.music_provider.add_request(db_request)
+        g.db_data_provider.add_request(db_request)
 
         if not 'spotify_client' in g:
             g.spotify_client = SpotifyClient(config.CONFIG['client_id'], config.CONFIG['client_secret'],

@@ -1,8 +1,8 @@
 #!/usr/bin/python3
 
-from trackify.db.db import DBProvider
+from trackify.db.db import DbProvider
 
-db = DBProvider()
+db = DbProvider()
 
 db.execute('ALTER TABLE access_tokens RENAME TO spotify_access_tokens')
 db.execute('ALTER TABLE refresh_tokens RENAME TO spotify_refresh_tokens')

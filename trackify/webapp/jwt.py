@@ -9,7 +9,7 @@ def access_token_required(func):
         if len(arr) != 2:
             return jsonify({"msg": "incorrect auth header"}), 401
         token_id = arr[1]
-        token = g.music_provider.get_api_access_token(token_id)
+        token = g.db_data_provider.get_api_access_token(token_id)
         if not token:
             return jsonify({"msg": "access token doesnt exist"}), 401
         if token.expired():
@@ -27,7 +27,7 @@ def refresh_token_required(func):
         if len(arr) != 2:
             return jsonify({"msg": "incorrect auth header"}), 401
         token_id = arr[1]
-        token = g.music_provider.get_api_refresh_token(token_id)
+        token = g.db_data_provider.get_api_refresh_token(token_id)
         if token is None:
             return jsonify({"msg": "refresh token doesnt exist"}), 401
         return func()
@@ -40,7 +40,7 @@ def get_user():
     if len(arr) != 2:
         return None
     token_id = arr[1]
-    token = g.music_provider.get_api_access_token(token_id)
+    token = g.db_data_provider.get_api_access_token(token_id)
     return token.refresh_token.user
 
 def get_refresh_token():
@@ -51,6 +51,6 @@ def get_refresh_token():
     if len(arr) != 2:
         return None
     token_id = arr[1]
-    token = g.music_provider.get_api_refresh_token(token_id)
+    token = g.db_data_provider.get_api_refresh_token(token_id)
     return token
     

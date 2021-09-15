@@ -12,21 +12,28 @@
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     </head>
     <body>
-        <div class="topnav" id="topnav">
-            {% if g.user %}
-            <a href="{{ url_for('home.index') }}">{{ g.user.username }}</a>
-            <a href="{{ url_for('settings.settings') }}">Settings</a>
-            <a href="{{ url_for('spotify.history') }}">History</a>
-            {% else %}
-            <a href="{{ url_for('home.index') }}">Home</a>
-            {% endif %}
-            <a href="{{ url_for('spotify.top_users') }}">Top Users</a>
-            {% if g.user %}
-            <a href="{{ url_for('auth.logout') }}">Logout</a>
-            {% endif %}
-            <a href="javascript:void(0);" class="icon" onclick="navbarFunction()">
-                <i class="fa fa-bars"></i>
-            </a>
+        <div class="topnav">
+            <div class="topnav_left" id="topnav_left">
+                {% if g.user %}
+                <a href="{{ url_for('home.index') }}">Home</a>
+                <a href="{{ url_for('spotify.data') }}">My data</a>
+                <a href="{{ url_for('settings.settings') }}">Settings</a>
+                <a href="{{ url_for('spotify.history') }}">History</a>
+                {% else %}
+                <a href="{{ url_for('home.index') }}">Home</a>
+                {% endif %}
+                <a href="{{ url_for('spotify.top_users') }}">Top Users</a>
+                <a href="javascript:void(0);" class="icon" onclick="navbarFunction()">
+                    <i class="fa fa-bars"></i>
+                </a>
+            </div>
+            <div class="topnav_right" id="topnav_right">
+                {% if g.user %}
+                <a href="{{ url_for('auth.logout') }}">Logout</a>
+                {% else %}
+                <a href="{{ url_for('auth.login') }}">Login</a>
+                {% endif %}
+            </div>
         </div>
         <div class="content_container">
             {% block content %}

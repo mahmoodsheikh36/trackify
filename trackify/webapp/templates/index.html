@@ -8,14 +8,14 @@
 
 {% block content %}
 <div class="message">
-{% if not g.music_provider.get_user_access_token(g.user) %}
+{% if not g.db_data_provider.get_user_access_token(g.user) %}
     <div class="auth">
         <p>you need to connect your <span class="highlighted">Spotify</span> account</p>
         <form action="{{ url_for('spotify.auth') }}">
             <button type="submit">connect <span class="highlighted">Spotify</span> account</button>
         </form>
     </div>
-{% elif not g.music_provider.user_has_plays(g.user) %}
+{% elif not g.db_data_provider.user_has_plays(g.user) %}
     <p>once you start listening to music on <span class="highlighted">Spotify</span>,
     refresh this page and your data will appear here</p>
 {% endif %}

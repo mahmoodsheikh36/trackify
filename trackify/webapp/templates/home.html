@@ -3,9 +3,33 @@
 {% block head %}
 <title>Trackify</title>
 <link rel="stylesheet" href="/static/css/home.css">
+<script src="/static/js/home.js"></script>
 {% endblock %}
 
 {% block content %}
 <input type=hidden id="navbar_value" value="Home" />
-what the fuck
+
+<div class="top_artists_container">
+    <h2 class="centered highlighted top_artists_header">Top Artists Past Week</h2>
+    <div class="top_artists" id="top_artists">
+    </div>
+</div>
+<div class="top_tracks_and_play_counter_container">
+    <div class="top_tracks_container">
+        <h2 class="centered highlighted top_tracks_header">Top Tracks Past Week</h2>
+        <div class="top_tracks" id="top_tracks">
+        </div>
+    </div>
+    <div class="play_counter_container">
+        <h2 class="centered highlighted">All time plays</h2>
+        live tracker of total plays
+        <br>
+        everytime a user plays a song no matter
+        <br>
+        for how long the number increases
+        <a class="play_counter centered" id="play_counter">
+            0
+        </a>
+    </div>
+</div>
 {% endblock %}

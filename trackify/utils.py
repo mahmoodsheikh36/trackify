@@ -55,3 +55,9 @@ def timestamp_to_date(timestamp):
     # get rid of extra digits if timestamp is in milliseconds/nanoseconds
     timestamp = int(timestamp / (10 ** (digits - 10)))
     return datetime.datetime.fromtimestamp(timestamp)
+
+def one_day_ago():
+    return current_time() - 24 * 3600 * 1000
+
+def one_week_ago():
+    return current_time() - 7 * 24 * 3600 * 1000
