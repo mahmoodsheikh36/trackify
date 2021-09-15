@@ -19,21 +19,23 @@ async function fetchTopArtists(cb) {
 }
 
 async function setupTopArtists() {
-    let first = true
     imagesPlaced = []
     fetchTopArtists(topArtists => {
-        topArtists.forEach(artist => {
+        topArtists.forEach((artist, idx) => {
+            let containerWidth = $('#top_artists').clientWidth
+            let containerHeight = $('#top_artists').clientHeight
+            let first = idx === 0
+            let img = {
+                width: first ? 135 : 85,
+                height: first ? 135 : 85,
+                x: first ? 0.5 * containerWidth - 135 / 2 : undefined,
+                y: first ? 0.5 * containerHeight - 135 / 2 : undefined
+            }
+            if (first) {
+                imagesPlaced.push(img) // we push it here to ensure no other image takes its place
+            }
+
             fetchArtistData(artist.name, data => {
-                let containerWidth = $('#top_artists').clientWidth
-                let containerHeight = $('#top_artists').clientHeight
-
-                let img = {
-                    width: first ? 135 : 85,
-                    height: first ? 135 : 85,
-                    x: first ? 0.5 * containerWidth - 135 / 2 : undefined,
-                    y: first ? 0.5 * containerHeight - 135 / 2 : undefined
-                }
-
                 let pass = first
                 while (!pass) {
                     let xNew = Math.ceil(Math.random() * containerWidth)
@@ -57,23 +59,52 @@ async function setupTopArtists() {
                     }
                 }
 
-                let imgElement = document.createElement('img')
-                imgElement.style.position = "absolute"
-                imgElement.src = data.thumb || '/static/music_placeholder.png'
-                if (first) {
-                    imgElement.classList.add('top_artist', 'biggest')
-                    first = false
-                } else {
-                    imgElement.className = 'top_artist'
+                if (!first) {
+                    imagesPlaced.push(img)
                 }
 
-                imgElement.style.width = img.width+'px'
-                imgElement.style.height = img.height+'px'
-                imgElement.style.left = img.x + 'px'
-                imgElement.style.top = img.y + 'px'
+                let container = document.createElement('div')
+                let imgElement = document.createElement('img')
+                let titleElement = document.createElement('a')
 
-                imagesPlaced.push(img)
-                $('#top_artists').appendChild(imgElement)
+                imgElement.src = data.thumb || '/static/music_placeholder.png'
+                container.style.width = img.width+'px'
+                container.style.height = img.height+'px'
+                container.style.left = img.x + 'px'
+                container.style.top = img.y + 'px'
+
+                if (first) {
+                    container.classList.add('top_artist', 'biggest')
+                    container.appendChild(imgElement)
+                } else {
+                    container.className = 'top_artist'
+
+                    let rankElement = document.createElement('div')
+                    rankElement.innerHTML = idx + 1
+                    rankElement.className = 'artist_rank'
+                    rankElement.style.left = img.width - 25 + 'px'
+
+                    container.appendChild(imgElement)
+                    container.appendChild(rankElement)
+                }
+
+                titleElement.innerHTML = artist.name
+                titleElement.className = 'artist_title highlighted_background hidden'
+                container.appendChild(titleElement)
+
+                container.onmouseover = () => {
+                    titleElement.classList.remove('hidden')
+                }
+                container.onmouseout = () => {
+                    titleElement.classList.add('hidden')
+                }
+                container.onclick = () => {
+                    console.log(data)
+                    window.open(`https://www.discogs.com${data.uri}`)
+                }
+
+                $('#top_artists').appendChild(container)
+
             })
         })
     })

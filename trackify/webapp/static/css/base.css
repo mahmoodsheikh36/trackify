@@ -6,6 +6,10 @@
     color: rgb(242, 93, 93);
 }
 
+.highlighted_background {
+    background-color: rgb(242, 93, 93);
+}
+
 /*
 html, body {
     height: 100%;

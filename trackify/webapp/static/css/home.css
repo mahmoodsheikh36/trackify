@@ -8,15 +8,23 @@ div.top_artists {
     height: 450px;
 }
 
-img.top_artist {
+.top_artist {
     position: absolute;
     padding: 5px;
+    animation: zoom_in 1s ease;
+}
+.top_artist:hover {
+    transform: scale(1.1);
+    cursor: pointer;
+}
+.top_artist img {
     border-radius: 50%;
-    animation: zoom_in 1s ease
+    width: 100%;
+    height: 100%;
 }
 
 .top_artists_header {
-    padding-top: 15px;
+    padding: 15px;
 }
 
 @media screen and (max-width: 800px) {
@@ -66,4 +74,35 @@ img.top_artist {
     display: block;
     height: 100%;
     padding-top: 40px;
+}
+
+.artist_rank {
+    width: 20px;
+    height: 20px;
+    text-align: center;
+    background-color: black;
+    border-radius: 30px;
+    position: absolute;
+    top: 0px;
+    font-size: 13px;
+    border-width: 5px;
+    border-color: red;
+}
+
+a.artist_title {
+    position: absolute;
+    top: 0;
+    left: 0;
+    font-size: 14px;
+    margin: auto;
+    width: 100%;
+    text-align: center;
+    color: black;
+    border-radius: 30px;
+    padding: 1px;
+    display: block;
+}
+
+a.artist_title.hidden {
+    display: none;
 }

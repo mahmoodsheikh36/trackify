@@ -26,9 +26,9 @@ def create_app():
 
         if not 'db_data_provider' in g:
             g.db_data_provider = DbDataProvider(config.CONFIG['database_user'],
-                                             config.CONFIG['database_password'],
-                                             config.CONFIG['database'],
-                                             config.CONFIG['database_host'])
+                                                config.CONFIG['database_password'],
+                                                config.CONFIG['database'],
+                                                config.CONFIG['database_host'])
         if not 'cache_data_provider' in g:
             g.cache_data_provider = CacheDataProvider()
 
