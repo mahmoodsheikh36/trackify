@@ -99,7 +99,7 @@ class SpotifyTracker:
 
 if __name__ == '__main__':
     from trackify.spotify.spotify import SpotifyClient
-    from trackify.db.classes import DbDataProvider
+    from trackify.db.data import DbDataProvider
     import config
 
     db_data_provider = DbDataProvider(config.CONFIG['database_user'], config.CONFIG['database_password'],
