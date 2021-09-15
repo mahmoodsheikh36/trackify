@@ -17,3 +17,4 @@ if __name__ == '__main__':
             cache_data_provider.set_top_users(hours, top_users)
 
         sleep(1)
+        db_data_provider.new_conn()
