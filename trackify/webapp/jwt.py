@@ -5,7 +5,7 @@ def access_token_required(func):
         auth_header = request.headers.get('Authorization')
         if auth_header is None:
             return jsonify({"msg": "auth header wasnt provided"}), 401
-        arr = auth_header.split(': ')
+        arr = auth_header.split(' ')
         if len(arr) != 2:
             return jsonify({"msg": "incorrect auth header"}), 401
         token_id = arr[1]
@@ -23,7 +23,7 @@ def refresh_token_required(func):
         auth_header = request.headers.get('Authorization')
         if auth_header is None:
             return jsonify({"msg": "auth header wasnt provided"}), 401
-        arr = auth_header.split(': ')
+        arr = auth_header.split(' ')
         if len(arr) != 2:
             return jsonify({"msg": "incorrect auth header"}), 401
         token_id = arr[1]
@@ -36,7 +36,7 @@ def refresh_token_required(func):
 
 def get_user():
     auth_header = request.headers.get('Authorization')
-    arr = auth_header.split(': ')
+    arr = auth_header.split(' ')
     if len(arr) != 2:
         return None
     token_id = arr[1]
@@ -47,7 +47,7 @@ def get_refresh_token():
     auth_header = request.headers.get('Authorization')
     if auth_header is None:
         return None
-    arr = auth_header.split(': ')
+    arr = auth_header.split(' ')
     if len(arr) != 2:
         return None
     token_id = arr[1]
