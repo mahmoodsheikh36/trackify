@@ -252,7 +252,12 @@ def artist_discogs_data():
 
     response = requests.get(f'https://api.discogs.com/database/search?q={artist_name}&type=artist&'
                             f'key={api_key}&secret={api_secret}')
-    artist_data = response.json()['results'][0]
+    print(response.text)
+    artist_data = {}
+    try:
+        artist_data = response.json()['results'][0]
+    except KeyError: # if discogs returns no results
+        pass
 
     g.cache_data_provider.set_artist_discogs_data(artist_name, artist_data)
 

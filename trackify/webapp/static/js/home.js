@@ -12,15 +12,17 @@ async function fetchArtistData(artistName, cb) {
 
 async function fetchTopArtists(cb) {
     let response = await fetch(
-        `/spotify/top_artists?num_of_artists_to_return=${IS_SMALL_SCREEN ? 10 : 15}`
+        `/spotify/top_artists?num_of_artists_to_return=25`
     )
     let data = await response.json()
     cb(data)
 }
 
 async function setupTopArtists() {
-    imagesPlaced = []
     fetchTopArtists(topArtists => {
+        let imagesPlaced = []
+        let iterations = 0
+        let maxIterations = 2000 // to stop endless loop from happening when adding artist bubbles
         topArtists.forEach((artist, idx) => {
             let containerWidth = $('#top_artists').clientWidth
             let containerHeight = $('#top_artists').clientHeight
@@ -37,7 +39,8 @@ async function setupTopArtists() {
 
             fetchArtistData(artist.name, data => {
                 let pass = first
-                while (!pass) {
+                while (!pass && !(iterations > 2000)) {
+                    ++iterations
                     let xNew = Math.ceil(Math.random() * containerWidth)
                     let yNew = Math.ceil(Math.random() * containerHeight)
                     img.x = xNew
@@ -58,6 +61,8 @@ async function setupTopArtists() {
                         pass = true
                     }
                 }
+                if (iterations > maxIterations)
+                    return
 
                 if (!first) {
                     imagesPlaced.push(img)
@@ -99,7 +104,6 @@ async function setupTopArtists() {
                     titleElement.classList.add('hidden')
                 }
                 container.onclick = () => {
-                    console.log(data)
                     window.open(`https://www.discogs.com${data.uri}`)
                 }
 
