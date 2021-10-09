@@ -108,25 +108,45 @@ textarea, select, input, button { outline: none; }
 }
 
 @media screen and (max-width: 600px) {
-    .topnav a:not(:first-child) {display: none;}
+    body {
+        font-size: 15px;
+    }
+
     .topnav a.icon {
         float: right;
         display: block;
     }
-    body {
-        font-size: 15px;
-    }
-}
 
-@media screen and (max-width: 600px) {
-    .topnav.responsive {position: relative;}
+    .topnav_left a:not(:first-child) {display: none;}
+    .topnav_right {display: none;}
+
+    .topnav.responsive {
+        display: flex;
+        flex-flow: column;
+        justify-content: space-between;
+        position: relative;
+    }
     .topnav.responsive .icon {
         position: absolute;
         right: 0;
         top: 0;
     }
-    .topnav.responsive a {
-        float: none;
+
+    .topnav.responsive .topnav_left {
+        display: flex;
+        flex-flow: column;
+        text-align: left;
+    }
+    .topnav.responsive .topnav_right {
+        display: flex;
+        flex-flow: column;
+        text-align: left;
+    }
+    .topnav.responsive .topnav_left a {
+        display: block;
+        text-align: left;
+    }
+    .topnav.responsive .topnav_right a {
         display: block;
         text-align: left;
     }

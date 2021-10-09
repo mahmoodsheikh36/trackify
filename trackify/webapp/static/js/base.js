@@ -2,12 +2,12 @@ function $(selector) {
     return document.querySelector(selector)
 }
 
-function navbarFunction() {
-    var x = document.getElementById("topnav")
-    if (x.className === "topnav") {
-        x.className += " responsive"
+function toggleMenu() {
+    let menuButton = $("#topnav")
+    if (menuButton.className === "topnav") {
+        menuButton.className += " responsive"
     } else {
-        x.className = "topnav"
+        menuButton.className = "topnav"
     }
 }
 
