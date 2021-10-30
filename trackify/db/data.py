@@ -365,7 +365,7 @@ class DbDataProvider:
     def get_user_track_plays(self, user, track_id, from_time=0, to_time=9999999999999):
         rows = self.db_provider.get_user_track_plays(user.id, track_id, from_time, to_time)
 
-        # gotta use list to keep order of plays and map for efficient access of a play using its id
+        # gotta use map for efficient access of a play using its id
         plays = {}
         resumes = {}
         pauses = {}
