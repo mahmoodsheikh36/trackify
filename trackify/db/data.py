@@ -537,3 +537,13 @@ class DbDataProvider:
 
     def get_total_plays(self):
         return self.db_provider.get_count_of_table_rows('plays')['COUNT(*)']
+
+    def get_last_play(self):
+        row = self.db_provider.get_last_play()
+        artist = Artist(None, row['artist_name'], [])
+        track = Track(None, row['track_name'], None, [artist], None,
+                      None, None, None, None)
+        user = User(None, row['username'], None, None, None)
+        play = Play(row['id'], row['time_started'], row['time_ended'], [], [],
+                    None, user, track, None, None)
+        return play

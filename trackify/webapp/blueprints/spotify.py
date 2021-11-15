@@ -230,6 +230,8 @@ def history():
 @bp.route('/top_artists', methods=('GET',))
 def top_artists():
     num_of_artists_to_return = request.args.get('num_of_artists_to_return', default=10, type=int)
+    if num_of_artists_to_return > 10:
+        num_of_artists_to_return = 10
     top_artists = g.db_data_provider.get_top_artists(num_of_artists_to_return,
                                                      one_week_ago(), current_time())
     return jsonify([{
@@ -265,7 +267,9 @@ def artist_discogs_data():
 
 @bp.route('/top_tracks', methods=('GET',))
 def top_tracks():
-    num_of_tracks_to_return = request.args.get('num_of_tracks_to_return', default=10, type=int)
+    num_of_tracks_to_return = request.args.get('num_of_tracks_to_return', default=5, type=int)
+    if num_of_tracks_to_return > 10:
+        num_of_tracks_to_return = 10
     top_tracks = g.db_data_provider.get_top_tracks(num_of_tracks_to_return,
                                                    one_week_ago(), current_time())
     return jsonify([{

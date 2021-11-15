@@ -544,3 +544,13 @@ WHERE p.user_id = %s AND ((p.time_started >= %s AND p.time_started <= %s) OR (p.
         return self.execute_fetchone('''
         SELECT COUNT(*) FROM {table_name}
         '''.format(table_name=table_name))
+
+    def get_last_play(self):
+        return self.execute_fetchone('''
+        SELECT plays.*, users.username, tracks.track_name, artists.artist_name FROM plays
+        JOIN users ON users.id = plays.user_id
+        JOIN tracks ON tracks.id = plays.track_id
+        JOIN track_artists ON track_artists.track_id = tracks.id
+        JOIN artists ON artists.id = track_artists.artist_id
+        ORDER BY time_started DESC LIMIT 1
+        ''')

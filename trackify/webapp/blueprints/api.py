@@ -325,3 +325,13 @@ def data():
         })
 
     return jsonify(data)
+
+@bp.route('/last_play', methods=('GET',))
+def last_play():
+    play = g.db_data_provider.get_last_play()
+    return jsonify({
+        'username': play.user.username,
+        'time_played': play.time_started,
+        'artist_name': play.track.artists[0].name,
+        'track_name': play.track.name
+    })
