@@ -2,7 +2,7 @@ const IS_SMALL_SCREEN = document.documentElement.clientWidth <= 600
 
 async function fetchArtistData(artistName, cb) {
     let response = await fetch(
-        '/spotify/artist_discogs_data?' + new URLSearchParams({
+        '/api/artist_discogs_data?' + new URLSearchParams({
             'artist_name': artistName
         })
     )
@@ -12,7 +12,7 @@ async function fetchArtistData(artistName, cb) {
 
 async function fetchTopArtists(cb) {
     let response = await fetch(
-        `/spotify/top_artists?num_of_artists_to_return=25`
+        `/api/top_artists?num_of_artists_to_return=25`
     )
     let data = await response.json()
     cb(data)
@@ -133,7 +133,7 @@ async function setupTopTracks() {
 
 async function fetchTopTracks(cb) {
     let response = await fetch(
-        '/spotify/top_tracks?num_of_tracks_to_return=5'
+        '/api/top_tracks?num_of_tracks_to_return=5'
     )
     let data = await response.json()
     cb(data)
@@ -150,7 +150,7 @@ async function setupTotalPlays() {
 
 async function fetchTotalPlays(cb) {
     let response = await fetch(
-        '/spotify/total_plays'
+        '/api/total_plays'
     )
     let data = await response.json()
     cb(data)

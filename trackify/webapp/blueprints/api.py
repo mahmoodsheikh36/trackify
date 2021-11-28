@@ -1,9 +1,16 @@
 from flask import Flask, jsonify, request, Blueprint, current_app, g
+import requests
 
-from trackify.utils import get_largest_elements, timestamp_to_date, current_time
+from trackify.utils import get_largest_elements, timestamp_to_date, current_time, one_week_ago
 from trackify.webapp.jwt import access_token_required, refresh_token_required, get_user, get_refresh_token
+import config
 
 bp = Blueprint('api', __name__, url_prefix='/api')
+
+@bp.after_request
+def after_request(response):
+    response.headers.set('Access-Control-Allow-Origin', '*')
+    return response
 
 @bp.route('/login', methods=('POST',))
 def login():
@@ -91,66 +98,6 @@ def history():
                 }
             },
         })
-
-    return jsonify(data)
-
-@bp.route('/top_tracks', methods=('GET',))
-@access_token_required
-def top_track():
-    hrs_str = request.args.get('hrs', default='24,{},{}'.format(24*7, 24*30), type=str)
-    hrs = []
-    for hr_str in hrs_str.split(','):
-        try:
-            hrs.append(int(hr_str))
-        except:
-            return jsonify({'msg': "'hrs' should be a list of comma-separated integers"}), 401
-    oldest_hr = hrs[0]
-    for i in range(len(hrs)):
-        try:
-            hrs[i] = int(hrs[i])
-        except:
-            return jsonify({'msg': "'hrs' should be an array of positive integers"}), 401
-        if hrs[i] <= 0:
-            return jsonify({'msg': "'hrs' should be an array of positive integers"}), 401
-        if hrs[i] > oldest_hr:
-            oldest_hr = hrs[i]
-
-    begin_time = current_time() - oldest_hr * 3600 * 1000
-
-    artists, albums, tracks, plays = g.db_data_provider.get_user_data(get_user())
-
-    data = {}
-    for hr in hrs:
-        begin_time = current_time() - hr * 3600 * 1000
-        for play in plays.values():
-           if hasattr(play.track, 'listened_ms'):
-               play.track.listened_ms += play.listened_ms(begin_time)
-           else:
-               play.track.listened_ms = play.listened_ms(begin_time)
-
-        def compare(track1, track2):
-            return track1.listened_ms > track2.listened_ms
-
-        top_tracks = get_largest_elements(list(tracks.values()), 20, compare)
-
-        data[hr] = []
-        for track in top_tracks:
-            if track.listened_ms == 0:
-                continue
-            data[hr].append({
-                'id': track.id,
-                'name': track.name,
-                'listened_ms': track.listened_ms,
-                'artist': {
-                    'name': track.artists[0].name,
-                    'id': track.artists[0].id
-                },
-                'album': {
-                    'id': track.album.id,
-                    'cover': track.album.mid_sized_image().url,
-                    'name': track.album.name,
-                }
-            })
 
     return jsonify(data)
 
@@ -334,4 +281,63 @@ def last_play():
         'time_played': play.time_started,
         'artist_name': play.track.artists[0].name,
         'track_name': play.track.name
+    })
+
+
+@bp.route('/top_artists', methods=('GET',))
+def top_artists():
+    num_of_artists_to_return = request.args.get('num_of_artists_to_return', default=10, type=int)
+    if num_of_artists_to_return > 25:
+        num_of_artists_to_return = 25
+    top_artists = g.db_data_provider.get_top_artists(num_of_artists_to_return,
+                                                     one_week_ago(), current_time())
+    return jsonify([{
+        'name': artist.name,
+        'listened_ms': artist.listened_ms
+    } for artist in top_artists])
+
+@bp.route('/artist_discogs_data', methods=('GET',))
+def artist_discogs_data():
+    artist_name = request.args.get('artist_name', default=None, type=str)
+    if not artist_name:
+        return ''
+
+    cached_data = g.cache_data_provider.get_artist_discogs_data(artist_name)
+    if cached_data:
+        return cached_data
+
+    api_key = config.CONFIG['discogs_api_key']
+    api_secret = config.CONFIG['discogs_api_secret']
+
+    response = requests.get(f'https://api.discogs.com/database/search?q={artist_name}&type=artist&'
+                            f'key={api_key}&secret={api_secret}')
+    artist_data = {}
+    try:
+        artist_data = response.json()['results'][0]
+    except KeyError: # if discogs returns no results
+        pass
+
+    g.cache_data_provider.set_artist_discogs_data(artist_name, artist_data)
+
+    return jsonify(artist_data)
+
+@bp.route('/top_tracks', methods=('GET',))
+def top_tracks():
+    num_of_tracks_to_return = request.args.get('num_of_tracks_to_return', default=5, type=int)
+    if num_of_tracks_to_return > 25:
+        num_of_tracks_to_return = 25
+    top_tracks = g.db_data_provider.get_top_tracks(num_of_tracks_to_return,
+                                                   one_week_ago(), current_time())
+    return jsonify([{
+        'name': track.name,
+        'listened_ms': track.listened_ms,
+        'image_url': track.album.smallest_image().url,
+        'artist_name': track.artists[0].name
+    } for track in top_tracks])
+
+@bp.route('total_plays', methods=('GET',))
+def total_plays():
+    total_plays = g.db_data_provider.get_total_plays()
+    return jsonify({
+        'total': total_plays
     })

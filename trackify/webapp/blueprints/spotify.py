@@ -1,4 +1,3 @@
-import requests
 from flask import Blueprint, render_template, g, redirect, request, url_for, jsonify
 
 from trackify.utils import (
@@ -7,8 +6,7 @@ from trackify.utils import (
 )
 from trackify.webapp.blueprints.auth import login_required
 from trackify.db.classes import SpotifyAuthCode, User, Track, Artist, Image, Album, Setting
-from trackify.utils import timestamp_to_date, one_week_ago, current_time
-import config
+from trackify.utils import timestamp_to_date, current_time
 
 bp = Blueprint('spotify', __name__, url_prefix='/spotify')
 
@@ -226,62 +224,3 @@ def history():
                            mins_from_ms=mins_from_ms,
                            secs_from_ms=secs_from_ms,
                            hrs_limit=hrs_limit)
-
-@bp.route('/top_artists', methods=('GET',))
-def top_artists():
-    num_of_artists_to_return = request.args.get('num_of_artists_to_return', default=10, type=int)
-    if num_of_artists_to_return > 25:
-        num_of_artists_to_return = 25
-    top_artists = g.db_data_provider.get_top_artists(num_of_artists_to_return,
-                                                     one_week_ago(), current_time())
-    return jsonify([{
-        'name': artist.name,
-        'listened_ms': artist.listened_ms
-    } for artist in top_artists])
-
-@bp.route('/artist_discogs_data', methods=('GET',))
-def artist_discogs_data():
-    artist_name = request.args.get('artist_name', default=None, type=str)
-    if not artist_name:
-        return ''
-
-    cached_data = g.cache_data_provider.get_artist_discogs_data(artist_name)
-    if cached_data:
-        return cached_data
-
-    api_key = config.CONFIG['discogs_api_key']
-    api_secret = config.CONFIG['discogs_api_secret']
-
-    response = requests.get(f'https://api.discogs.com/database/search?q={artist_name}&type=artist&'
-                            f'key={api_key}&secret={api_secret}')
-    print(response.text)
-    artist_data = {}
-    try:
-        artist_data = response.json()['results'][0]
-    except KeyError: # if discogs returns no results
-        pass
-
-    g.cache_data_provider.set_artist_discogs_data(artist_name, artist_data)
-
-    return jsonify(artist_data)
-
-@bp.route('/top_tracks', methods=('GET',))
-def top_tracks():
-    num_of_tracks_to_return = request.args.get('num_of_tracks_to_return', default=5, type=int)
-    if num_of_tracks_to_return > 25:
-        num_of_tracks_to_return = 25
-    top_tracks = g.db_data_provider.get_top_tracks(num_of_tracks_to_return,
-                                                   one_week_ago(), current_time())
-    return jsonify([{
-        'name': track.name,
-        'listened_ms': track.listened_ms,
-        'image_url': track.album.smallest_image().url,
-        'artist_name': track.artists[0].name
-    } for track in top_tracks])
-
-@bp.route('total_plays', methods=('GET',))
-def total_plays():
-    total_plays = g.db_data_provider.get_total_plays()
-    return jsonify({
-        'total': total_plays
-    })
