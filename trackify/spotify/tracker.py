@@ -22,8 +22,8 @@ class SpotifyTracker:
             try:
                 self.db_data_provider.new_conn()
                 users = self.db_data_provider.get_users()
-                try:
-                    for user in users:
+                for user in users:
+                    try:
                         user.access_token = self.db_data_provider.get_user_spotify_access_token(user)
                         if not user.access_token:
                             continue
@@ -32,6 +32,8 @@ class SpotifyTracker:
                                 self.db_data_provider.get_user_spotify_refresh_token(user)
                             user.access_token = self.spotify_client.fetch_access_token(
                                 user.refresh_token)
+                            if not user.access_token: # then refresh token might've been revoked by the user
+                                continue
                             self.db_data_provider.add_spotify_access_token(user.access_token)
 
                         play, retry_after = self.spotify_client.get_current_play(
@@ -85,12 +87,12 @@ class SpotifyTracker:
                                     self.db_data_provider.add_seek(seek)
 
                         user_data[user.id] = play, current_time()
+                        #print('{} - {}'.format(play.track.name, play.track.artists[0].name))
                         sleep(REQUEST_TIMEOUT)
-                    #print('{} - {}'.format(play.track.name, play.track.artists[0].name))
-                except Exception as e:
-                    logger.exception(e)
-                    if user and user.id and user.id in user_data:
-                        del user_data[user.id]
+                    except Exception as e:
+                        logger.exception(e)
+                        if user and user.id and user.id in user_data:
+                            del user_data[user.id]
             except Exception as e:
                 user_data = {}
                 logger.exception(e)
