@@ -7,7 +7,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="message">
+<div class="new_user_message">
 {% if not g.db_data_provider.get_user_spotify_access_token(g.user) %}
     <div class="auth">
         <p>you need to connect your <span class="highlighted">Spotify</span> account</p>

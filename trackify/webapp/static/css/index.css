@@ -1,4 +1,4 @@
-div.message {
+div.new_user_message {
     display: flex;
     flex-flow: column nowrap;
     align-items: center;
