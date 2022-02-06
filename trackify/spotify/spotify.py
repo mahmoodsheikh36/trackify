@@ -14,6 +14,7 @@ class SpotifyClient:
         self.client_secret = client_secret
         self.redirect_uri = redirect_uri
         self.scope = scope
+        self.request_queue = []
 
     def fetch_refresh_token(self, auth_code):
         r = requests.post('https://accounts.spotify.com/api/token',
@@ -29,8 +30,8 @@ class SpotifyClient:
         r_json = json.loads(r.text)
         access_token = SpotifyAccessToken(generate_id(), r_json['access_token'],
                                           auth_code.user, current_time())
-        refresh_token = RefreshToken(generate_id(), r_json['refresh_token'],
-                                     auth_code.user, current_time())
+        refresh_token = SpotifyRefreshToken(generate_id(), r_json['refresh_token'],
+                                            auth_code.user, current_time())
         return refresh_token, access_token
 
     def fetch_access_token(self, refresh_token):
@@ -113,3 +114,9 @@ class SpotifyClient:
                     int(r_json['progress_ms']))
 
         return play, None
+
+    def make_request(self):
+        pass
+
+    def get_saved_tracks(self):
+        pass

@@ -23,16 +23,13 @@ def auth():
 @bp.route('/callback', methods=('GET',))
 @login_required
 def callback():
-    try:
-        auth_code = SpotifyAuthCode(generate_id(), request.args['code'],
-                             g.user, current_time())
-        g.db_data_provider.add_auth_code(auth_code)
-        refresh_token, access_token = g.spotify_client.fetch_refresh_token(auth_code)
-        if access_token and refresh_token:
-            g.db_data_provider.add_refresh_token(refresh_token)
-            g.db_data_provider.add_access_token(access_token)
-    except:
-        pass
+    auth_code = SpotifyAuthCode(generate_id(), request.args['code'],
+                            g.user, current_time())
+    g.db_data_provider.add_spotify_auth_code(auth_code)
+    refresh_token, access_token = g.spotify_client.fetch_refresh_token(auth_code)
+    if access_token and refresh_token:
+        g.db_data_provider.add_spotify_refresh_token(refresh_token)
+        g.db_data_provider.add_spotify_access_token(access_token)
     return redirect(url_for('home.index'))
 
 @bp.route('/data', methods=('GET',))
