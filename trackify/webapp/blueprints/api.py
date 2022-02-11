@@ -316,6 +316,8 @@ def artist_discogs_data():
         artist_data = response.json()['results'][0]
     except KeyError: # if discogs returns no results
         pass
+    except IndexError:
+        pass
 
     g.cache_data_provider.set_artist_discogs_data(artist_name, artist_data)
 
