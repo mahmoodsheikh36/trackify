@@ -109,7 +109,7 @@ class DbDataProvider:
         return users
 
     def get_user_data(self, user, from_time=0, to_time=9999999999999):
-        db_rows = self.db_provider.get_user_data_new(user.id, from_time, to_time)
+        db_rows = self.db_provider.get_user_data(user.id, from_time, to_time)
 
         tracks = {}
         albums = {}
