@@ -20,7 +20,11 @@ function validate() {
         $('#error_message').innerHTML = 'passwords do not match'
         return false
     }
-    if (email != '' && !validateEmail(email)) {
+    if (email == '') {
+        $('#error_message').innerHTML = 'email cant be empty'
+        return false
+    }
+    if (!validateEmail(email)) {
         $('#error_message').innerHTML = 'entered email is incorrect'
         return false
     }
