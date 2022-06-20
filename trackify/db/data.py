@@ -115,7 +115,7 @@ class DbDataProvider:
         albums = {}
         artists = {}
         plays = {}
-        album_images = {}
+        images = {}
 
         seeks = {}
         pauses = {}
@@ -131,9 +131,8 @@ class DbDataProvider:
             if row['album_id'] in albums:
                 album = albums[row['album_id']]
             else:
-                album = Album(row['album_id'], row['album_name'], [], [artist], [],
-                              row['album_type'], row['album_release_date'],
-                              row['album_release_date_precision'])
+                album = Album(row['album_id'], row['album_name'], [], [artist],
+                              [], None, None, None)
                 albums[album.id] = album
                 artist.albums.append(album)
 
@@ -141,25 +140,23 @@ class DbDataProvider:
                 track = tracks[row['track_id']]
             else:
                 track = Track(row['track_id'], row['track_name'], album, [artist],
-                              row['track_duration_ms'], row['track_popularity'],
-                              row['track_preview_url'], row['track_number'],
-                              row['track_explicit'])
+                              None, None, None, None, None)
                 album.tracks.append(track)
                 tracks[track.id] = track
 
             if not row['play_id'] in plays:
                 play = Play(row['play_id'], row['play_time_started'],
                             row['play_time_ended'], [], [], [],
-                            user, track, None, row['play_volume_percent'])
+                            user, track, None, None)
                 plays[play.id] = play
             else:
                 play = plays[row['play_id']]
 
-            if not row['seek_id'] in seeks and row['seek_id']:
-                seek = Seek(row['seek_id'], play, row['seek_position'],
-                            row['seek_time_added'])
-                play.seeks.append(seek)
-                seeks[seek.id] = seek
+            #if not row['seek_id'] in seeks and row['seek_id']:
+            #    seek = Seek(row['seek_id'], play, row['seek_position'],
+            #                row['seek_time_added'])
+            #    play.seeks.append(seek)
+            #    seeks[seek.id] = seek
             if not row['pause_id'] in pauses and row['pause_id']:
                 pause = Pause(row['pause_id'], play, row['pause_time_added'])
                 play.pauses.append(pause)
@@ -169,10 +166,10 @@ class DbDataProvider:
                 play.resumes.append(resume)
                 resumes[resume.id] = resume
 
-            if row['album_image_id'] and not row['album_image_id'] in album_images:
+            if row['album_image_id'] and not row['album_image_id'] in images:
                 image = Image(row['album_image_id'], row['album_image_url'],
                               row['album_image_width'], row['album_image_height'])
-                album_images[row['album_image_id']] = image
+                images[row['album_image_id']] = image
                 albums[row['album_id']].add_image(image)
 
         return artists, albums, tracks, plays

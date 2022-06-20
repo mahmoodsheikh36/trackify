@@ -382,49 +382,34 @@ WHERE p.user_id = %s AND ((p.time_started >= %s AND p.time_started <= %s) OR (p.
         p.id AS play_id,
         p.time_started AS play_time_started,
         p.time_ended AS play_time_ended,
-        p.user_id AS play_user_id,
         p.track_id AS play_track_id,
-        p.device_id AS play_device_id,
-        p.context_uri AS play_context_uri,
-        p.volume_percent AS play_volume_percent,
         a.id AS artist_id,
         a.artist_name AS artist_name,
         t.id AS track_id,
-        t.duration_ms AS track_duration_ms,
-        t.popularity AS track_popularity,
-        t.preview_url AS track_preview_url,
-        t.explicit AS track_explicit,
-        t.album_id AS track_album_id,
         t.track_name AS track_name,
-        t.track_number AS track_number,
         al.id AS album_id,
-        al.release_date AS album_release_date,
-        al.release_date_precision AS album_release_date_precision,
         al.album_name AS album_name,
-        al.album_type AS album_type,
         pa.id AS pause_id,
         pa.time_added AS pause_time_added,
         r.id AS resume_id,
         r.time_added AS resume_time_added,
-        s.id AS seek_id,
-        s.time_added AS seek_time_added,
-        s.position AS seek_position,
-        ali.id AS album_image_id,
-        ali.width AS album_image_width,
-        ali.height AS album_image_height,
-        ali.url AS album_image_url
+        ali.id as album_image_id,
+        ali.width as album_image_width,
+        ali.height as album_image_height,
+        ali.url as album_image_url
         FROM plays p
         JOIN tracks t ON t.id = p.track_id
         JOIN track_artists ta ON t.id = ta.track_id
         JOIN artists a ON a.id = ta.artist_id
         JOIN albums al ON al.id = t.album_id
-        JOIN album_images ali on ali.album_id = t.album_id
+        JOIN album_artists aa ON al.id = aa.album_id
+        JOIN album_images ali ON ali.album_id = al.id
         LEFT JOIN pauses pa ON pa.play_id = p.id
         LEFT JOIN resumes r ON r.play_id = p.id
-        LEFT JOIN seeks s ON s.play_id = p.id
         WHERE p.user_id = %s AND ((p.time_started >= %s AND p.time_started <= %s) OR
                                     (p.time_ended >= %s AND p.time_ended <= %s))
-        ''', (user_id, from_time, to_time, from_time, to_time)) 
+        ''', (user_id, from_time, to_time, from_time, to_time))
+        return
 
     def get_all_users_data(self, from_time, to_time):
         return self.execute_fetchall('''
