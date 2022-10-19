@@ -19,7 +19,8 @@ trackify tracks your spotify activity and displays it in beautiful charts for yo
    #+BEGIN_SRC bash
    sudo mysql -u database_user -p -D database_name < trackify/db/schema.sql
    #+END_SRC
-
-* todo
-  1. in the function that fetches data for all users instead of fetching settings for each user
-  use the data fetched from the original query
+** run using gunicorn
+#+begin_src bash
+  gunicorn --workers 3 --pid /tmp/trackify.pid --log-file /tmp/trackify.log --bind unix:app.sock trackify.webapp:web_application
+#+end_src
+note that this connection isnt bound to a port but to a sock file which can be redirected to from a webserver like nginx

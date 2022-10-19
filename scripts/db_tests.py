@@ -28,6 +28,12 @@ def get_count_of_table_rows(table_name):
     one = provider.get_count_of_table_rows(table_name)
     print(one)
 
+def get_tracks():
+    provider = DbProvider()
+    rows = provider.get_tracks()
+    print(rows)
+
 #test3()
-get_count_of_table_rows('plays')
-get_count_of_table_rows('tracks')
+#get_count_of_table_rows('plays')
+#get_count_of_table_rows('tracks')
+get_tracks()
