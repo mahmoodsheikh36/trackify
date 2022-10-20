@@ -145,7 +145,7 @@ async function setupTotalPlays() {
             let totalPlays = data['total']
             $('#play_counter').innerHTML = totalPlays.toLocaleString()
         })
-    }, 2500)
+    }, 30000)
 }
 
 async function fetchTotalPlays(cb) {
