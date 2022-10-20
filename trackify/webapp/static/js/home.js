@@ -158,6 +158,6 @@ async function fetchTotalPlays(cb) {
 
 window.onload = () => {
     setupTopArtists()
-    setupTopTracks()
+  /*     setupTopTracks() */
     setupTotalPlays()
 }
