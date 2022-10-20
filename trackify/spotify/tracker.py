@@ -25,11 +25,11 @@ class SpotifyTracker:
                 for user in users:
                     try:
                         user.access_token = self.db_data_provider.get_user_spotify_access_token(user)
-                        if not user.access_token:
-                            continue
-                        if user.access_token.expired():
+                        if not user.access_token or user.access_token.expired():
                             user.refresh_token =\
                                 self.db_data_provider.get_user_spotify_refresh_token(user)
+                            if not user.refresh_token:
+                                continue
                             user.access_token = self.spotify_client.fetch_access_token(
                                 user.refresh_token)
                             if not user.access_token: # then refresh token might've been revoked by the user
@@ -87,7 +87,7 @@ class SpotifyTracker:
                                     self.db_data_provider.add_seek(seek)
 
                         user_data[user.id] = play, current_time()
-                        #print('{} - {}'.format(play.track.name, play.track.artists[0].name))
+                        # print('{} - {}'.format(play.track.name, play.track.artists[0].name))
                         sleep(REQUEST_TIMEOUT)
                     except Exception as e:
                         logger.exception(e)
