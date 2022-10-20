@@ -7,7 +7,7 @@ logger=logging.getLogger(__name__)
 from trackify.utils import current_time, generate_id
 from trackify.db.classes import Pause, Resume, Seek
 
-REQUEST_TIMEOUT = 0.03
+REQUEST_TIMEOUT = 0.08
 ITERATION_TIMEOUT = 0.6
 
 class SpotifyTracker:
