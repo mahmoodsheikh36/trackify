@@ -139,12 +139,17 @@ async function fetchTopTracks(cb) {
     cb(data)
 }
 
+function fetchAndHandleTotalPlays() {
+  fetchTotalPlays(data => {
+    let totalPlays = data['total']
+    $('#play_counter').innerHTML = totalPlays.toLocaleString()
+  })
+}
+
 async function setupTotalPlays() {
+    fetchAndHandleTotalPlays();
     setInterval(() => {
-        fetchTotalPlays(data => {
-            let totalPlays = data['total']
-            $('#play_counter').innerHTML = totalPlays.toLocaleString()
-        })
+      fetchAndHandleTotalPlays();
     }, 30000)
 }
 
