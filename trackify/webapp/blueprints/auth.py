@@ -42,7 +42,7 @@ def register():
             error = 'username is not available'
 
         if not error:
-            user = User(generate_id(), username, generate_password_hash(password),
+            user = User(generate_id(), username, generate_password_hash(password, salt_length=15),
                         email, current_time())
             g.db_data_provider.add_user(user)
             return redirect(url_for('auth.login'))

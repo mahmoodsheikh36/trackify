@@ -74,7 +74,7 @@ def history():
     for play in plays.values():
         if play.time_started > begin_time:
             plays_to_sort.append(play)
-            
+
     def compare(play1, play2):
         return play1.time_started > play2.time_started
     sorted_plays = get_largest_elements(plays_to_sort, -1, compare)
