@@ -85,16 +85,6 @@ class DbDataProvider:
             users.append(user)
         return users
 
-    def get_user_spotify_access_token(self, user):
-        row = self.db_provider.get_user_spotify_access_token(user.id)
-        if row:
-            return SpotifyAccessToken(row['id'], row['token'], user, row['time_added'])
-        return None
-
-    def get_user_spotify_refresh_token(self, user):
-        row = self.db_provider.get_user_spotify_refresh_token(user.id)
-        return SpotifyRefreshToken(row['id'], row['token'], user, row['time_added'])
-
     def get_users_with_spotify_tokens(self):
         rows = self.db_provider.get_users_with_spotify_tokens()
         users = []
